@@ -46,7 +46,7 @@ def loadEnv() {
 project.ext.env = loadEnv()
 
 android {
-    namespace project.env.BUNDLE_ID_ANDROID
+    namespace "com.example.startup_repo"
     compileSdk flutter.compileSdkVersion
     ndkVersion flutter.ndkVersion
 
