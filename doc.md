@@ -12,9 +12,9 @@ We have created a repository that allows developers to manage Android configurat
 
 ### Step-by-Step Guide
 
-1. **Define Variables in [`.env`](.env) File**
+1. **Create and Define Variables in [`.env`](.env) File**
 
-   The [`.env`](.env) file is located at the root of the project. It contains the following variables:
+   Create a file named `.env` at the root of your project and define the following variables:
 
    ```properties
    # App name
@@ -37,9 +37,9 @@ We have created a repository that allows developers to manage Android configurat
    PRIMARY_COLOR=#3498db
    ```
 
-2. **Use Variables in [`android/app/build.gradle`](android/app/build.gradle)**
+2. **Load Variables in [`android/app/build.gradle`](android/app/build.gradle)**
 
-   The [`android/app/build.gradle`](android/app/build.gradle) file is located at [`android/app/build.gradle`](android/app/build.gradle). The variables from the [`.env`](.env) file are loaded and used in this file:
+   In your `android/app/build.gradle` file, add the following code to load the variables from the `.env` file:
 
    ```gradle
    def loadEnv() {
@@ -56,7 +56,15 @@ We have created a repository that allows developers to manage Android configurat
    }
 
    project.ext.env = loadEnv()
+   ```
 
+   This code defines a function `loadEnv` that reads the `.env` file and loads the properties into a `Properties` object. The properties are then assigned to `project.ext.env` for use in the `build.gradle` file.
+
+3. **Use Variables in [`android/app/build.gradle`](android/app/build.gradle)**
+
+   In your `android/app/build.gradle` file, use the loaded variables as follows:
+
+   ```gradle
    android {
        namespace "com.example.startup_repo"
        compileSdk flutter.compileSdkVersion
@@ -100,9 +108,11 @@ We have created a repository that allows developers to manage Android configurat
    }
    ```
 
-3. **Use Variables in [`android/app/src/debug/AndroidManifest.xml`](android/app/src/debug/AndroidManifest.xml)**
+   This code uses the variables loaded from the `.env` file in the `defaultConfig`, `signingConfigs`, and `buildTypes` sections of the `android` block.
 
-   The [`android/app/src/debug/AndroidManifest.xml`](android/app/src/debug/AndroidManifest.xml) file is located at [`android/app/src/main/AndroidManifest.xml`](android/app/src/main/AndroidManifest.xml). The `APP_NAME` variable is used in this file:
+4. **Use Variables in [`android/app/src/main/AndroidManifest.xml`](android/app/src/main/AndroidManifest.xml)**
+
+   In your `android/app/src/main/AndroidManifest.xml` file, use the `APP_NAME` variable:
 
    ```xml
    <manifest xmlns:android="http://schemas.android.com/apk/res/android">
@@ -119,17 +129,27 @@ We have created a repository that allows developers to manage Android configurat
    </manifest>
    ```
 
+5. **Update [`settings.gradle`](settings.gradle)**
+
+   In your `settings.gradle` file, uncomment the following lines if you are using Firebase:
+
+   ```gradle
+   // Uncomment the following lines when using Firebase
+   // id "com.google.gms.google-services" version "4.4.0" apply false
+   // id "com.google.firebase.crashlytics" version "2.9.9" apply false
+   ```
+
 ### Important Note
 
-Do not change the `namespace "com.example.startup_repo"` in [`android/app/build.gradle`](android/app/build.gradle) as it is used as an import in [`android/app/src/main/kotlin/com/example/startup_repo/MainActivity.kt`](android/app/src/main/kotlin/com/example/startup_repo/MainActivity.kt).
+Do not change the `namespace "com.example.startup_repo"` in `android/app/build.gradle` as it is used as an import in `android/app/src/main/kotlin/com/example/startup_repo/MainActivity.kt`.
 
 ## iOS Configuration
 
 ### Step-by-Step Guide
 
-1. **Define Variables in [`ios/Flutter/Environment.xcconfig`](ios/Flutter/Environment.xcconfig)**
+1. **Create and Define Variables in [`ios/Flutter/Environment.xcconfig`](ios/Flutter/Environment.xcconfig)**
 
-   The [`ios/Flutter/Environment.xcconfig`](ios/Flutter/Environment.xcconfig) file is located at [`ios/Flutter/Environment.xcconfig`](ios/Flutter/Environment.xcconfig). It contains the following variables:
+   Create a file named `Environment.xcconfig` in the `ios/Flutter/` directory and define the following variables:
 
    ```plaintext
    APP_NAME = Startup Repo
@@ -140,7 +160,7 @@ Do not change the `namespace "com.example.startup_repo"` in [`android/app/build.
 
 2. **Import [`ios/Flutter/Environment.xcconfig`](ios/Flutter/Environment.xcconfig) in [`ios/Flutter/Debug.xcconfig`](ios/Flutter/Debug.xcconfig) and [`ios/Flutter/Release.xcconfig`](ios/Flutter/Release.xcconfig)**
 
-   The [`ios/Flutter/Debug.xcconfig`](ios/Flutter/Debug.xcconfig) and [`ios/Flutter/Release.xcconfig`](ios/Flutter/Release.xcconfig) files are located at [`ios/Flutter/Debug.xcconfig`](ios/Flutter/Debug.xcconfig) and [`ios/Flutter/Release.xcconfig`](ios/Flutter/Release.xcconfig), respectively. These files import the [`ios/Flutter/Environment.xcconfig`](ios/Flutter/Environment.xcconfig) file:
+   In your `ios/Flutter/Debug.xcconfig` and `ios/Flutter/Release.xcconfig` files, import the `Environment.xcconfig` file:
 
    ```plaintext
    # Debug.xcconfig
@@ -166,9 +186,11 @@ Do not change the `namespace "com.example.startup_repo"` in [`android/app/build.
    MY_BUNDLE_ID= ${BUNDLE_ID}
    ```
 
+   This code imports the `Environment.xcconfig` file, which contains the variables defined earlier, into the `Debug.xcconfig` and `Release.xcconfig` files.
+
 3. **Use Variables in [`ios/Runner/Info.plist`](ios/Runner/Info.plist)**
 
-   The [`ios/Runner/Info.plist`](ios/Runner/Info.plist) file is located at [`ios/Runner/Info.plist`](ios/Runner/Info.plist). The variables are used in this file:
+   In your `ios/Runner/Info.plist` file, use the variables:
 
    ```xml
    <plist version="1.0">
@@ -189,7 +211,7 @@ Do not change the `namespace "com.example.startup_repo"` in [`android/app/build.
 
 4. **Use Variables in [`ios/Runner.xcodeproj/project.pbxproj`](ios/Runner.xcodeproj/project.pbxproj)**
 
-   The [`ios/Runner.xcodeproj/project.pbxproj`](ios/Runner.xcodeproj/project.pbxproj) file is located at [`ios/Runner.xcodeproj/project.pbxproj`](ios/Runner.xcodeproj/project.pbxproj). The variables are used in this file:
+   In your `ios/Runner.xcodeproj/project.pbxproj` file, use the variables:
 
    ```pbxproj
    97C147071CF9000F007C117D /* Release */ = {
