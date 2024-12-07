@@ -62,7 +62,7 @@ class MyApp extends StatelessWidget {
                 ),
               ),
               child: GetMaterialApp(
-                title: AppConstants.APP_NAME,
+                title: AppConstants.appName,
                 debugShowCheckedModeBanner: false,
                 themeMode: themeController.themeMode,
                 theme: lightTheme,

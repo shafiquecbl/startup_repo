@@ -15,27 +15,27 @@ class SplashRepo implements SplashRepoInterface {
   @override
   void initSharedData() {
     // check if the theme, language and country code are set
-    if (!prefs.containsKey(AppConstants.THEME)) {
-      prefs.setString(AppConstants.THEME, 'system');
+    if (!prefs.containsKey(AppConstants.theme)) {
+      prefs.setString(AppConstants.theme, 'system');
     }
 
     // check if the theme, language and country code are set
-    if (!prefs.containsKey(AppConstants.COUNTRY_CODE)) {
-      prefs.setString(AppConstants.COUNTRY_CODE, AppConstants.languages[0].countryCode);
+    if (!prefs.containsKey(AppConstants.countryCode)) {
+      prefs.setString(AppConstants.countryCode, AppConstants.languages[0].countryCode);
     }
 
     // check if the theme, language and country code are set
-    if (!prefs.containsKey(AppConstants.LANGUAGE_CODE)) {
-      prefs.setString(AppConstants.LANGUAGE_CODE, AppConstants.languages[0].languageCode);
+    if (!prefs.containsKey(AppConstants.languageCode)) {
+      prefs.setString(AppConstants.languageCode, AppConstants.languages[0].languageCode);
     }
   }
 
   @override
-  Future<Response?> getConfig() async => await apiClient.get(AppConstants.CONFIG_URL);
+  Future<Response?> getConfig() async => await apiClient.get(AppConstants.configUrl);
 
   @override
-  Future<bool> saveFirstTime() async => await prefs.setBool(AppConstants.ON_BOARDING_SKIP, false);
+  Future<bool> saveFirstTime() async => await prefs.setBool(AppConstants.onBoardingSkip, false);
 
   @override
-  bool getFirstTime() => prefs.getBool(AppConstants.ON_BOARDING_SKIP) ?? true;
+  bool getFirstTime() => prefs.getBool(AppConstants.onBoardingSkip) ?? true;
 }

@@ -1,21 +1,21 @@
+import 'package:startup_repo/data/model/env.dart';
 import '../data/model/language.dart';
 
 class AppConstants {
   // app name and package name
-  static const String APP_NAME = 'PixArt';
-  static const String APP_PACKAGE_NAME = 'pixart.aiart.generator';
+  static String appName = EnvModel.appName;
 
   // Base URL
-  static const String BASE_URL = 'https://pixartai.dcodax.net/api/';
+  static String baseUrl = EnvModel.baseUrl;
 
   // API Endpoints
-  static const String CONFIG_URL = 'config';
+  static const String configUrl = 'config';
 
   // Shared Key
-  static const String THEME = 'theme';
-  static const String COUNTRY_CODE = 'country_code';
-  static const String LANGUAGE_CODE = 'language_code';
-  static const String ON_BOARDING_SKIP = 'on_boarding_skip';
+  static const String theme = 'theme';
+  static const String countryCode = 'country_code';
+  static const String languageCode = 'language_code';
+  static const String onBoardingSkip = 'on_boarding_skip';
 
   // Language
   static List<LanguageModel> languages = [

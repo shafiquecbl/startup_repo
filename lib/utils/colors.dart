@@ -5,7 +5,7 @@ Color primaryColor = EnvModel.primaryColor;
 Color secondaryColor = EnvModel.secondaryColor;
 
 // background color
-const Color backgroundColorDark = Colors.black;
+const Color backgroundColorDark = Color(0xFF121212);
 const Color backgroundColorLight = Color(0xFFFFFFFF);
 
 // card color

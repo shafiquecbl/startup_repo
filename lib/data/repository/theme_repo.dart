@@ -11,7 +11,7 @@ class ThemeRepo implements ThemeRepoInterface {
   Future<ThemeMode> loadCurrentTheme() async {
     String? data;
     try {
-      data = prefs.getString(AppConstants.THEME);
+      data = prefs.getString(AppConstants.theme);
     } catch (e) {
       data = 'system';
     }
@@ -37,6 +37,6 @@ class ThemeRepo implements ThemeRepoInterface {
       default:
         mode = 'system';
     }
-    await prefs.setString(AppConstants.THEME, mode);
+    await prefs.setString(AppConstants.theme, mode);
   }
 }

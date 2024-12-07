@@ -34,7 +34,7 @@ class ApiClient extends GetxService implements ApiClientInterface {
 
   @override
   Future<http.Response?> get(String uri, {Map<String, String>? headers}) async {
-    Uri url = Uri.parse(AppConstants.BASE_URL + uri);
+    Uri url = Uri.parse(AppConstants.baseUrl + uri);
     try {
       // print the api call
       debugPrint('====> API Call: $url, ====> Header: $_mainHeaders');
@@ -65,7 +65,7 @@ class ApiClient extends GetxService implements ApiClientInterface {
     Map<String, dynamic> body, {
     Map<String, dynamic>? headers,
   }) async {
-    Uri url = Uri.parse(AppConstants.BASE_URL + uri);
+    Uri url = Uri.parse(AppConstants.baseUrl + uri);
     try {
       // print the api call
       debugPrint('====> API Call: $url, ====> Header: $_mainHeaders');
@@ -102,7 +102,7 @@ class ApiClient extends GetxService implements ApiClientInterface {
     Map<String, dynamic> body, {
     Map<String, dynamic>? headers,
   }) async {
-    Uri url = Uri.parse(AppConstants.BASE_URL + uri);
+    Uri url = Uri.parse(AppConstants.baseUrl + uri);
     try {
       // print the api call
       debugPrint('====> API Call: $url, ====> Header: $_mainHeaders');
@@ -135,7 +135,7 @@ class ApiClient extends GetxService implements ApiClientInterface {
 
   @override
   Future<http.Response?> delete(String uri, {Map<String, String>? headers}) async {
-    Uri url = Uri.parse(AppConstants.BASE_URL + uri);
+    Uri url = Uri.parse(AppConstants.baseUrl + uri);
     try {
       // print the api call
       debugPrint('====> API Call: $url, ====> Header: $_mainHeaders');

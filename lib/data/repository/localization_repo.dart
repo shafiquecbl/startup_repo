@@ -11,16 +11,16 @@ class LocalizationRepo implements LocalizationRepoInterface {
   @override
   Locale loadCurrentLanguage() {
     return Locale(
-      prefs.getString(AppConstants.LANGUAGE_CODE) ?? AppConstants.languages.first.languageCode,
-      prefs.getString(AppConstants.COUNTRY_CODE) ?? AppConstants.languages.first.countryCode,
+      prefs.getString(AppConstants.languageCode) ?? AppConstants.languages.first.languageCode,
+      prefs.getString(AppConstants.countryCode) ?? AppConstants.languages.first.countryCode,
     );
   }
 
   @override
   Future<void> saveLanguage(Locale locale) async {
     Get.updateLocale(locale);
-    await prefs.setString(AppConstants.LANGUAGE_CODE, locale.languageCode);
-    await prefs.setString(AppConstants.COUNTRY_CODE, locale.countryCode!);
+    await prefs.setString(AppConstants.languageCode, locale.languageCode);
+    await prefs.setString(AppConstants.countryCode, locale.countryCode!);
   }
 
   @override

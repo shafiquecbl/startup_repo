@@ -1,5 +1,10 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_screenutil/flutter_screenutil.dart';
+import 'package:iconsax/iconsax.dart';
+import 'package:startup_repo/utils/colors.dart';
+
 import 'package:startup_repo/utils/style.dart';
+import 'package:startup_repo/view/base/common/primary_button.dart';
 
 class HomeScreen extends StatelessWidget {
   const HomeScreen({super.key});
@@ -75,6 +80,26 @@ class HomeScreen extends StatelessWidget {
             Text(
               'Label Small(${labelSmall(context).fontSize?.ceilToDouble()})',
               style: labelSmall(context),
+            ),
+            SizedBox(height: 16.sp),
+            Row(
+              children: [
+                Expanded(
+                  child: PrimaryOutlineButton(
+                    text: 'Outline Button',
+                    icon: Icon(Iconsax.video, size: 16, color: primaryColor),
+                    onPressed: () {},
+                  ),
+                ),
+                SizedBox(width: 16.sp),
+                Expanded(
+                  child: PrimaryButton(
+                    text: 'Primary Button',
+                    icon: const Icon(Iconsax.video, size: 16, color: Colors.white),
+                    onPressed: () {},
+                  ),
+                ),
+              ],
             ),
           ],
         ),

@@ -3,16 +3,11 @@ import 'package:flutter_dotenv/flutter_dotenv.dart';
 
 class EnvModel {
   static String appName = dotenv.env['APP_NAME'] ?? '';
-  static Color primaryColor = _loadColorFromEnv('PRIMARY_COLOR');
-  static Color secondaryColor = _loadColorFromEnv('SECONDARY_COLOR');
+  static String baseUrl = dotenv.env['BASE_URL'] ?? '';
+  static Color primaryColor = _getColor('PRIMARY_COLOR');
+  static Color secondaryColor = _getColor('SECONDARY_COLOR');
 
-  static Color _loadColorFromEnv(String key) {
-    final colorString = dotenv.env[key] ?? '#000000';
-    return _hexToColor(colorString);
-  }
-
-  static Color _hexToColor(String hex) {
-    final hexCode = hex.replaceAll('#', '');
-    return Color(int.parse('FF$hexCode', radix: 16));
+  static Color _getColor(String key) {
+    return Color(int.parse(dotenv.env[key].toString()));
   }
 }
