@@ -1,0 +1,5 @@
+{
+  "dart.flutterSdkPath": ".fvm/versions/3.22.0",
+  "java.configuration.updateBuildConfiguration": "automatic",
+  "dart.lineLength": 110,
+}
