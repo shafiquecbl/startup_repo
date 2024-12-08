@@ -78,7 +78,7 @@ We have created a repository that allows developers to manage Android configurat
            versionName project.env.ANDROID_VERSION_NAME.toString()
            multiDexEnabled true
 
-           <!-- define variables here to use in [`AndroidManifest.xml`](android/app/src/main/AndroidManifest.xml) -->
+           <!-- define variables here to use in AndroidManifest.xml -->
            resValue "string", "app_name", project.env.APP_NAME
        }
 

@@ -53,7 +53,7 @@ android {
         versionName project.env.ANDROID_VERSION_NAME.toString()
         multiDexEnabled true
 
-        // Define placeholder for app name
+        // define variables here to use in AndroidManifest.xml 
         resValue "string", "app_name", project.env.APP_NAME
     }
 
