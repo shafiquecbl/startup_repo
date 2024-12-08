@@ -114,7 +114,7 @@ We have created a repository that allows developers to manage Android configurat
 
 4. **Use Variables in [`android/app/src/main/AndroidManifest.xml`](android/app/src/main/AndroidManifest.xml)**
 
-   In your `android/app/src/main/AndroidManifest.xml` file, use the `app_name` variable define in [`android/app/build.gradle`](android/app/build.gradle):
+   In your `android/app/src/main/AndroidManifest.xml` file, use the `app_name` variable defined in [`android/app/build.gradle`](android/app/build.gradle):
 
    ```xml
    <manifest xmlns:android="http://schemas.android.com/apk/res/android">
@@ -228,6 +228,41 @@ Do not change the `namespace "com.example.startup_repo"` in `android/app/build.g
        name = Release;
    };
    ```
+
+## Updating the App Logo
+
+We use the `flutter_launcher_icons` package to generate the app logo for both Android and iOS platforms. Follow these steps to update the app logo:
+
+1. **Replace the Logo**
+
+   Replace the existing logo in the `assets/images/logo.png` file with your new logo.
+
+2. **Run the Command**
+
+   Run the following command to generate the app icons:
+
+   ```sh
+   dart run flutter_launcher_icons
+   ```
+
+   This command will generate the app icons for both Android and iOS platforms based on the new logo.
+
+### Configuration in `pubspec.yaml`
+
+Ensure that the following configuration is present in your `pubspec.yaml` file:
+
+```yaml
+dev_dependencies:
+  flutter_test:
+    sdk: flutter
+  flutter_lints: ^3.0.0
+  flutter_launcher_icons: ^0.14.2
+
+flutter_launcher_icons:
+  android: true
+  ios: true
+  image_path: "assets/images/logo.png"
+```
 
 ## Future Plans
 
