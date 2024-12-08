@@ -33,9 +33,11 @@ We have created a repository that allows developers to manage Android configurat
    KEYSTORE_PASSWORD=upload
    KEY_PASSWORD=upload
 
-   # Primary color
-   PRIMARY_COLOR=#3498db
+   # Primary color (Flutter format: 0xFF6949FF)
+   PRIMARY_COLOR=0xFF6949FF
    ```
+
+   **Note:** We use the Flutter format for colors (`0xFF6949FF`) instead of the standard hex format (`#6949FF`) because the `#` character is used for comments in the `.env` file.
 
 2. **Load Variables in [`android/app/build.gradle`](android/app/build.gradle)**
 
