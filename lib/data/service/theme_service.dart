@@ -7,12 +7,30 @@ class ThemeService implements ThemeServiceInterface {
   ThemeService({required this.themeRepo});
 
   @override
-  Future<ThemeMode> loadCurrentTheme() async {
-    return themeRepo.loadCurrentTheme();
+  ThemeMode loadCurrentTheme() {
+    String data = themeRepo.loadCurrentTheme();
+    if (data == 'system') {
+      return ThemeMode.system;
+    } else if (data == 'dark') {
+      return ThemeMode.dark;
+    } else {
+      return ThemeMode.light;
+    }
   }
 
   @override
-  Future<void> saveThemeMode(ThemeMode themeMode) async {
-    await themeRepo.saveThemeMode(themeMode);
+  Future<bool> saveThemeMode(ThemeMode themeMode) async {
+    String mode = 'system';
+    switch (themeMode) {
+      case ThemeMode.light:
+        mode = 'light';
+        break;
+      case ThemeMode.dark:
+        mode = 'dark';
+        break;
+      default:
+        mode = 'system';
+    }
+    return await themeRepo.saveThemeMode(mode);
   }
 }

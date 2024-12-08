@@ -13,7 +13,7 @@ class ThemeController extends GetxController implements GetxService {
   ThemeMode get themeMode => _themeMode;
 
   void _loadCurrentTheme() async {
-    _themeMode = await themeService.loadCurrentTheme();
+    _themeMode = themeService.loadCurrentTheme();
     update();
   }
 
@@ -25,5 +25,3 @@ class ThemeController extends GetxController implements GetxService {
 
   static ThemeController get find => Get.find();
 }
-
-bool get isDark => Get.isDarkMode;

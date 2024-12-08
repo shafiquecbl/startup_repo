@@ -8,19 +8,57 @@ This document provides a detailed overview of the code architecture for the `sta
 
 The project is organized into several folders, each with a specific purpose:
 
-- `controllers`: Manages state management.
-- `data`: Handles data-related operations.
-  - `api`: Manages API calls.
-  - `model`: Contains data models.
-    - `body`: Models for sending data to the API.
-    - `response`: Models for receiving data from the API.
-    - `other`: Models used within the app.
-  - `repository`: Handles the final step of getting or sending data to the API or local storage.
-  - `service`: Contains the logical part of the controllers.
-- `helper`: Contains helper functions and classes.
-- `theme`: Contains dark and light themes.
-- `utils`: Contains utility files.
-- `view`: Manages the UI.
+### `controllers`
+
+Manages state management using the `Get` package. Each controller is responsible for a specific part of the application state and interacts with the corresponding service.
+
+### `data`
+
+Handles all data-related operations, including API calls, data models, repositories, and services.
+
+#### `api`
+
+Manages API calls using the `http` package. Contains classes that handle HTTP requests and responses.
+
+#### `model`
+
+Contains data models used throughout the application.
+
+- **`body`**: Models for sending data to the API.
+- **`response`**: Models for receiving data from the API.
+- **`other`**: Models used within the app for various purposes.
+
+#### `repository`
+
+Handles the final step of getting or sending data to the API or local storage. Acts as an intermediary between the data source and the rest of the application. Each repository can have multiple required parameters, such as API client interface and shared preferences.
+
+#### `service`
+
+Contains the logical part of the controllers. Each service has a required parameter, which is their repository class interface. Services implement the business logic and interact with repositories to fetch or save data.
+
+### `helper`
+
+Contains helper functions and classes that provide utility methods and functionalities used across the application.
+
+### `theme`
+
+Contains dark and light themes for the application. Defines the visual styling and appearance of the app.
+
+### `utils`
+
+Contains utility files that provide constants, colors, images, styles, and other reusable components.
+
+- **`app_constants.dart`**: Contains app-wide constants.
+- **`colors.dart`**: Manages app colors.
+- **`images.dart`**: Manages image assets.
+- **`style.dart`**: Contains common styles.
+
+### `view`
+
+Manages the UI components of the application. Contains screens and reusable widgets.
+
+- **`base`**: Contains common reusable widgets used in multiple screens.
+- **`screen`**: Contains all screens. Each screen has a separate folder, which can further contain a `widgets` folder for reusable widgets specific to that screen.
 
 ## Detailed Explanation
 
@@ -31,13 +69,32 @@ The `controllers` folder contains classes that manage the state of the applicati
 #### Example: `ThemeController`
 
 ```dart
+import 'package:flutter/material.dart';
 import 'package:get/get.dart';
-import 'package:startup_repo/data/service/theme_service_interface.dart';
+import '../data/service/theme_service_interface.dart';
 
 class ThemeController extends GetxController implements GetxService {
   final ThemeServiceInterface themeService;
 
-  ThemeController({required this.themeService});
+  ThemeController({required this.themeService}) {
+    _loadCurrentTheme();
+  }
+
+  ThemeMode _themeMode = ThemeMode.light;
+  ThemeMode get themeMode => _themeMode;
+
+  void _loadCurrentTheme() async {
+    _themeMode = themeService.loadCurrentTheme();
+    update();
+  }
+
+  void setThemeMode(ThemeMode themeMode) {
+    _themeMode = themeMode;
+    themeService.saveThemeMode(themeMode);
+    update();
+  }
+
+  static ThemeController get find => Get.find();
 }
 ```
 
@@ -57,13 +114,31 @@ class ThemeService implements ThemeServiceInterface {
   ThemeService({required this.themeRepo});
 
   @override
-  Future<ThemeMode> loadCurrentTheme() async {
-    return themeRepo.loadCurrentTheme();
+  ThemeMode loadCurrentTheme() {
+    String data = themeRepo.loadCurrentTheme();
+    if (data == 'system') {
+      return ThemeMode.system;
+    } else if (data == 'dark') {
+      return ThemeMode.dark;
+    } else {
+      return ThemeMode.light;
+    }
   }
 
   @override
-  Future<void> saveThemeMode(ThemeMode themeMode) async {
-    await themeRepo.saveThemeMode(themeMode);
+  Future<bool> saveThemeMode(ThemeMode themeMode) async {
+    String mode = 'system';
+    switch (themeMode) {
+      case ThemeMode.light:
+        mode = 'light';
+        break;
+      case ThemeMode.dark:
+        mode = 'dark';
+        break;
+      default:
+        mode = 'system';
+    }
+    return await themeRepo.saveThemeMode(mode);
   }
 }
 ```
@@ -78,8 +153,8 @@ Service interfaces define the contract for the services. They ensure that the se
 import 'package:flutter/material.dart';
 
 abstract class ThemeServiceInterface {
-  Future<ThemeMode> loadCurrentTheme();
-  Future<void> saveThemeMode(ThemeMode themeMode);
+  ThemeMode loadCurrentTheme();
+  Future<bool> saveThemeMode(ThemeMode themeMode);
 }
 ```
 
@@ -90,7 +165,6 @@ The `repository` folder handles the final step of getting or sending data to the
 #### Example: `ThemeRepo`
 
 ```dart
-import 'package:flutter/material.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import '../../utils/app_constants.dart';
 import 'theme_repo_interface.dart';
@@ -100,38 +174,16 @@ class ThemeRepo implements ThemeRepoInterface {
   ThemeRepo({required this.prefs});
 
   @override
-  Future<ThemeMode> loadCurrentTheme() async {
-    String? data;
-    try {
-      data = prefs.getString(AppConstants.theme);
-    } catch (e) {
-      data = 'system';
-    }
-    if (data == null || data == 'system') {
-      return ThemeMode.system;
-    } else if (data == 'dark') {
-      return ThemeMode.dark;
-    } else {
-      return ThemeMode.light;
-    }
+  String loadCurrentTheme() {
+    return prefs.getString(AppConstants.theme) ?? 'system';
   }
 
   @override
-  Future<void> saveThemeMode(ThemeMode themeMode) async {
-    String mode = 'system';
-    switch (themeMode) {
-      case ThemeMode.light:
-        mode = 'light';
-        break;
-      case ThemeMode.dark:
-        mode = 'dark';
-        break;
-      default:
-        mode = 'system';
-    }
-    await prefs.setString(AppConstants.theme, mode);
+  Future<bool> saveThemeMode(String themeMode) async {
+    return await prefs.setString(AppConstants.theme, themeMode);
   }
 }
+
 ```
 
 ### Repository Interfaces
@@ -141,11 +193,9 @@ Repository interfaces define the contract for the repositories. They ensure that
 #### Example: `ThemeRepoInterface`
 
 ```dart
-import 'package:flutter/material.dart';
-
 abstract class ThemeRepoInterface {
-  Future<ThemeMode> loadCurrentTheme();
-  Future<void> saveThemeMode(ThemeMode themeMode);
+  String loadCurrentTheme();
+  Future<bool> saveThemeMode(String themeMode);
 }
 ```
 
