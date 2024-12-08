@@ -77,6 +77,8 @@ We have created a repository that allows developers to manage Android configurat
            versionCode project.env.ANDROID_VERSION_CODE.toInteger()
            versionName project.env.ANDROID_VERSION_NAME.toString()
            multiDexEnabled true
+
+           <!-- define variables here to use in [`AndroidManifest.xml`](android/app/src/main/AndroidManifest.xml) -->
            resValue "string", "app_name", project.env.APP_NAME
        }
 
@@ -112,7 +114,7 @@ We have created a repository that allows developers to manage Android configurat
 
 4. **Use Variables in [`android/app/src/main/AndroidManifest.xml`](android/app/src/main/AndroidManifest.xml)**
 
-   In your `android/app/src/main/AndroidManifest.xml` file, use the `APP_NAME` variable:
+   In your `android/app/src/main/AndroidManifest.xml` file, use the `app_name` variable define in [`android/app/build.gradle`](android/app/build.gradle):
 
    ```xml
    <manifest xmlns:android="http://schemas.android.com/apk/res/android">
