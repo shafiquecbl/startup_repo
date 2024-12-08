@@ -26,498 +26,432 @@ The project is organized into several folders, each with a specific purpose:
 
 ### Controllers
 
-The `controllers` folder contains classes that manage the state of the application. These classes use the `Get` package for state management.
+The `controllers` folder contains classes that manage the state of the application. These classes use the `Get` package for state management. Each controller has a required parameter, which is their service class interface.
 
-#### Example: `localization_controller.dart`
+#### Example: `ThemeController`
 
 ```dart
 import 'package:get/get.dart';
-import 'package:startup_repo/data/service/localization_service_interface.dart';
+import 'package:startup_repo/data/service/theme_service_interface.dart';
 
-class LocalizationController extends GetxController {
-  final LocalizationServiceInterface localizationService;
+class ThemeController extends GetxController implements GetxService {
+  final ThemeServiceInterface themeService;
 
-  LocalizationController({required this.localizationService});
-
-  // Add your controller logic here
+  ThemeController({required this.themeService});
 }
 ```
 
-### Data
+### Services
 
-The `data` folder handles all data-related operations.
+The `service` folder contains the logical part of the controllers. Each service has a required parameter, which is their repository class interface.
 
-#### API
-
-The `api` folder contains classes that manage API calls. These classes use the `http` package to make HTTP requests.
-
-#### Example: `api_client.dart`
+#### Example: `ThemeService`
 
 ```dart
+import 'package:flutter/material.dart';
+import 'package:startup_repo/data/repository/theme_repo_interface.dart';
+import 'theme_service_interface.dart';
+
+class ThemeService implements ThemeServiceInterface {
+  final ThemeRepoInterface themeRepo;
+  ThemeService({required this.themeRepo});
+
+  @override
+  Future<ThemeMode> loadCurrentTheme() async {
+    return themeRepo.loadCurrentTheme();
+  }
+
+  @override
+  Future<void> saveThemeMode(ThemeMode themeMode) async {
+    await themeRepo.saveThemeMode(themeMode);
+  }
+}
+```
+
+### Service Interfaces
+
+Service interfaces define the contract for the services. They ensure that the services implement the required methods.
+
+#### Example: `ThemeServiceInterface`
+
+```dart
+import 'package:flutter/material.dart';
+
+abstract class ThemeServiceInterface {
+  Future<ThemeMode> loadCurrentTheme();
+  Future<void> saveThemeMode(ThemeMode themeMode);
+}
+```
+
+### Repositories
+
+The `repository` folder handles the final step of getting or sending data to the API or local storage. Each repository can have multiple required parameters, such as API client interface and shared preferences.
+
+#### Example: `ThemeRepo`
+
+```dart
+import 'package:flutter/material.dart';
+import 'package:shared_preferences/shared_preferences.dart';
+import '../../utils/app_constants.dart';
+import 'theme_repo_interface.dart';
+
+class ThemeRepo implements ThemeRepoInterface {
+  final SharedPreferences prefs;
+  ThemeRepo({required this.prefs});
+
+  @override
+  Future<ThemeMode> loadCurrentTheme() async {
+    String? data;
+    try {
+      data = prefs.getString(AppConstants.theme);
+    } catch (e) {
+      data = 'system';
+    }
+    if (data == null || data == 'system') {
+      return ThemeMode.system;
+    } else if (data == 'dark') {
+      return ThemeMode.dark;
+    } else {
+      return ThemeMode.light;
+    }
+  }
+
+  @override
+  Future<void> saveThemeMode(ThemeMode themeMode) async {
+    String mode = 'system';
+    switch (themeMode) {
+      case ThemeMode.light:
+        mode = 'light';
+        break;
+      case ThemeMode.dark:
+        mode = 'dark';
+        break;
+      default:
+        mode = 'system';
+    }
+    await prefs.setString(AppConstants.theme, mode);
+  }
+}
+```
+
+### Repository Interfaces
+
+Repository interfaces define the contract for the repositories. They ensure that the repositories implement the required methods.
+
+#### Example: `ThemeRepoInterface`
+
+```dart
+import 'package:flutter/material.dart';
+
+abstract class ThemeRepoInterface {
+  Future<ThemeMode> loadCurrentTheme();
+  Future<void> saveThemeMode(ThemeMode themeMode);
+}
+```
+
+### API Client
+
+The `api` folder contains classes that manage API calls. These classes use the `http` package to make HTTP requests. The API client can have multiple required parameters, such as shared preferences and base URL.
+
+#### Example: `ApiClient`
+
+```dart
+import 'dart:convert';
+import 'dart:io';
+import 'dart:typed_data';
+import 'package:flutter/material.dart';
+import 'package:get/get.dart';
 import 'package:http/http.dart' as http;
 import 'package:shared_preferences/shared_preferences.dart';
-import 'package:startup_repo/utils/app_constants.dart';
+import '../../utils/app_constants.dart';
+import '../../view/base/common/snackbar.dart';
+import '../model/response/error.dart';
+import 'api_client_interface.dart';
 
-class ApiClient {
+class ApiClient extends GetxService implements ApiClientInterface {
   final SharedPreferences sharedPreferences;
   final String baseUrl;
-
   ApiClient({required this.sharedPreferences, required this.baseUrl});
 
-  Future<http.Response> get(String url) async {
-    final response = await http.get(Uri.parse(baseUrl + url));
-    return response;
-  }
+  final int timeoutInSeconds = 120;
+  http.Client? _client; // Track the client for cancellation
 
-  Future<http.Response> post(String url, {required Map<String, dynamic> body}) async {
-    final response = await http.post(Uri.parse(baseUrl + url), body: body);
-    return response;
-  }
-}
-```
-
-#### Model
-
-The `model` folder contains data models.
-
-##### Body
-
-Contains models for sending data to the API.
-
-##### Example: `login_body.dart`
-
-```dart
-class LoginBody {
-  final String email;
-  final String password;
-
-  LoginBody({required this.email, required this.password});
-
-  Map<String, dynamic> toJson() {
-    return {
-      'email': email,
-      'password': password,
-    };
-  }
-}
-```
-
-##### Response
-
-Contains models for receiving data from the API.
-
-##### Example: `login_response.dart`
-
-```dart
-class LoginResponse {
-  final String token;
-
-  LoginResponse({required this.token});
-
-  factory LoginResponse.fromJson(Map<String, dynamic> json) {
-    return LoginResponse(
-      token: json['token'],
-    );
-  }
-}
-```
-
-##### Other
-
-Contains models used within the app.
-
-##### Example: `user.dart`
-
-```dart
-class User {
-  final String id;
-  final String name;
-  final String email;
-
-  User({required this.id, required this.name, required this.email});
-
-  factory User.fromJson(Map<String, dynamic> json) {
-    return User(
-      id: json['id'],
-      name: json['name'],
-      email: json['email'],
-    );
-  }
-}
-```
-
-#### Repository
-
-The `repository` folder handles the final step of getting or sending data to the API or local storage. It acts as an intermediary between the data source and the rest of the application.
-
-##### Example: `localization_repo.dart`
-
-```dart
-import 'package:shared_preferences/shared_preferences.dart';
-import 'package:startup_repo/data/repository/localization_repo_interface.dart';
-
-class LocalizationRepo implements LocalizationRepoInterface {
-  final SharedPreferences prefs;
-
-  LocalizationRepo({required this.prefs});
+  final Map<String, String> _mainHeaders = {
+    "Content-Type": "application/json",
+    'Accept': 'application/json',
+  };
 
   @override
-  Locale loadCurrentLanguage() {
-    // Load the current language from shared preferences
+  Future<void> cancelRequest() async {
+    if (_client != null) {
+      _client!.close(); // Cancel the ongoing request
+      _client = null; // Reset the client
+      debugPrint('====> API request canceled');
+    }
   }
 
   @override
-  Future<void> saveLanguage(Locale locale) async {
-    // Save the language to shared preferences
+  Future<http.Response?> get(String uri, {Map<String, String>? headers}) async {
+    Uri url = Uri.parse(AppConstants.baseUrl + uri);
+    try {
+      // print the api call
+      debugPrint('====> API Call: $url, ====> Header: $_mainHeaders');
+
+      // Initialize a new client
+      _client = http.Client();
+
+      // api call
+      http.Response response = await _client!
+          .get(url, headers: headers ?? _mainHeaders)
+          .timeout(Duration(seconds: timeoutInSeconds));
+
+      _client = null; // Reset the client after completion
+
+      // handle response
+      return _handleResponse(response);
+    } catch (e) {
+      _client = null; // Reset the client after completion
+      hideLoading();
+      _socketException(e);
+      return null;
+    }
   }
 
   @override
-  List<Locale> get availableLanguages {
-    // Return the list of available languages
+  Future<http.Response?> post(
+    String uri,
+    Map<String, dynamic> body, {
+    Map<String, dynamic>? headers,
+  }) async {
+    Uri url = Uri.parse(AppConstants.baseUrl + uri);
+    try {
+      // print the api call
+      debugPrint('====> API Call: $url, ====> Header: $_mainHeaders');
+      debugPrint('====> Body: $body');
+
+      // Initialize a new client
+      _client = http.Client();
+
+      // api call
+      http.Response response = await _client!.post(
+        url,
+        body: jsonEncode(body),
+        headers: {
+          ..._mainHeaders,
+          if (headers != null) ...headers,
+        },
+      ).timeout(Duration(seconds: timeoutInSeconds));
+
+      _client = null; // Reset the client after completion
+
+      // handle response
+      return _handleResponse(response);
+    } catch (e) {
+      _client = null; // Reset the client after completion
+      hideLoading();
+      _socketException(e);
+      return null;
+    }
   }
-}
-```
-
-#### Service
-
-The `service` folder contains the logical part of the controllers. Controllers only have variables, while the complete logical part is in the service.
-
-##### Example: `localization_service.dart`
-
-```dart
-import 'package:flutter/material.dart';
-import 'package:startup_repo/data/repository/localization_repo_interface.dart';
-import 'localization_service_interface.dart';
-
-class LocalizationService implements LocalizationServiceInterface {
-  final LocalizationRepoInterface localizationRepo;
-
-  LocalizationService({required this.localizationRepo});
 
   @override
-  Locale loadCurrentLanguage() {
-    return localizationRepo.loadCurrentLanguage();
+  Future<http.Response?> put(
+    String uri,
+    Map<String, dynamic> body, {
+    Map<String, dynamic>? headers,
+  }) async {
+    Uri url = Uri.parse(AppConstants.baseUrl + uri);
+    try {
+      // print the api call
+      debugPrint('====> API Call: $url, ====> Header: $_mainHeaders');
+      debugPrint('====> Body: $body');
+
+      // Initialize a new client
+      _client = http.Client();
+
+      // api call
+      http.Response response = await _client!.put(
+        url,
+        body: jsonEncode(body),
+        headers: {
+          ..._mainHeaders,
+          if (headers != null) ...headers,
+        },
+      ).timeout(Duration(seconds: timeoutInSeconds));
+
+      _client = null; // Reset the client after completion
+
+      // handle response
+      return _handleResponse(response);
+    } catch (e) {
+      _client = null; // Reset the client after completion
+      hideLoading();
+      _socketException(e);
+      return null;
+    }
   }
 
   @override
-  Future<void> saveLanguage(Locale locale) async {
-    await localizationRepo.saveLanguage(locale);
+  Future<http.Response?> delete(String uri, {Map<String, String>? headers}) async {
+    Uri url = Uri.parse(AppConstants.baseUrl + uri);
+    try {
+      // print the api call
+      debugPrint('====> API Call: $url, ====> Header: $_mainHeaders');
+
+      // Initialize a new client
+      _client = http.Client();
+
+      // api call
+      http.Response response = await _client!
+          .delete(url, headers: headers ?? _mainHeaders)
+          .timeout(Duration(seconds: timeoutInSeconds));
+
+      _client = null; // Reset the client after completion
+
+      // handle response
+      return _handleResponse(response);
+    } catch (e) {
+      _client = null; // Reset the client after completion
+      hideLoading();
+      _socketException(e);
+      return null;
+    }
   }
 
   @override
-  List<Locale> get availableLanguages {
-    return localizationRepo.availableLanguages;
+  Future<Uint8List?> downloadImage(String uri) async {
+    try {
+      // print the api call
+      debugPrint('====> API Call: $uri, ====> Header: $_mainHeaders');
+
+      http.Response response = await http
+          .get(
+            Uri.parse(uri),
+            headers: _mainHeaders,
+          )
+          .timeout(Duration(seconds: timeoutInSeconds));
+      if (response.statusCode != 200) {
+        return _handleError(jsonDecode(response.body));
+      } else {
+        hideLoading();
+        return Uint8List.fromList(response.bodyBytes);
+      }
+    } catch (e) {
+      hideLoading();
+      _socketException(e);
+      return null;
+    }
+  }
+
+  Future<http.Response?> _handleResponse(http.Response response) async {
+    if (response.statusCode != 200) {
+      return _handleError(jsonDecode(response.body));
+    } else {
+      hideLoading();
+      return response;
+    }
+  }
+
+  _handleError(Map<String, dynamic> body) {
+    if (body.containsKey('message')) {
+      showToast(body['message']);
+      return null;
+    }
+    ErrorResponse response = ErrorResponse.fromJson(body);
+    hideLoading();
+    showToast(response.errors.first.message);
+    return null;
+  }
+
+  _socketException(Object e) {
+    if (e is SocketException) {
+      showToast('Please check your internet connection');
+    } else {
+      if (e is http.ClientException) {
+        if (e.message != 'Connection closed before full header was received') {
+          showToast('Something went wrong');
+        }
+      } else {
+        showToast('Something went wrong');
+      }
+    }
   }
 }
 ```
 
-### Helper
+### API Client Interfaces
 
-The `helper` folder contains helper functions and classes.
+API client interfaces define the contract for the API clients. They ensure that the API clients implement the required methods.
 
-#### Example: `dependency_injection.dart`
+#### Example: `ApiClientInterface`
 
 ```dart
-import 'package:get/get.dart';
-import 'package:shared_preferences/shared_preferences.dart';
-import 'package:startup_repo/controller/localization_controller.dart';
-import 'package:startup_repo/controller/theme_controller.dart';
-import 'package:startup_repo/data/repository/localization_repo.dart';
-import 'package:startup_repo/data/repository/theme_repo.dart';
-import 'package:startup_repo/data/service/localization_service.dart';
-import 'package:startup_repo/data/service/theme_service.dart';
+import 'dart:typed_data';
+import 'package:http/http.dart';
 
-Future<void> init() async {
-  final sharedPreferences = await SharedPreferences.getInstance();
-  Get.lazyPut(() => sharedPreferences);
+abstract class ApiClientInterface {
+  Future<void> cancelRequest();
 
-  // Repositories
-  Get.lazyPut(() => LocalizationRepo(prefs: Get.find()));
-  Get.lazyPut(() => ThemeRepo(prefs: Get.find()));
+  Future<Response?> get(
+    String uri, {
+    Map<String, String>? headers,
+  });
 
-  // Services
-  Get.lazyPut(() => LocalizationService(localizationRepo: Get.find()));
-  Get.lazyPut(() => ThemeService(themeRepo: Get.find()));
+  Future<Response?> post(
+    String url,
+    Map<String, dynamic> body, {
+    Map<String, dynamic>? headers,
+  });
 
-  // Controllers
-  Get.lazyPut(() => LocalizationController(localizationService: Get.find()));
-  Get.lazyPut(() => ThemeController(themeService: Get.find()));
+  Future<Response?> put(
+    String url,
+    Map<String, dynamic> body, {
+    Map<String, dynamic>? headers,
+  });
+
+  Future<Response?> delete(
+    String url, {
+    Map<String, String>? headers,
+  });
+
+  Future<Uint8List?> downloadImage(String uri);
 }
 ```
 
-### Theme
+### Dependency Injection
 
-The `theme` folder contains dark and light themes for the application.
+Dependency injection is used to manage the dependencies between different classes. The `Get` package is used for dependency injection.
 
-#### Example: `dark_theme.dart`
-
-```dart
-import 'package:flutter/material.dart';
-
-final ThemeData darkTheme = ThemeData(
-  brightness: Brightness.dark,
-  primaryColor: Colors.blue,
-  accentColor: Colors.blueAccent,
-  // Add other theme properties here
-);
-```
-
-#### Example: `light_theme.dart`
+#### Example: `get_di.dart`
 
 ```dart
-import 'package:flutter/material.dart';
+// Core
+final sharedPreferences = await SharedPreferences.getInstance();
+Get.lazyPut(() => sharedPreferences);
+ApiClientInterface apiClient = ApiClient(sharedPreferences: Get.find(), baseUrl: AppConstants.baseUrl);
+Get.lazyPut(() => apiClient);
 
-final ThemeData lightTheme = ThemeData(
-  brightness: Brightness.light,
-  primaryColor: Colors.blue,
-  accentColor: Colors.blueAccent,
-  // Add other theme properties here
-);
+// Repository
+LocalizationRepoInterface localizationRepo = LocalizationRepo(prefs: Get.find());
+Get.lazyPut(() => localizationRepo);
+ThemeRepoInterface themeRepo = ThemeRepo(prefs: Get.find());
+Get.lazyPut(() => themeRepo);
+SplashRepoInterface splashRepo = SplashRepo(apiClient: Get.find(), prefs: Get.find());
+Get.lazyPut(() => splashRepo);
+
+// Service
+LocalizationServiceInterface localizationService = LocalizationService(localizationRepo: Get.find());
+Get.lazyPut(() => localizationService);
+ThemeServiceInterface themeService = ThemeService(themeRepo: Get.find());
+Get.lazyPut(() => themeService);
+SplashServiceInterface splashService = SplashService(splashRepo: Get.find());
+Get.lazyPut(() => splashService);
+
+// Controller
+Get.lazyPut(() => LocalizationController(localizationService: Get.find()));
+Get.lazyPut(() => ThemeController(themeService: Get.find()));
+Get.lazyPut(() => LocalizationController(localizationService: Get.find()));
 ```
-
-### Utils
-
-The `utils` folder contains utility files.
-
-#### Example: `app_constants.dart`
-
-```dart
-class AppConstants {
-  static const String BASE_URL = 'https://api.example.com';
-  static const String THEME = 'theme';
-  static const String COUNTRY_CODE = 'country_code';
-  static const String LANGUAGE_CODE = 'language_code';
-  // Add other constants here
-}
-```
-
-#### Example: `colors.dart`
-
-```dart
-import 'package:flutter/material.dart';
-
-const Color primaryColor = Color(0xFF6949FF);
-const Color secondaryColor = Color(0xFFD27579);
-
-// background color
-const Color backgroundColorDark = Colors.black;
-const Color backgroundColorLight = Color(0xFFFFFFFF);
-
-// card color
-const Color cardColorDark = Color(0xFF222222);
-const Color cardColorLight = Color(0xFFF7F8FA);
-
-// text color
-const Color textColordark = Color(0XFFDADADA);
-const Color textColorLight = Colors.black;
-
-// shadow color
-const Color shadowColorDark = Color(0xFF0A1220);
-const Color shadowColorLight = Color(0xFFE8E8E8);
-
-// hint color
-const Color hintColorDark = Color(0xFFA4A6A4);
-const Color hintColorLight = Color(0xFF9F9F9F);
-
-// disabled color
-const Color disabledColorDark = Color(0xffa2a7ad);
-const Color disabledColorLight = Color(0xffa2a7ad);
-
-// divider Color
-const Color dividerColorDark = Color(0xFF424242);
-const Color dividerColorLight = Color(0xFFBDBDBD);
-
-// icon color
-const Color iconColorDark = Colors.white;
-const Color iconColorLight = Colors.black;
-
-// gradient
-const LinearGradient primaryGradient = LinearGradient(
-  colors: [secondaryColor, primaryColor],
-  stops: [0.2, 1.0],
-  begin: Alignment.bottomLeft,
-  end: Alignment.topRight,
-);
-```
-
-#### Example: `images.dart`
-
-```dart
-class Images {
-  static const String logo = 'assets/images/logo.png';
-  static const String background = 'assets/images/background.png';
-  // Add other image paths here
-}
-```
-
-#### Example: `style.dart`
-
-```dart
-import 'package:flutter/material.dart';
-import 'package:flutter_screenutil/flutter_screenutil.dart';
-
-// Padding and BorderRadius
-EdgeInsets pagePadding = EdgeInsets.all(16.sp);
-double get radius => 16.sp;
-BorderRadius get borderRadius => BorderRadius.circular(16.sp);
-
-// Text Styles (using Theme.of(context).textTheme)
-TextStyle displayLarge(BuildContext context) => Theme.of(context).textTheme.displayLarge!;
-TextStyle displayMedium(BuildContext context) => Theme.of(context).textTheme.displayMedium!;
-TextStyle displaySmall(BuildContext context) => Theme.of(context).textTheme.displaySmall!;
-TextStyle headlineLarge(BuildContext context) => Theme.of(context).textTheme.headlineLarge!;
-TextStyle headlineMedium(BuildContext context) => Theme.of(context).textTheme.headlineMedium!;
-TextStyle headlineSmall(BuildContext context) => Theme.of(context).textTheme.headlineSmall!;
-TextStyle titleLarge(BuildContext context) => Theme.of(context).textTheme.titleLarge!;
-TextStyle titleMedium(BuildContext context) => Theme.of(context).textTheme.titleMedium!;
-TextStyle titleSmall(BuildContext context) => Theme.of(context).textTheme.titleSmall!;
-TextStyle bodyLarge(BuildContext context) => Theme.of(context).textTheme.bodyLarge!;
-TextStyle bodyMedium(BuildContext context) => Theme.of(context).textTheme.bodyMedium!;
-TextStyle bodySmall(BuildContext context) => Theme.of(context).textTheme.bodySmall!;
-TextStyle labelLarge(BuildContext context) => Theme.of(context).textTheme.labelLarge!;
-TextStyle labelMedium(BuildContext context) => Theme.of(context).textTheme.labelMedium!;
-TextStyle labelSmall(BuildContext context) => Theme.of(context).textTheme.labelSmall!;
-```
-
-### View
-
-The `view` folder manages the UI.
-
-#### Base
-
-Contains common reusable widgets used in multiple screens.
-
-##### Example: `loading.dart`
-
-```dart
-import 'package:flutter/material.dart';
-
-class Loading extends StatelessWidget {
-  @override
-  Widget build(BuildContext context) {
-    return Center(
-      child: CircularProgressIndicator(),
-    );
-  }
-}
-```
-
-#### Screen
-
-Contains all screens. Each screen has a separate folder, which can further contain a `widgets` folder for reusable widgets specific to that screen.
-
-##### Example: Home Screen
-
-###### `home.dart`
-
-```dart
-import 'package:flutter/material.dart';
-import 'package:startup_repo/utils/style.dart';
-
-class HomeScreen extends StatelessWidget {
-  const HomeScreen({super.key});
-
-  @override
-  Widget build(BuildContext context) {
-    return Scaffold(
-      appBar: AppBar(
-        title: const Text('Home'),
-      ),
-      body: Padding(
-        padding: pagePadding,
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            // demonstrate all the text theme,
-            Text(
-              'Display Large (${displayLarge(context).fontSize?.ceilToDouble()})',
-              style: displayLarge(context),
-            ),
-            Text(
-              'Display Medium (${displayMedium(context).fontSize?.ceilToDouble()})',
-              style: displayMedium(context),
-            ),
-            Text(
-              'Display Small (${displaySmall(context).fontSize?.ceilToDouble()})',
-              style: displaySmall(context),
-            ),
-            Text(
-              'Headline Large (${headlineLarge(context).fontSize?.ceilToDouble()})',
-              style: headlineLarge(context),
-            ),
-            Text(
-              'Headline Medium (${headlineMedium(context).fontSize?.ceilToDouble()})',
-              style: headlineMedium(context),
-            ),
-            Text(
-              'Headline Small (${headlineSmall(context).fontSize?.ceilToDouble()})',
-              style: headlineSmall(context),
-            ),
-            Text(
-              'Title Large (${titleLarge(context).fontSize?.ceilToDouble()})',
-              style: titleLarge(context),
-            ),
-            Text(
-              'Title Medium (${titleMedium(context).fontSize?.ceilToDouble()})',
-              style: titleMedium(context),
-            ),
-            Text(
-              'Title Small (${titleSmall(context).fontSize?.ceilToDouble()})',
-              style: titleSmall(context),
-            ),
-            Text(
-              'Body Large (${bodyLarge(context).fontSize?.ceilToDouble()})',
-              style: bodyLarge(context),
-            ),
-            Text(
-              'Body Medium (${bodyMedium(context).fontSize?.ceilToDouble()})',
-              style: bodyMedium(context),
-            ),
-            Text(
-              'Body Small (${bodySmall(context).fontSize?.ceilToDouble()})',
-              style: bodySmall(context),
-            ),
-            Text(
-              'Label Large (${labelLarge(context).fontSize?.ceilToDouble()})',
-              style: labelLarge(context),
-            ),
-            Text(
-              'Label Medium (${labelMedium(context).fontSize?.ceilToDouble()})',
-              style: labelMedium(context),
-            ),
-            Text(
-              'Label Small (${labelSmall(context).fontSize?.ceilToDouble()})',
-              style: labelSmall(context),
-            ),
-          ],
-        ),
-      ),
-    );
-  }
-}
-```
-
-## Assets
-
-The project includes various assets such as images and icons. These assets are used to enhance the visual appeal of the application.
-
-## Packages
-
-The project includes several packages, each with a specific purpose:
-
-- `get`: Used for state management and dependency injection.
-- `intl`: Provides internationalization and localization support.
-- `http`: Used for making HTTP requests.
-- `iconsax`: Provides a collection of icons.
-- `shimmer`: Used for creating shimmer effects.
-- `google_fonts`: Provides access to Google Fonts.
-- `url_launcher`: Used for launching URLs.
-- `flutter_dotenv`: Used for loading environment variables from a `.env` file.
-- `connectivity_plus`: Provides connectivity status.
-- `flutter_screenutil`: Provides screen size and font size adaptation.
-- `shared_preferences`: Used for storing key-value pairs locally.
-- `cached_network_image`: Used for caching network images.
-- `flutter_smart_dialog`: Provides smart dialog support.
 
 ## Conclusion
 
