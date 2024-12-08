@@ -4,7 +4,6 @@ import 'package:get/get.dart';
 import 'package:iconsax/iconsax.dart';
 import 'package:startup_repo/controller/theme_controller.dart';
 import 'package:startup_repo/utils/colors.dart';
-
 import 'package:startup_repo/utils/style.dart';
 import 'package:startup_repo/view/base/common/primary_button.dart';
 
