@@ -4,37 +4,39 @@ import '../data/model/env.dart';
 Color primaryColor = EnvModel.primaryColor;
 Color secondaryColor = EnvModel.secondaryColor;
 
-// background color
-const Color backgroundColorDark = Color(0xFF121212);
+// background colors
 const Color backgroundColorLight = Color(0xFFFFFFFF);
+const Color backgroundColorDark = Color(0xFF1E1E1E);
 
-// card color
-const Color cardColorDark = Color(0xFF222222);
-const Color cardColorLight = Color(0xFFF7F8FA);
+// card colors
+const Color cardColorLight = Color(0xFFF5F5F5);
+const Color cardColorDark = Color(0xFF2A2A2A);
 
-// text color
-const Color textColordark = Color(0XFFDADADA);
-const Color textColorLight = Colors.black;
+const Color transparent = Colors.transparent;
 
-// shadow color
-const Color shadowColorDark = Color(0xFF0A1220);
+// shadow colors
 const Color shadowColorLight = Color(0xFFE8E8E8);
+const Color shadowColorDark = Color(0xFF3A3A3A);
 
-// hint color
-const Color hintColorDark = Color(0xFFA4A6A4);
-const Color hintColorLight = Color(0xFF9F9F9F);
+// divider colors
+const Color dividerColorLight = Color(0xFFD0D5DD);
+const Color dividerColorDark = Color(0xFF3F3F3F);
 
-// disabled color
-const Color disabledColorDark = Color(0xffa2a7ad);
-const Color disabledColorLight = Color(0xffa2a7ad);
+// disabled colors
+const Color disabledColorLight = Color(0xffA0A0A0);
+Color disabledColorDark = const Color(0xFFB0B0B0);
 
-// divider Color
-Color dividerColorDark = Colors.grey[800]!;
-Color dividerColorLight = Colors.grey[300]!;
+// hint colors
+const Color hintColorLight = Color(0xff606060);
+const Color hintColorDark = Color(0xFF909090);
 
-// icon color
-const Color iconColorDark = Colors.white;
-const Color iconColorLight = Colors.black;
+// text colors
+const Color textColorLight = Colors.black;
+const Color textColorDark = Colors.white;
+
+// icon colors
+const Color iconColorLight = Color(0xff606060);
+const Color iconColorDark = Color(0xFF909090);
 
 // gradient
 LinearGradient get primaryGradient => LinearGradient(

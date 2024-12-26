@@ -14,6 +14,7 @@ import 'theme/dark_theme.dart';
 import 'theme/light_theme.dart';
 import 'utils/app_constants.dart';
 import 'utils/messages.dart';
+import 'utils/scroll_behavior.dart';
 import 'view/screens/home/home.dart';
 
 void main() async {
@@ -65,8 +66,8 @@ class MyApp extends StatelessWidget {
                 title: AppConstants.appName,
                 debugShowCheckedModeBanner: false,
                 themeMode: themeController.themeMode,
-                theme: lightTheme,
-                darkTheme: darkTheme,
+                theme: light(context),
+                darkTheme: dark(context),
                 locale: localizeController.locale,
                 translations: Messages(languages: languages),
                 fallbackLocale: Locale(
@@ -76,6 +77,12 @@ class MyApp extends StatelessWidget {
                 navigatorObservers: [FlutterSmartDialog.observer],
                 builder: FlutterSmartDialog.init(
                   loadingBuilder: (string) => const LoadingWidget(),
+                  builder: (context, child) {
+                    return ScrollConfiguration(
+                      behavior: CustomScrollBehavior(),
+                      child: child ?? const SizedBox(),
+                    );
+                  },
                 ),
                 home: const HomeScreen(),
               ),

@@ -1,10 +1,4 @@
-import 'package:flutter/material.dart';
-import 'package:flutter_screenutil/flutter_screenutil.dart';
-import 'package:get/get.dart';
-import 'package:startup_repo/utils/style.dart';
-import 'package:startup_repo/view/base/common/divider.dart';
-import '../../helper/navigation.dart';
-import 'common/primary_button.dart';
+import '../../imports.dart';
 
 Future showConfirmationDialog({
   required String title,
@@ -37,28 +31,22 @@ class ConfirmationDialog extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Dialog(
-      insetPadding: EdgeInsets.symmetric(horizontal: 30.sp),
-      shape: RoundedRectangleBorder(borderRadius: borderRadius),
-      child: Container(
-        padding: EdgeInsets.all(20.sp),
-        decoration: BoxDecoration(
-          color: Theme.of(context).cardColor,
-          borderRadius: borderRadius,
-        ),
+      child: Padding(
+        padding: paddingDefault,
         child: Column(
           mainAxisSize: MainAxisSize.min,
           children: [
             Text(
               title.tr,
-              style: Theme.of(context).textTheme.bodyLarge?.copyWith(fontWeight: FontWeight.bold),
+              style: bodyLarge(context).copyWith(fontWeight: FontWeight.bold),
             ),
-            CustomDivider(padding: 16.sp),
+            Divider(height: spacingLarge),
             Text(
               subtitle.tr,
               textAlign: TextAlign.center,
               style: Theme.of(context).textTheme.bodyMedium,
             ),
-            SizedBox(height: 24.sp),
+            SizedBox(height: spacingLarge),
             Row(
               mainAxisAlignment: MainAxisAlignment.end,
               children: [
@@ -69,13 +57,8 @@ class ConfirmationDialog extends StatelessWidget {
                     textColor: Theme.of(context).textTheme.bodyLarge!.color,
                   ),
                 ),
-                SizedBox(width: 16.sp),
-                Expanded(
-                  child: PrimaryButton(
-                    text: actionText,
-                    onPressed: onAccept,
-                  ),
-                ),
+                SizedBox(width: spacingDefault),
+                Expanded(child: PrimaryButton(text: actionText, onPressed: onAccept)),
               ],
             ),
           ],

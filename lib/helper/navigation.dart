@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 
-pop() => Navigator.pop(Get.context!);
+pop() => Get.back();
 
 /// Launch a new screen
 Future<dynamic> launchScreen(Widget child, {bool pushAndRemove = false, bool replace = false}) async {

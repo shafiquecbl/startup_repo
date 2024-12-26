@@ -1,15 +1,4 @@
-import 'package:flutter/material.dart';
-import 'package:flutter_screenutil/flutter_screenutil.dart';
-import 'package:get/get.dart';
-import 'package:iconsax/iconsax.dart';
-import '../../../controller/localization_controller.dart';
-import '../../../data/model/language.dart';
-import '../../../helper/navigation.dart';
-import '../../../utils/colors.dart';
-import '../../../utils/style.dart';
-import '../../base/common/primary_button.dart';
-import '../../base/common/textfield.dart';
-import '../../base/common/divider.dart';
+import '../../../imports.dart';
 
 class LanguageScreen extends StatefulWidget {
   const LanguageScreen({super.key});
@@ -27,22 +16,20 @@ class _LanguageScreenState extends State<LanguageScreen> {
       ),
       body: GetBuilder<LocalizationController>(builder: (con) {
         return Padding(
-          padding: pagePadding,
+          padding: paddingDefault,
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               CustomTextField(
                 hintText: 'search_langauge'.tr,
-                suffixIcon: Icon(Iconsax.search_normal, size: 20.sp),
-                radius: 32.sp,
-                filled: true,
+                suffixIcon: Iconsax.search_normal,
                 onChanged: con.searchLanguage,
               ),
               SizedBox(height: 16.sp),
               Expanded(
                 child: ListView.separated(
                   itemCount: con.languages.length,
-                  separatorBuilder: (context, index) => CustomDivider(padding: 0.sp),
+                  separatorBuilder: (context, index) => const Divider(),
                   itemBuilder: (context, index) {
                     LanguageModel language = con.languages[index];
                     bool selected = con.selectedIndex == index;
@@ -87,7 +74,7 @@ class _LanguageScreenState extends State<LanguageScreen> {
         );
       }),
       bottomNavigationBar: Padding(
-        padding: pagePadding.copyWith(top: 0),
+        padding: paddingDefault.copyWith(top: 0),
         child: PrimaryButton(text: 'done'.tr, onPressed: pop),
       ),
     );

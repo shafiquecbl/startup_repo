@@ -1,10 +1,26 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 
-// Padding and BorderRadius
-EdgeInsets pagePadding = EdgeInsets.all(16.sp);
-double get radius => 16.sp;
-BorderRadius get borderRadius => BorderRadius.circular(16.sp);
+// Padding
+EdgeInsets paddingSmall = EdgeInsets.all(8.sp);
+EdgeInsets paddingMedium = EdgeInsets.all(12.sp);
+EdgeInsets paddingDefault = EdgeInsets.all(16.sp);
+EdgeInsets paddingHorizontal = EdgeInsets.symmetric(horizontal: 16.sp);
+EdgeInsets paddingVertical = EdgeInsets.symmetric(vertical: 16.sp);
+
+// Spacing
+double spacingExtraSmall = 4.sp;
+double spacingSmall = 8.sp;
+double spacingMedium = 12.sp;
+double spacingDefault = 16.sp;
+double spacingLarge = 24.sp;
+double spacingExtraLarge = 32.sp;
+
+double get radiusSmall => 8.sp;
+double get radiusDefault => 12.sp;
+
+BorderRadius get borderRadiusSmall => BorderRadius.circular(radiusSmall);
+BorderRadius get borderRadiusDefault => BorderRadius.circular(radiusDefault);
 
 // Text Styles (using Theme.of(context).textTheme)
 TextStyle displayLarge(BuildContext context) => Theme.of(context).textTheme.displayLarge!;
