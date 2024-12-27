@@ -5,8 +5,6 @@ import 'package:flutter_screenutil/flutter_screenutil.dart';
 EdgeInsets paddingSmall = EdgeInsets.all(8.sp);
 EdgeInsets paddingMedium = EdgeInsets.all(12.sp);
 EdgeInsets paddingDefault = EdgeInsets.all(16.sp);
-EdgeInsets paddingHorizontal = EdgeInsets.symmetric(horizontal: 16.sp);
-EdgeInsets paddingVertical = EdgeInsets.symmetric(vertical: 16.sp);
 
 // Spacing
 double spacingExtraSmall = 4.sp;
