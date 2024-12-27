@@ -13,6 +13,19 @@ class HomeScreen extends StatelessWidget {
       body: ListView(
         padding: paddingDefault,
         children: [
+          Column(
+            children: <Widget>[
+              Text('w100', style: titleSmall(context).copyWith(fontWeight: FontWeight.w100)),
+              Text('w200', style: titleSmall(context).copyWith(fontWeight: FontWeight.w200)),
+              Text('w300', style: titleSmall(context).copyWith(fontWeight: FontWeight.w300)),
+              Text('w400', style: titleSmall(context).copyWith(fontWeight: FontWeight.w400)),
+              Text('w500', style: titleSmall(context).copyWith(fontWeight: FontWeight.w500)),
+              Text('w600', style: titleSmall(context).copyWith(fontWeight: FontWeight.w600)),
+              Text('w700', style: titleSmall(context).copyWith(fontWeight: FontWeight.w700)),
+              Text('w800', style: titleSmall(context).copyWith(fontWeight: FontWeight.w800)),
+              Text('w900', style: titleSmall(context).copyWith(fontWeight: FontWeight.w900)),
+            ],
+          ),
           // demonstrate all the text theme,
           Text(
             'Display Large(${displayLarge(context).fontSize?.ceilToDouble()})',

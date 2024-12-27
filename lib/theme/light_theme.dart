@@ -25,7 +25,7 @@ ThemeData light(BuildContext context) => ThemeData(
         outline: dividerColorLight,
         surface: cardColorDark,
       ),
-      textTheme: texThemeLight(context),
+      textTheme: textThemeLight(context),
       iconTheme: iconThemeLight(context),
       appBarTheme: appBarThemeLight(context),
       elevatedButtonTheme: elevatedButtonThemeData(context),
