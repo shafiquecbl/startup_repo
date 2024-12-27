@@ -25,4 +25,4 @@ TextTheme textThemeLight(BuildContext context) {
 }
 
 TextTheme textThemeDark(BuildContext context) =>
-    textThemeLight(context).copyWith().apply(displayColor: textColorDark, bodyColor: textColorDark);
+    textThemeLight(context).apply(displayColor: textColorDark, bodyColor: textColorDark);
