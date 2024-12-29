@@ -38,14 +38,10 @@ class ConfirmationDialog extends StatelessWidget {
           children: [
             Text(
               title.tr,
-              style: bodyLarge(context).copyWith(fontWeight: FontWeight.bold),
+              style: bodyLarge(context).copyWith(fontWeight: FontWeight.w700),
             ),
             Divider(height: spacingLarge),
-            Text(
-              subtitle.tr,
-              textAlign: TextAlign.center,
-              style: Theme.of(context).textTheme.bodyMedium,
-            ),
+            Text(subtitle.tr, textAlign: TextAlign.center, style: bodyMedium(context)),
             SizedBox(height: spacingLarge),
             Row(
               mainAxisAlignment: MainAxisAlignment.end,
@@ -54,7 +50,7 @@ class ConfirmationDialog extends StatelessWidget {
                   child: PrimaryOutlineButton(
                     text: 'cancel'.tr,
                     onPressed: pop,
-                    textColor: Theme.of(context).textTheme.bodyLarge!.color,
+                    textColor: context.textTheme.bodyLarge!.color,
                   ),
                 ),
                 SizedBox(width: spacingDefault),

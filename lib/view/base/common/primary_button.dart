@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:get/get.dart';
+import 'package:startup_repo/imports.dart';
 import '../../../utils/colors.dart';
 
 class PrimaryButton extends StatelessWidget {
@@ -32,10 +33,7 @@ class PrimaryButton extends StatelessWidget {
           if (icon != null) ...[icon!, SizedBox(width: 8.sp)],
           Text(
             text.tr,
-            style: Theme.of(context)
-                .textTheme
-                .bodySmall
-                ?.copyWith(fontWeight: FontWeight.bold, color: textColor),
+            style: bodySmall(context).copyWith(fontWeight: FontWeight.w600, color: textColor),
           ),
         ],
       ),
@@ -70,10 +68,7 @@ class PrimaryOutlineButton extends StatelessWidget {
           if (text != null)
             Text(
               text!,
-              style: Theme.of(context)
-                  .textTheme
-                  .bodySmall
-                  ?.copyWith(fontWeight: FontWeight.bold, color: textColor),
+              style: bodySmall(context).copyWith(fontWeight: FontWeight.w600, color: textColor),
             ),
         ],
       ),

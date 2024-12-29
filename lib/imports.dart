@@ -7,7 +7,6 @@ export 'helper/navigation.dart';
 export 'view/base/common/primary_button.dart';
 export 'utils/colors.dart';
 export 'utils/style.dart';
-export 'package:google_fonts/google_fonts.dart';
 export 'view/base/common/snackbar.dart';
 export 'package:iconsax/iconsax.dart';
 export 'controller/localization_controller.dart';

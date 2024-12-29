@@ -15,7 +15,6 @@ dependencies:
   http: ^1.2.2
   iconsax: ^0.0.8
   shimmer: ^3.0.0
-  google_fonts: ^6.2.1
   url_launcher: ^6.3.0
   flutter_dotenv: ^5.2.1
   connectivity_plus: ^6.0.5
@@ -54,4 +53,26 @@ flutter:
     - assets/
     - assets/images/
     - assets/languages/
+
+  fonts:
+    - family: Poppins
+      fonts:
+        - asset: assets/fonts/100.ttf
+          weight: 100
+        - asset: assets/fonts/200.ttf
+          weight: 200
+        - asset: assets/fonts/300.ttf
+          weight: 300
+        - asset: assets/fonts/400.ttf
+          weight: 400
+        - asset: assets/fonts/500.ttf
+          weight: 500
+        - asset: assets/fonts/600.ttf
+          weight: 600
+        - asset: assets/fonts/700.ttf
+          weight: 700
+        - asset: assets/fonts/800.ttf
+          weight: 800
+        - asset: assets/fonts/900.ttf
+          weight: 900
 

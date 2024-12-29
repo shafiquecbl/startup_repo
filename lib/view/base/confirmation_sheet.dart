@@ -49,7 +49,7 @@ class ConfirmationSheet extends StatelessWidget {
           SizedBox(height: spacingDefault),
           Text(
             title.tr,
-            style: bodyLarge(context).copyWith(fontWeight: FontWeight.bold),
+            style: bodyLarge(context).copyWith(fontWeight: FontWeight.w700),
           ),
           SizedBox(height: spacingDefault),
           Text(

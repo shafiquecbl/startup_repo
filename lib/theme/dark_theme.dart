@@ -13,6 +13,7 @@ import 'src/text_theme.dart';
 import 'src/textbuton_theme.dart';
 
 ThemeData dark(BuildContext context) => ThemeData(
+      fontFamily: 'Poppins',
       useMaterial3: true,
       brightness: Brightness.light,
       primaryColor: primaryColor,

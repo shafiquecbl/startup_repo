@@ -45,7 +45,7 @@ class CustomTextField extends StatelessWidget {
             // title
             Align(
               alignment: AlignmentDirectional.centerStart,
-              child: Text(labelText ?? '', style: bodyMedium(context).copyWith(fontWeight: FontWeight.bold)),
+              child: Text(labelText ?? '', style: bodyMedium(context).copyWith(fontWeight: FontWeight.w700)),
             ),
             SizedBox(height: spacingSmall),
           ],
@@ -62,22 +62,14 @@ class CustomTextField extends StatelessWidget {
             onTap: onTap,
             decoration: InputDecoration(
               prefixIcon: prefixIcon != null
-                  ? Icon(
-                      prefixIcon,
-                      size: 20.sp,
-                      color: Theme.of(context).hintColor,
-                    )
+                  ? Icon(prefixIcon, size: 20.sp, color: Theme.of(context).hintColor)
                   : null,
               suffixIcon: suffixIcon != null
-                  ? Icon(
-                      suffixIcon,
-                      size: 20.sp,
-                      color: Theme.of(context).hintColor,
-                    )
+                  ? Icon(suffixIcon, size: 20.sp, color: Theme.of(context).hintColor)
                   : null,
               hintText: hintText,
             ),
-            style: Theme.of(context).textTheme.bodyMedium!.copyWith(fontWeight: FontWeight.normal),
+            style: bodyMedium(context).copyWith(fontWeight: FontWeight.normal),
           ),
         ],
       ),
@@ -102,7 +94,7 @@ class CustomDropDown extends StatelessWidget {
         if (labelText != null) ...[
           Align(
             alignment: AlignmentDirectional.centerStart,
-            child: Text(labelText ?? '', style: bodyMedium(context).copyWith(fontWeight: FontWeight.bold)),
+            child: Text(labelText ?? '', style: bodyMedium(context).copyWith(fontWeight: FontWeight.w700)),
           ),
           SizedBox(height: spacingSmall),
         ],

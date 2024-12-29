@@ -13,6 +13,7 @@ import 'src/bottom_sheet_theme.dart';
 import 'src/divider_theme.dart';
 
 ThemeData light(BuildContext context) => ThemeData(
+      fontFamily: 'Poppins',
       useMaterial3: true,
       brightness: Brightness.light,
       primaryColor: primaryColor,
