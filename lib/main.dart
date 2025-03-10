@@ -2,28 +2,25 @@
 
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
-import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:flutter_smart_dialog/flutter_smart_dialog.dart';
 import 'package:get/get.dart';
-import 'package:startup_repo/view/base/common/loading.dart';
-import 'controller/localization_controller.dart';
-import 'controller/theme_controller.dart';
-import 'helper/get_di.dart' as di;
-import 'theme/dark_theme.dart';
-import 'theme/light_theme.dart';
-import 'utils/app_constants.dart';
-import 'utils/messages.dart';
-import 'utils/scroll_behavior.dart';
-import 'view/screens/home/home.dart';
+import 'package:startup_repo/core/widgets/loading.dart';
+import 'features/language/presentation/controller/localization_controller.dart';
+import 'features/theme/presentation/controller/theme_controller.dart';
+import 'core/helper/get_di.dart' as di;
+import 'core/theme/dark_theme.dart';
+import 'core/theme/light_theme.dart';
+import 'core/utils/app_constants.dart';
+import 'core/utils/messages.dart';
+import 'core/utils/scroll_behavior.dart';
+import 'features/home/presentation/view/home.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
   // disable landscape mode
   SystemChrome.setPreferredOrientations([DeviceOrientation.portraitUp]);
 
-  // Load the .env file
-  await dotenv.load();
   // initialize localization
   Map<String, Map<String, String>> languages = await di.init();
 
