@@ -324,7 +324,3 @@ class SplashBinding extends Bindings {
 
 - **Controller Lifecycle:**  
   Global controllers are initialized once and persist, whereas screen-specific controllers are registered through bindings and disposed when their screen is closed.
-
----
-
-_Document Version: 2.0 – Updated to reflect the current dependency injection strategy using feature-specific DI with central registration in the startup_repo project._
