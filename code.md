@@ -1,508 +1,266 @@
-# Code Architecture Documentation
+# Code Architecture Documentation for Pixart
 
-## Introduction
+## 1. Introduction
 
-This document provides a detailed overview of the code architecture for the `startup_repo` Flutter project. It explains the purpose of each folder and file, the assets included, and the packages used. This documentation aims to help developers understand the project structure and how to work with it effectively.
+This document describes the code architecture for the Pixart image generation application. Our goal is to provide a scalable, maintainable, and modular structure using GetX for state management and dependency injection. The architecture follows a layered approach with clear separation of concerns among data, domain, and presentation layers.
 
-## Project Structure
+The key components are:
 
-The project is organized into several folders, each with a specific purpose:
+- **Repository:** Handles raw data fetching and storage (API calls, local storage, etc.). It works with basic data types and models.
+- **Service:** Contains business logic. It transforms raw data from the repository into domain models and applies necessary validations or calculations.
+- **Controller:** Manages UI state and user interactions. It calls the service for data and updates the UI accordingly.
+- **Bindings:** Define dependency injection for each feature, ensuring that controllers and services are instantiated only when needed.
 
-### `controllers`
+This document also explains how to manage multiple controllers effectively—distinguishing global controllers (which persist throughout the app) from screen-specific controllers (which are disposed when the screen is closed).
 
-Manages state management using the `Get` package. Each controller is responsible for a specific part of the application state and interacts with the corresponding service.
+---
 
-### `data`
+## 2. Project Structure
 
-Handles all data-related operations, including API calls, data models, repositories, and services.
+Below is the updated directory structure for the project:
 
-#### `api`
+````
+lib/
+├── firebase_options.dart
+├── imports.dart
+├── main.dart
+├── core/
+│   ├── api/
+│   │   ├── api_client.dart
+│   │   └── api_client_interface.dart
+│   ├── error/
+│   │   ├── error.dart
+│   │   └── together_ai_error.dart
+│   ├── helper/
+│   │   ├── get_di.dart              // Centralized dependency injection for core/global dependencies
+│   │   ├── navigation.dart          // Navigation helpers
+│   │   └── notification_helper.dart
+│   ├── theme/
+│   │   ├── dark_theme.dart
+│   │   ├── light_theme.dart
+│   │   └── src/
+│   │       ├── appbar_theme.dart
+│   │       ├── bottom_sheet_theme.dart
+│   │       ├── dialog_theme.dart
+│   │       ├── divider_theme.dart
+│   │       ├── dropdown_theme.dart
+│   │       ├── elevated_button_theme.dart
+│   │       ├── icon_theme.dart
+│   │       ├── input_decoration_theme.dart
+│   │       ├── outline_button_theme.dart
+│   │       ├── text_theme.dart
+│   │       └── textbuton_theme.dart
+│   ├── utils/
+│   │   ├── app_constants.dart
+│   │   ├── colors.dart
+│   │   ├── images.dart
+│   │   ├── messages.dart
+│   │   ├── scroll_behavior.dart
+│   │   └── style.dart
+│   └── common/                    // Common reusable widgets (buttons, text fields, dialogs, etc.)\n│       ├── confirmation_dialog.dart\n│       ├── confirmation_sheet.dart\n│       ├── loading.dart\n│       ├── network_image.dart\n│       ├── primary_button.dart\n│       ├── shimmer.dart\n│       ├── snackbar.dart\n│       └── textfield.dart
+├── features/
+│   ├── home/
+│   │   └── presentation/
+│   │       └── view/
+│   │           └── home.dart
+│   ├── language/
+│   │   ├── data/
+│   │   │   ├── model/\n│   │   │   └── language.dart\n│   │   │\n│   │   └── repository/\n│   │       ├── localization_repo.dart\n│   │       └── localization_repo_interface.dart
+│   │   ├── domain/
+│   │   │   ├── binding/\n│   │   │   └── language_binding.dart\n│   │   │   └── service/\n│   │       ├── localization_service.dart\n│   │       └── localization_service_interface.dart
+│   │   └── presentation/\n│       ├── controller/\n│       │   └── localization_controller.dart\n│       └── view/\n│           └── language.dart
+│   ├── splash/
+│   │   ├── data/\n│   │   ├── model/\n│   │   │   └── config_model.dart\n│   │   └── repository/\n│   │       ├── splash_repo.dart\n│   │       └── splash_repo_interface.dart
+│   │   ├── domain/\n│   │   ├── binding/\n│   │   │   └── splash_binding.dart\n│   │   │   └── service/\n│   │       ├── splash_service.dart\n│   │       └── splash_service_interface.dart\n│   └── presentation/\n│       └── controller/\n│           └── splash_controller.dart
+│   ├── theme/
+│   │   ├── data/\n│   │   └── repository/\n│   │       ├── theme_repo.dart\n│   │       └── theme_repo_interface.dart\n│   ├── domain/\n│   │   ├── binding/\n│   │   │   └── theme_binding.dart\n│   │   └── service/\n│   │       ├── theme_service.dart\n│   │       └── theme_service_interface.dart\n│   └── presentation/\n│       └── controller/\n│           └── theme_controller.dart\n   \n   // ... Other feature directories (ads, background_remover, dashboard, history, home, html, inspirations, review, settings, subscription, tools, upscale_image, welcome, etc.)\n\n```\n\n## Detailed Explanation\n\n### Core Layer\n\n#### **API**\n- **Purpose:** Manage API communication (HTTP requests, responses, error handling).\n- **Files:** `api_client.dart`, `api_client_interface.dart`.\n\n#### **Error**\n- **Purpose:** Handle errors in a unified manner. Contains custom error classes such as `error.dart` and `together_ai_error.dart`.\n\n#### **Helper**\n- **Purpose:** Contains helper functions and classes for dependency injection (`get_di.dart`), navigation, and notifications.\n\n#### **Theme**\n- **Purpose:** Contains dark and light themes and their subcomponents for UI styling.\n\n#### **Utils**\n- **Purpose:** Houses utility files for constants, colors, images, messages, scroll behavior, and style.\n\n#### **Common**\n- **Purpose:** Contains reusable UI widgets used across multiple features (e.g., confirmation dialogs, primary buttons, shimmer, text fields).\n\n### Feature Layer\n\nEach feature is self-contained and follows a modular structure:\n\n#### **Data**\n- **Model:** Contains data models (DTOs) specific to the feature.\n- **Repository:** Manages data fetching from APIs or local storage. It only returns raw data which is then transformed by the service layer.\n\n#### **Domain**\n- **Binding:** Contains GetX bindings that handle dependency injection for that feature. This ensures controllers and services are only initialized when needed.\n- **Service:** Implements business logic, processes data from repositories, and transforms raw data into domain models. Use cases may be added here for complex business logic, but in our current architecture, services already provide that functionality.\n\n#### **Presentation**\n- **Controller:** Manages UI state and interacts with the service layer. There are two types:\n  - **Global Controllers:** Persist throughout the app (e.g., `SymptomsController`).\n  - **Screen-Specific Controllers:** Created when the screen is opened and disposed when closed (e.g., `LogSymptomsController`, `SymptomsViewController`).\n- **View:** Contains screens and widgets for UI, organized per feature.\n\n### Controller Management and Lifecycle\n\n- **Global Controllers:** Initialized at app startup (using `Get.put(..., permanent: true)`) and remain in memory.\n- **Screen-Specific Controllers:** Initialized via feature-specific bindings (using `Get.lazyPut()` or `Get.create()`) so they are created when the screen opens and disposed automatically when the screen is closed.\n\n#### **Best Practices for Controller Lifecycle**\n1. **Use Bindings:** Each feature should have a binding class (e.g., `SymptomsBinding`, `LogSymptomsBinding`) that registers its controllers, services, and repositories.\n2. **Global vs. Local:** Use `Get.put()` for controllers that need to persist, and `Get.lazyPut()` or `Get.create()` for those only needed while a screen is active.\n3. **Avoid Cross-Controller Dependencies:** If a screen-specific controller is needed by a global controller, consider either making it persistent or refactoring its logic into a service so that the global controller doesn’t depend on a transient controller.\n4. **Centralize Dependency Injection:** Use a dedicated dependency injection file (e.g., `get_di.dart` or `initial_binding.dart`) to register global dependencies, while feature-specific bindings handle local ones.\n\n### Flow Between Layers\n\n1. **UI (View)** triggers an action (e.g., log symptoms) → calls the corresponding **Controller**.\n2. The **Controller** calls the **Service** for business logic (e.g., formatting data, validating input).\n3. The **Service** interacts with the **Repository** to fetch or store data.\n4. The **Repository** communicates with APIs or local storage and returns raw data.\n5. The **Service** transforms the raw data into domain models and returns them to the **Controller**.\n6. The **Controller** updates the UI accordingly.\n\n### Example: Logging Symptoms\n\n- **SymptomsController (Global):**\n  - Fetches the full list of symptoms from the backend.\n  - Provides methods for logging symptoms and retrieving logged data by date or month.\n\n- **LogSymptomsController (Screen-Specific):**\n  - Manages UI state such as the selected date, search query, and the initialization of logged data for a given date.\n  - Retrieves logged data using `SymptomsController` and then updates local state (weight, temperature, notes, etc.).\n  - On logging, it calls `SymptomsController.logSymptoms(...)` to send data to the backend.\n\n- **SymptomSelectionController (Screen-Specific):**\n  - Manages which symptoms are selected in the UI.\n  - Provides methods to toggle, initialize, and clear symptom selections.\n\n- **HealthMetricsControllers (Optional):**\n  - If necessary, separate controllers can handle weight, temperature, and notes for finer control.\n\n### Managing Multiple Controllers\n\nBecause different controllers serve different purposes (global vs. screen-specific), it’s important to:\n\n- **Clearly Label and Document Each Controller:**\n  - For example, annotate `SymptomsController` as _global_ and `LogSymptomsController` as _screen-specific_.\n\n- **Use Feature Bindings:**\n  - Ensure that screen-specific controllers are registered in a feature binding so that they are automatically disposed when the screen is closed.\n\n- **Minimize Cross-Controller Dependencies:**\n  - If a screen-specific controller is used inside a global controller, either refactor its logic into a service or use persistent instances with `Get.put()`.\n\n- **Centralize Global Controller Initialization:**\n  - Use an initial binding for global controllers in `main.dart` to avoid cluttering screen-specific bindings.\n\n### Dependency Injection Example\n\nIn `get_di.dart`, register global dependencies:\n\n```dart\n// Core dependencies\nfinal sharedPreferences = await SharedPreferences.getInstance();\nGet.lazyPut(() => sharedPreferences);\nApiClientInterface apiClient = ApiClient(sharedPreferences: Get.find(), baseUrl: AppConstants.baseUrl);\nGet.lazyPut(() => apiClient);\n\n// Global repositories\nLocalizationRepoInterface localizationRepo = LocalizationRepo(prefs: Get.find());\nGet.lazyPut(() => localizationRepo);\nThemeRepoInterface themeRepo = ThemeRepo(prefs: Get.find());\nGet.lazyPut(() => themeRepo);\nSplashRepoInterface splashRepo = SplashRepo(apiClient: Get.find(), prefs: Get.find());\nGet.lazyPut(() => splashRepo);\n\n// Global services\nLocalizationServiceInterface localizationService = LocalizationService(localizationRepo: Get.find());\nGet.lazyPut(() => localizationService);\nThemeServiceInterface themeService = ThemeService(themeRepo: Get.find());\nGet.lazyPut(() => themeService);\nSplashServiceInterface splashService = SplashService(splashRepo: Get.find());\nGet.lazyPut(() => splashService);\n\n// Global controllers\nGet.put(() => LocalizationController(localizationService: Get.find()), permanent: true);\nGet.put(() => ThemeController(themeService: Get.find()), permanent: true);\n```\n\nFor feature-specific controllers, create a binding per feature. For example, for logging symptoms:\n\n```dart\nclass LogSymptomsBinding extends Bindings {\n  @override\n  void dependencies() {\n    Get.lazyPut(() => LogSymptomsController());\n    Get.lazyPut(() => SymptomSelectionController());\n    // Optionally, if using separate health metrics controllers\n    // Get.lazyPut(() => WeightController());\n    // Get.lazyPut(() => TemperatureController());\n    // Get.lazyPut(() => NotesController());\n  }\n}\n```\n\nThen, in your routing (or manually in `initState` if not using named routes):\n\n```dart\nGetPage(\n  name: '/logSymptoms',\n  page: () => LogSymptomsScreen(),\n  binding: LogSymptomsBinding(),\n);\n```\n\n### Conclusion\n\nThe updated architecture is designed to:\n\n- **Maintain a clear separation of concerns:** Data fetching is handled by repositories, business logic by services, and UI state by controllers.\n- **Support scalability:** New features can be added without disrupting existing functionality.\n- **Simplify controller management:** Global controllers persist across the app, while screen-specific controllers are disposed automatically when the screen is closed.\n- **Be understandable for junior developers:** With a consistent approach using bindings and centralized dependency injection, the project remains organized and maintainable.\n\nThis document should guide the team to follow best practices in managing dependencies, controller lifecycles, and separation of concerns. \n\nFeel free to adjust details as needed to match any further refinements in your project. \n\n---\n\n*Document Version: 1.1 - Updated to reflect new architecture decisions and best practices based on team discussions.*\n"}
 
-Manages API calls using the `http` package. Contains classes that handle HTTP requests and responses.
+Below is an updated, detailed architecture document for your Pixart application. This document is intended to guide your team in understanding the code structure, the responsibilities of each layer, and how to manage controllers (global vs. screen-specific) effectively.
 
-#### `model`
+---
 
-Contains data models used throughout the application.
+# Code Architecture Documentation for Pixart
 
-- **`body`**: Models for sending data to the API.
-- **`response`**: Models for receiving data from the API.
-- **`other`**: Models used within the app for various purposes.
+## 1. Introduction
 
-#### `repository`
+This document outlines the architecture of the Pixart image generation application. It explains the purpose of each folder, the flow between repositories, services, and controllers, and best practices for dependency management and controller lifecycles. This guide is designed to help all developers—even juniors—understand and work with the project consistently.
 
-Handles the final step of getting or sending data to the API or local storage. Acts as an intermediary between the data source and the rest of the application. Each repository can have multiple required parameters, such as API client interface and shared preferences.
+**Key Objectives:**
 
-#### `service`
+- **Separation of Concerns:** Distinct layers for data, domain, and presentation.
+- **Scalability:** New features can be added without modifying existing code.
+- **Maintainability:** Controllers, services, and repositories are isolated for easier testing and debugging.
+- **Effective Controller Lifecycle Management:** Global controllers persist across the app, while screen-specific controllers are initialized on demand and disposed when the screen is closed.
 
-Contains the logical part of the controllers. Each service has a required parameter, which is their repository class interface. Services implement the business logic and interact with repositories to fetch or save data.
+---
 
-### `helper`
+## 2. Project Structure
 
-Contains helper functions and classes that provide utility methods and functionalities used across the application.
+The project is organized into two main sections: **core** and **features**.
 
-### `theme`
+### Core Layer
 
-Contains dark and light themes for the application. Defines the visual styling and appearance of the app.
+Contains reusable components and utilities that are shared across the entire application.
 
-### `utils`
+````
 
-Contains utility files that provide constants, colors, images, styles, and other reusable components.
-
-- **`app_constants.dart`**: Contains app-wide constants.
-- **`colors.dart`**: Manages app colors.
-- **`images.dart`**: Manages image assets.
-- **`style.dart`**: Contains common styles.
-
-### `view`
-
-Manages the UI components of the application. Contains screens and reusable widgets.
-
-- **`base`**: Contains common reusable widgets used in multiple screens.
-- **`screen`**: Contains all screens. Each screen has a separate folder, which can further contain a `widgets` folder for reusable widgets specific to that screen.
-
-## Detailed Explanation
-
-### Controllers
-
-The `controllers` folder contains classes that manage the state of the application. These classes use the `Get` package for state management. Each controller has a required parameter, which is their service class interface.
-
-#### Example: `ThemeController`
-
-```dart
-import 'package:flutter/material.dart';
-import 'package:get/get.dart';
-import '../data/service/theme_service_interface.dart';
-
-class ThemeController extends GetxController implements GetxService {
-  final ThemeServiceInterface themeService;
-
-  ThemeController({required this.themeService}) {
-    _loadCurrentTheme();
-  }
-
-  ThemeMode _themeMode = ThemeMode.light;
-  ThemeMode get themeMode => _themeMode;
-
-  void _loadCurrentTheme() async {
-    _themeMode = themeService.loadCurrentTheme();
-    update();
-  }
-
-  void setThemeMode(ThemeMode themeMode) {
-    _themeMode = themeMode;
-    themeService.saveThemeMode(themeMode);
-    update();
-  }
-
-  static ThemeController get find => Get.find();
-}
-```
-
-### Services
-
-The `service` folder contains the logical part of the controllers. Each service has a required parameter, which is their repository class interface.
-
-#### Example: `ThemeService`
-
-```dart
-import 'package:flutter/material.dart';
-import 'package:startup_repo/data/repository/theme_repo_interface.dart';
-import 'theme_service_interface.dart';
-
-class ThemeService implements ThemeServiceInterface {
-  final ThemeRepoInterface themeRepo;
-  ThemeService({required this.themeRepo});
-
-  @override
-  ThemeMode loadCurrentTheme() {
-    String data = themeRepo.loadCurrentTheme();
-    if (data == 'system') {
-      return ThemeMode.system;
-    } else if (data == 'dark') {
-      return ThemeMode.dark;
-    } else {
-      return ThemeMode.light;
-    }
-  }
-
-  @override
-  Future<bool> saveThemeMode(ThemeMode themeMode) async {
-    String mode = 'system';
-    switch (themeMode) {
-      case ThemeMode.light:
-        mode = 'light';
-        break;
-      case ThemeMode.dark:
-        mode = 'dark';
-        break;
-      default:
-        mode = 'system';
-    }
-    return await themeRepo.saveThemeMode(mode);
-  }
-}
-```
-
-### Service Interfaces
-
-Service interfaces define the contract for the services. They ensure that the services implement the required methods.
-
-#### Example: `ThemeServiceInterface`
-
-```dart
-import 'package:flutter/material.dart';
-
-abstract class ThemeServiceInterface {
-  ThemeMode loadCurrentTheme();
-  Future<bool> saveThemeMode(ThemeMode themeMode);
-}
-```
-
-### Repositories
-
-The `repository` folder handles the final step of getting or sending data to the API or local storage. Each repository can have multiple required parameters, such as API client interface and shared preferences.
-
-#### Example: `ThemeRepo`
-
-```dart
-import 'package:shared_preferences/shared_preferences.dart';
-import '../../utils/app_constants.dart';
-import 'theme_repo_interface.dart';
-
-class ThemeRepo implements ThemeRepoInterface {
-  final SharedPreferences prefs;
-  ThemeRepo({required this.prefs});
-
-  @override
-  String loadCurrentTheme() {
-    return prefs.getString(AppConstants.theme) ?? 'system';
-  }
-
-  @override
-  Future<bool> saveThemeMode(String themeMode) async {
-    return await prefs.setString(AppConstants.theme, themeMode);
-  }
-}
+lib/
+├── core/
+│ ├── api/ // API client classes for HTTP requests\n│ │ ├── api_client.dart\n│ │ └── api_client_interface.dart
+│ ├── error/ // Error handling classes (custom errors, etc.)
+│ ├── helper/ // Helper functions & dependency injection (e.g., get_di.dart, navigation, notification_helper)\n ├── get_di.dart\n ├── navigation.dart\n └── notification_helper.dart
+│ ├── theme/ // Theme definitions (dark, light, and sub-themes for UI components)\n ├── dark_theme.dart\n ├── light_theme.dart\n └── src/...\n └── textbuton_theme.dart
+│ ├── utils/ // Utility functions, constants, colors, images, messages, styles\n ├── app_constants.dart\n ├── colors.dart\n ├── images.dart\n ├── messages.dart\n ├── scroll_behavior.dart\n └── style.dart
+│ └── common/ // Common reusable widgets (confirmation dialogs, buttons, loading indicators, etc.)\n ├── confirmation_dialog.dart\n ├── confirmation_sheet.dart\n ├── loading.dart\n ├── network_image.dart\n ├── primary_button.dart\n ├── shimmer.dart\n ├── snackbar.dart\n └── textfield.dart
 
 ```
 
-### Repository Interfaces
+### Features Layer
 
-Repository interfaces define the contract for the repositories. They ensure that the repositories implement the required methods.
+Each feature is a self-contained module that follows a modular structure with separate layers.
 
-#### Example: `ThemeRepoInterface`
-
-```dart
-abstract class ThemeRepoInterface {
-  String loadCurrentTheme();
-  Future<bool> saveThemeMode(String themeMode);
-}
 ```
 
-### API Client
+lib/
+└── features/
+├── home/ // Home screen feature\n │ └── presentation/\n │ └── view/\n │ └── home.dart
+├── language/ // Language selection feature\n │ ├── data/\n │ │ ├── model/ (e.g., language.dart)\n │ │ └── repository/ (e.g., localization_repo.dart)\n │ ├── domain/\n │ │ ├── binding/ (language_binding.dart)\n │ │ └── service/ (localization_service.dart)\n │ └── presentation/\n │ ├── controller/ (localization_controller.dart)\n │ └── view/ (language.dart)\n ├── splash/ // Splash screen feature (startup configuration)\n ├── theme/ // Theme-related features\n └── ... // Other features (ads, background_remover, history, upscale_image, etc.)\n\nEach feature follows the pattern:\n\nfeature_name/\n├── data/\n│ ├── model/ // Data models (DTOs)\n│ └── repository/ // Repositories (data fetching from API/local storage)\n├── domain/\n│ ├── binding/ // GetX bindings (dependency injection for the feature)\n│ └── service/ // Business logic (data processing, validation, transformation)\n└── presentation/\n ├── controller/ // Controllers (manages UI state, user interactions)\n └── view/ // UI screens and feature-specific widgets\n └── widgets/ // Reusable components specific to the feature\n```
 
-The `api` folder contains classes that manage API calls. These classes use the `http` package to make HTTP requests. The API client can have multiple required parameters, such as shared preferences and base URL.
+---
 
-#### Example: `ApiClient`
+## 3. Detailed Layer Responsibilities
 
-```dart
-import 'dart:convert';
-import 'dart:io';
-import 'dart:typed_data';
-import 'package:flutter/material.dart';
-import 'package:get/get.dart';
-import 'package:http/http.dart' as http;
-import 'package:shared_preferences/shared_preferences.dart';
-import '../../utils/app_constants.dart';
-import '../../view/base/common/snackbar.dart';
-import '../model/response/error.dart';
-import 'api_client_interface.dart';
+### 3.1 Data Layer
 
-class ApiClient extends GetxService implements ApiClientInterface {
-  final SharedPreferences sharedPreferences;
-  final String baseUrl;
-  ApiClient({required this.sharedPreferences, required this.baseUrl});
+- **Model:** Contains data structures that mirror API responses or represent local data.
+- **Repository:** Handles all data operations (API calls, local storage). It accepts raw data (e.g., JSON) and returns it to the service layer. The repository does not include any business logic.
 
-  final int timeoutInSeconds = 120;
-  http.Client? _client; // Track the client for cancellation
+### 3.2 Domain Layer
 
-  final Map<String, String> _mainHeaders = {
-    "Content-Type": "application/json",
-    'Accept': 'application/json',
-  };
+- **Binding:** Contains GetX bindings that register dependencies (repositories, services, controllers) for the feature. This ensures that controllers and services are only created when needed.
+- **Service:** Implements the business logic. It interacts with the repository to fetch data, applies validations or transformations, and then returns domain models to the controller. (For many features, the service layer itself acts as a use case, so separate use case classes are not necessary unless the business logic is very complex.)
 
-  @override
-  Future<void> cancelRequest() async {
-    if (_client != null) {
-      _client!.close(); // Cancel the ongoing request
-      _client = null; // Reset the client
-      debugPrint('====> API request canceled');
-    }
-  }
+### 3.3 Presentation Layer
 
-  @override
-  Future<http.Response?> get(String uri, {Map<String, String>? headers}) async {
-    Uri url = Uri.parse(AppConstants.baseUrl + uri);
-    try {
-      // print the api call
-      debugPrint('====> API Call: $url, ====> Header: $_mainHeaders');
+- **Controller:** Manages UI state and user interactions. It calls methods on the service layer to fetch or update data. There are two kinds of controllers:
+  - **Global Controllers:** These persist throughout the app (e.g., `SymptomsController`). They are initialized in a global binding and remain in memory.
+  - **Screen-Specific Controllers:** These are created when a particular screen is shown (e.g., `LogSymptomsController`, `SymptomsViewController`). They are registered using feature bindings so that they are disposed automatically when the screen is closed.
+- **View:** Contains the UI code. Views use GetX (e.g., `GetBuilder`, `Obx`) to rebuild based on controller updates.
 
-      // Initialize a new client
-      _client = http.Client();
+---
 
-      // api call
-      http.Response response = await _client!
-          .get(url, headers: headers ?? _mainHeaders)
-          .timeout(Duration(seconds: timeoutInSeconds));
+## 4. Flow Between Layers
 
-      _client = null; // Reset the client after completion
+1. **User Interaction:** The user performs an action on the UI (View).
+2. **Controller:** The corresponding controller is triggered, which calls a method on the service.
+3. **Service:** The service processes the request, interacts with the repository, and applies business logic.
+4. **Repository:** The repository makes API calls or reads local data, returning raw data.
+5. **Service:** The service transforms raw data into domain models.
+6. **Controller:** The controller receives the domain models, updates its state, and triggers a UI update.
+7. **UI (View):** The UI rebuilds based on the updated state.
 
-      // handle response
-      return _handleResponse(response);
-    } catch (e) {
-      _client = null; // Reset the client after completion
-      hideLoading();
-      _socketException(e);
-      return null;
-    }
-  }
+---
 
-  @override
-  Future<http.Response?> post(
-    String uri,
-    Map<String, dynamic> body, {
-    Map<String, dynamic>? headers,
-  }) async {
-    Uri url = Uri.parse(AppConstants.baseUrl + uri);
-    try {
-      // print the api call
-      debugPrint('====> API Call: $url, ====> Header: $_mainHeaders');
-      debugPrint('====> Body: $body');
+## 5. Managing Multiple Controllers
 
-      // Initialize a new client
-      _client = http.Client();
+### Global vs. Screen-Specific Controllers
 
-      // api call
-      http.Response response = await _client!.post(
-        url,
-        body: jsonEncode(body),
-        headers: {
-          ..._mainHeaders,
-          if (headers != null) ...headers,
-        },
-      ).timeout(Duration(seconds: timeoutInSeconds));
+- **Global Controllers:**
 
-      _client = null; // Reset the client after completion
+  - Example: `SymptomsController`
+  - Initialized using `Get.put(..., permanent: true)` or in a global binding.
+  - Remains in memory across the app's lifetime.
 
-      // handle response
-      return _handleResponse(response);
-    } catch (e) {
-      _client = null; // Reset the client after completion
-      hideLoading();
-      _socketException(e);
-      return null;
-    }
-  }
+- **Screen-Specific Controllers:**
+  - Example: `LogSymptomsController`, `SymptomsViewController`, and any controller for a bottom sheet or dialog.
+  - Registered using feature-specific bindings (e.g., `LogSymptomsBinding`).
+  - Automatically disposed when the associated screen is removed from the navigation stack.
 
-  @override
-  Future<http.Response?> put(
-    String uri,
-    Map<String, dynamic> body, {
-    Map<String, dynamic>? headers,
-  }) async {
-    Uri url = Uri.parse(AppConstants.baseUrl + uri);
-    try {
-      // print the api call
-      debugPrint('====> API Call: $url, ====> Header: $_mainHeaders');
-      debugPrint('====> Body: $body');
+### Best Practices for Controller Management
 
-      // Initialize a new client
-      _client = http.Client();
+1. **Use Feature-Specific Bindings:**  
+   Create a binding for each feature that registers the controllers, services, and repositories. For example:
 
-      // api call
-      http.Response response = await _client!.put(
-        url,
-        body: jsonEncode(body),
-        headers: {
-          ..._mainHeaders,
-          if (headers != null) ...headers,
-        },
-      ).timeout(Duration(seconds: timeoutInSeconds));
+   ```dart
+   class LogSymptomsBinding extends Bindings {
+     @override
+     void dependencies() {
+       Get.lazyPut<LogSymptomsController>(() => LogSymptomsController(initialDate: DateTime.now())); // Screen-specific
+       Get.lazyPut<SymptomSelectionController>(() => SymptomSelectionController()); // Screen-specific
+     }
+   }
+   ```
 
-      _client = null; // Reset the client after completion
+   Then, attach this binding in your route or when navigating to the feature.
 
-      // handle response
-      return _handleResponse(response);
-    } catch (e) {
-      _client = null; // Reset the client after completion
-      hideLoading();
-      _socketException(e);
-      return null;
-    }
-  }
+2. **Centralize Global Controllers:**  
+   Global controllers should be initialized in a central file (e.g., `get_di.dart` or an `InitialBinding`) and marked as permanent:
 
-  @override
-  Future<http.Response?> delete(String uri, {Map<String, String>? headers}) async {
-    Uri url = Uri.parse(AppConstants.baseUrl + uri);
-    try {
-      // print the api call
-      debugPrint('====> API Call: $url, ====> Header: $_mainHeaders');
+   ```dart
+   Get.put(SymptomsController(symptomsService: MySymptomsService()), permanent: true);
+   ```
 
-      // Initialize a new client
-      _client = http.Client();
+3. **Avoid Cross-Controller Dependencies:**  
+   If a global controller depends on a screen-specific controller, either refactor the shared logic into a service or ensure the dependent controller is not disposed when the screen closes.
 
-      // api call
-      http.Response response = await _client!
-          .delete(url, headers: headers ?? _mainHeaders)
-          .timeout(Duration(seconds: timeoutInSeconds));
+4. **Clear Documentation and Naming:**
+   - Name controllers clearly (e.g., `SymptomsController` for global, `LogSymptomsController` for the log screen).\n - Document in comments which controllers are global and which are screen-specific.\n - Explain the lifecycle in your team's documentation.
 
-      _client = null; // Reset the client after completion
+---
 
-      // handle response
-      return _handleResponse(response);
-    } catch (e) {
-      _client = null; // Reset the client after completion
-      hideLoading();
-      _socketException(e);
-      return null;
-    }
-  }
+## 6. Dependency Injection Strategy
 
-  @override
-  Future<Uint8List?> downloadImage(String uri) async {
-    try {
-      // print the api call
-      debugPrint('====> API Call: $uri, ====> Header: $_mainHeaders');
+### Global Dependency Injection
 
-      http.Response response = await http
-          .get(
-            Uri.parse(uri),
-            headers: _mainHeaders,
-          )
-          .timeout(Duration(seconds: timeoutInSeconds));
-      if (response.statusCode != 200) {
-        return _handleError(jsonDecode(response.body));
-      } else {
-        hideLoading();
-        return Uint8List.fromList(response.bodyBytes);
-      }
-    } catch (e) {
-      hideLoading();
-      _socketException(e);
-      return null;
-    }
-  }
+- Use a centralized dependency injection file (`get_di.dart`) to register core dependencies (e.g., API client, SharedPreferences, global repositories, global services, and global controllers).
+- Example:
 
-  Future<http.Response?> _handleResponse(http.Response response) async {
-    if (response.statusCode != 200) {
-      return _handleError(jsonDecode(response.body));
-    } else {
-      hideLoading();
-      return response;
-    }
-  }
+  ```dart
+  // get_di.dart
+  final sharedPreferences = await SharedPreferences.getInstance();
+  Get.lazyPut(() => sharedPreferences);
+  ApiClientInterface apiClient = ApiClient(sharedPreferences: Get.find(), baseUrl: AppConstants.baseUrl);
+  Get.lazyPut(() => apiClient);
 
-  _handleError(Map<String, dynamic> body) {
-    if (body.containsKey('message')) {
-      showToast(body['message']);
-      return null;
-    }
-    ErrorResponse response = ErrorResponse.fromJson(body);
-    hideLoading();
-    showToast(response.errors.first.message);
-    return null;
-  }
+  // Global repositories and services
+  LocalizationRepoInterface localizationRepo = LocalizationRepo(prefs: Get.find());
+  Get.lazyPut(() => localizationRepo);
+  LocalizationServiceInterface localizationService = LocalizationService(localizationRepo: Get.find());
+  Get.lazyPut(() => localizationService);
 
-  _socketException(Object e) {
-    if (e is SocketException) {
-      showToast('Please check your internet connection');
-    } else {
-      if (e is http.ClientException) {
-        if (e.message != 'Connection closed before full header was received') {
-          showToast('Something went wrong');
-        }
-      } else {
-        showToast('Something went wrong');
-      }
-    }
-  }
-}
-```
+  // Global controllers
+  Get.put(LocalizationController(localizationService: Get.find()), permanent: true);
+  ```
 
-### API Client Interfaces
+### Feature-Specific Dependency Injection
 
-API client interfaces define the contract for the API clients. They ensure that the API clients implement the required methods.
+- For each feature, create a Binding class that registers feature-specific dependencies.
+- Example (for Log Symptoms):
+  ```dart
+  class LogSymptomsBinding extends Bindings {
+    @override
+    void dependencies() {
+      Get.lazyPut<LogSymptomsController>(() => LogSymptomsController(initialDate: DateTime.now())); // Screen-specific\n      Get.lazyPut<SymptomSelectionController>(() => SymptomSelectionController()); // Screen-specific\n    }\n  }
+  ```
+- Attach these bindings in your routes so that the controllers are created only when the feature is accessed.
 
-#### Example: `ApiClientInterface`
+---
 
-```dart
-import 'dart:typed_data';
-import 'package:http/http.dart';
+## 7. Summary
 
-abstract class ApiClientInterface {
-  Future<void> cancelRequest();
+- **Repository:** Handles data access and retrieval. It only deals with raw data formats.
+- **Service:** Contains business logic and transforms raw data into domain models. It interacts with the repository.
+- **Controller:** Manages UI state and handles user interactions. Global controllers persist across the app, while screen-specific controllers are disposed automatically when the screen is closed.
+- **Bindings:** Provide a mechanism for dependency injection, ensuring that feature-specific controllers and services are created only when needed and disposed automatically.
 
-  Future<Response?> get(
-    String uri, {
-    Map<String, String>? headers,
-  });
+**Managing Multiple Controllers:**
 
-  Future<Response?> post(
-    String url,
-    Map<String, dynamic> body, {
-    Map<String, dynamic>? headers,
-  });
+- **Global Controllers** are initialized centrally and are permanent.
+- **Screen-Specific Controllers** are registered via feature bindings (using `Get.lazyPut()` or `Get.create()`) and are disposed automatically when the screen is removed.
+- **Clear documentation and naming conventions** help the team understand which controllers persist and which are transient.
 
-  Future<Response?> put(
-    String url,
-    Map<String, dynamic> body, {
-    Map<String, dynamic>? headers,
-  });
+This updated architecture should help maintain consistency, scalability, and ease of maintenance across the project, making it easier for junior developers to follow best practices.
 
-  Future<Response?> delete(
-    String url, {
-    Map<String, String>? headers,
-  });
+---
 
-  Future<Uint8List?> downloadImage(String uri);
-}
-```
-
-### Dependency Injection
-
-Dependency injection is used to manage the dependencies between different classes. The `Get` package is used for dependency injection.
-
-#### Example: `get_di.dart`
-
-```dart
-// Core
-final sharedPreferences = await SharedPreferences.getInstance();
-Get.lazyPut(() => sharedPreferences);
-ApiClientInterface apiClient = ApiClient(sharedPreferences: Get.find(), baseUrl: AppConstants.baseUrl);
-Get.lazyPut(() => apiClient);
-
-// Repository
-LocalizationRepoInterface localizationRepo = LocalizationRepo(prefs: Get.find());
-Get.lazyPut(() => localizationRepo);
-ThemeRepoInterface themeRepo = ThemeRepo(prefs: Get.find());
-Get.lazyPut(() => themeRepo);
-SplashRepoInterface splashRepo = SplashRepo(apiClient: Get.find(), prefs: Get.find());
-Get.lazyPut(() => splashRepo);
-
-// Service
-LocalizationServiceInterface localizationService = LocalizationService(localizationRepo: Get.find());
-Get.lazyPut(() => localizationService);
-ThemeServiceInterface themeService = ThemeService(themeRepo: Get.find());
-Get.lazyPut(() => themeService);
-SplashServiceInterface splashService = SplashService(splashRepo: Get.find());
-Get.lazyPut(() => splashService);
-
-// Controller
-Get.lazyPut(() => LocalizationController(localizationService: Get.find()));
-Get.lazyPut(() => ThemeController(themeService: Get.find()));
-Get.lazyPut(() => LocalizationController(localizationService: Get.find()));
-```
-
-## Conclusion
-
-By understanding the project structure, the purpose of each folder and file, and the assets and packages included in the project, you will be able to work more effectively with the `startup_repo` Flutter project. This documentation aims to provide you with a comprehensive understanding of the project to help you contribute and maintain it efficiently.
+_Document Version: 2.0 - Updated to reflect new architectural decisions and best practices based on team feedback and ongoing discussions._
