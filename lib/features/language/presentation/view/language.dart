@@ -102,10 +102,7 @@ class LanguageRadioButton extends StatelessWidget {
           duration: const Duration(milliseconds: 300),
           height: 12.sp,
           width: 12.sp,
-          decoration: BoxDecoration(
-            shape: BoxShape.circle,
-            color: primaryColor,
-          ),
+          decoration: const BoxDecoration(shape: BoxShape.circle, color: primaryColor),
         ),
       ),
     );

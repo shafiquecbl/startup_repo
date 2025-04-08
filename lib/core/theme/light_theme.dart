@@ -25,6 +25,7 @@ ThemeData light(BuildContext context) => ThemeData(
       colorScheme: ColorScheme.fromSeed(seedColor: primaryColor, secondary: primaryColor).copyWith(
         outline: dividerColorLight,
         surface: cardColorDark,
+        brightness: Brightness.light,
       ),
       textTheme: textThemeLight(context),
       iconTheme: iconThemeLight(context),

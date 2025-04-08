@@ -15,7 +15,7 @@ import 'src/textbuton_theme.dart';
 ThemeData dark(BuildContext context) => ThemeData(
       fontFamily: 'Poppins',
       useMaterial3: true,
-      brightness: Brightness.light,
+      brightness: Brightness.dark,
       primaryColor: primaryColor,
       disabledColor: disabledColorDark,
       scaffoldBackgroundColor: backgroundColorDark,
@@ -25,6 +25,7 @@ ThemeData dark(BuildContext context) => ThemeData(
       colorScheme: ColorScheme.fromSeed(seedColor: primaryColor, secondary: primaryColor).copyWith(
         outline: dividerColorDark,
         surface: cardColorDark,
+         brightness: Brightness.dark,
       ),
       textTheme: textThemeDark(context),
       iconTheme: iconThemeDark(context),

@@ -1,8 +1,4 @@
-import 'package:flutter/material.dart';
-import 'package:flutter_screenutil/flutter_screenutil.dart';
-import 'package:get/get.dart';
 import 'package:startup_repo/imports.dart';
-import '../utils/colors.dart';
 
 class PrimaryButton extends StatelessWidget {
   final String text;
