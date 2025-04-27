@@ -1,10 +1,11 @@
+import 'package:startup_repo/core/utils/app_padding.dart';
+import 'package:startup_repo/core/utils/app_radius.dart';
 import 'package:startup_repo/imports.dart';
 
-DialogTheme dialogThemeLight(BuildContext context) => DialogTheme(
-      shape: RoundedRectangleBorder(borderRadius: borderRadiusDefault),
+DialogTheme get dialogThemeLight => DialogTheme(
+      shape: AppRadius.circular16Shape,
       backgroundColor: backgroundColorLight,
-      insetPadding: EdgeInsets.all(30.sp),
+      insetPadding: AppPadding.padding32,
     );
 
-DialogTheme dialogThemeDark(BuildContext context) =>
-    dialogThemeLight(context).copyWith(backgroundColor: backgroundColorDark);
+DialogTheme get dialogThemeDark => dialogThemeLight.copyWith(backgroundColor: backgroundColorDark);

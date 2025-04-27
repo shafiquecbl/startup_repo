@@ -1,35 +1,34 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
-import 'package:get/get.dart';
+import 'package:startup_repo/core/utils/app_padding.dart';
+import 'package:startup_repo/core/utils/app_radius.dart';
 import 'package:startup_repo/core/utils/colors.dart';
-import 'package:startup_repo/core/utils/style.dart';
 
-InputDecorationTheme inputDecorationThemeLight(BuildContext context) => InputDecorationTheme(
+InputDecorationTheme get inputDecorationThemeLight => InputDecorationTheme(
       floatingLabelBehavior: FloatingLabelBehavior.never,
       filled: true,
       fillColor: cardColorLight,
-      contentPadding: paddingDefault,
+      contentPadding: AppPadding.padding16,
       // borders
       enabledBorder: border(color: dividerColorLight),
       disabledBorder: border(),
       focusedBorder: border(),
-      errorBorder: border(color: context.theme.colorScheme.error),
-      focusedErrorBorder: border(color: context.theme.colorScheme.error),
+      errorBorder: border(color: Colors.red),
+      focusedErrorBorder: border(color: Colors.red),
       // styles
-      errorStyle: bodySmall(context).copyWith(color: context.theme.colorScheme.error),
-      hintStyle: bodySmall(context).copyWith(color: hintColorLight),
-      labelStyle: bodyMedium(context).copyWith(color: hintColorLight),
+      errorStyle: TextStyle(fontSize: 12.sp, color: Colors.red),
+      hintStyle: TextStyle(fontSize: 14.sp, color: hintColorLight),
+      labelStyle: TextStyle(fontSize: 14.sp, color: hintColorLight),
     );
 
-InputDecorationTheme inputDecorationThemeDark(BuildContext context) =>
-    inputDecorationThemeLight(context).copyWith(
+InputDecorationTheme get inputDecorationThemeDark => inputDecorationThemeLight.copyWith(
       fillColor: cardColorDark,
-      hintStyle: bodyMedium(context).copyWith(color: hintColorDark),
-      labelStyle: bodyMedium(context).copyWith(color: hintColorDark),
+      hintStyle: TextStyle(fontSize: 14.sp, color: hintColorDark),
+      labelStyle: TextStyle(fontSize: 14.sp, color: hintColorDark),
       enabledBorder: border(color: dividerColorDark),
     );
 
 InputBorder border({Color? color}) => OutlineInputBorder(
       borderSide: BorderSide(color: color ?? primaryColor, width: 1.sp),
-      borderRadius: borderRadiusDefault,
+      borderRadius: AppRadius.circular16,
     );

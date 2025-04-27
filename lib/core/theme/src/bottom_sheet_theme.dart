@@ -1,13 +1,14 @@
 import 'package:startup_repo/imports.dart';
+import '../../utils/app_radius.dart';
 
-BottomSheetThemeData bottomSheetThemeLight(BuildContext context) => BottomSheetThemeData(
-      shape: RoundedRectangleBorder(borderRadius: BorderRadius.vertical(top: Radius.circular(radiusDefault))),
+BottomSheetThemeData get bottomSheetThemeLight => BottomSheetThemeData(
+      shape: RoundedRectangleBorder(borderRadius: AppRadius.top(AppRadius.radius16)),
       backgroundColor: backgroundColorLight,
       modalBackgroundColor: backgroundColorLight,
       elevation: 0,
     );
 
-BottomSheetThemeData bottomSheetThemeDark(BuildContext context) => bottomSheetThemeLight(context).copyWith(
+BottomSheetThemeData get bottomSheetThemeDark => bottomSheetThemeLight.copyWith(
       backgroundColor: backgroundColorDark,
       modalBackgroundColor: backgroundColorDark,
     );

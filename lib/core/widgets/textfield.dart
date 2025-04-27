@@ -1,3 +1,4 @@
+import 'package:startup_repo/core/utils/design_system.dart';
 import 'package:startup_repo/imports.dart';
 
 class CustomTextField extends StatelessWidget {
@@ -36,7 +37,7 @@ class CustomTextField extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Padding(
-      padding: padding ?? EdgeInsetsDirectional.only(top: labelText != null ? spacingDefault : 0),
+      padding: padding ?? EdgeInsetsDirectional.only(top: labelText != null ? AppSize.s16 : 0),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         mainAxisAlignment: MainAxisAlignment.start,
@@ -45,9 +46,9 @@ class CustomTextField extends StatelessWidget {
             // title
             Align(
               alignment: AlignmentDirectional.centerStart,
-              child: Text(labelText ?? '', style: bodyMedium(context).copyWith(fontWeight: FontWeight.w700)),
+              child: Text(labelText ?? '', style: context.font14.copyWith(fontWeight: FontWeight.w700)),
             ),
-            SizedBox(height: spacingSmall),
+            SizedBox(height: AppSize.s8),
           ],
           TextFormField(
             onTapOutside: (event) => FocusScope.of(context).unfocus(),
@@ -69,7 +70,7 @@ class CustomTextField extends StatelessWidget {
                   : null,
               hintText: hintText,
             ),
-            style: bodyMedium(context).copyWith(fontWeight: FontWeight.normal),
+            style: context.font14.copyWith(fontWeight: FontWeight.normal),
           ),
         ],
       ),
@@ -94,14 +95,14 @@ class CustomDropDown extends StatelessWidget {
         if (labelText != null) ...[
           Align(
             alignment: AlignmentDirectional.centerStart,
-            child: Text(labelText ?? '', style: bodyMedium(context).copyWith(fontWeight: FontWeight.w700)),
+            child: Text(labelText ?? '', style: context.font14.copyWith(fontWeight: FontWeight.w700)),
           ),
-          SizedBox(height: spacingSmall),
+          SizedBox(height: AppSize.s8),
         ],
         DropdownButtonFormField(
           decoration: InputDecoration(labelText: hintText),
           dropdownColor: Theme.of(context).cardColor,
-          style: bodyMedium(context),
+          style: context.font14,
           items: items,
           onChanged: onChanged,
         ),

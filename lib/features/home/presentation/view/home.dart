@@ -1,3 +1,5 @@
+import 'package:startup_repo/core/utils/app_padding.dart';
+import 'package:startup_repo/core/utils/design_system.dart';
 import 'package:startup_repo/features/theme/presentation/controller/theme_controller.dart';
 import 'package:startup_repo/core/widgets/confirmation_dialog.dart';
 import 'package:startup_repo/core/widgets/confirmation_sheet.dart';
@@ -11,83 +13,22 @@ class HomeScreen extends StatelessWidget {
     return Scaffold(
       appBar: AppBar(title: const Text('Home')),
       body: ListView(
-        padding: paddingDefault,
+        padding: AppPadding.padding16,
         children: [
           Column(
             children: <Widget>[
-              Text('w100', style: titleSmall(context).copyWith(fontWeight: FontWeight.w100)),
-              Text('w200', style: titleSmall(context).copyWith(fontWeight: FontWeight.w200)),
-              Text('w300', style: titleSmall(context).copyWith(fontWeight: FontWeight.w300)),
-              Text('w400', style: titleSmall(context).copyWith(fontWeight: FontWeight.w400)),
-              Text('w500', style: titleSmall(context).copyWith(fontWeight: FontWeight.w500)),
-              Text('w600', style: titleSmall(context).copyWith(fontWeight: FontWeight.w600)),
-              Text('w700', style: titleSmall(context).copyWith(fontWeight: FontWeight.w700)),
-              Text('w800', style: titleSmall(context).copyWith(fontWeight: FontWeight.w800)),
-              Text('w900', style: titleSmall(context).copyWith(fontWeight: FontWeight.w900)),
+              Text('w100', style: context.font18.copyWith(fontWeight: FontWeight.w100)),
+              Text('w200', style: context.font18.copyWith(fontWeight: FontWeight.w200)),
+              Text('w300', style: context.font18.copyWith(fontWeight: FontWeight.w300)),
+              Text('w400', style: context.font18.copyWith(fontWeight: FontWeight.w400)),
+              Text('w500', style: context.font18.copyWith(fontWeight: FontWeight.w500)),
+              Text('w600', style: context.font18.copyWith(fontWeight: FontWeight.w600)),
+              Text('w700', style: context.font18.copyWith(fontWeight: FontWeight.w700)),
+              Text('w800', style: context.font18.copyWith(fontWeight: FontWeight.w800)),
+              Text('w900', style: context.font18.copyWith(fontWeight: FontWeight.w900)),
             ],
           ),
-          // demonstrate all the text theme,
-          Text(
-            'Display Large(${displayLarge(context).fontSize?.ceilToDouble()})',
-            style: displayLarge(context),
-          ),
-          Text(
-            'Display Medium(${displayMedium(context).fontSize?.ceilToDouble()})',
-            style: displayMedium(context),
-          ),
-          Text(
-            'Display Small(${displaySmall(context).fontSize?.ceilToDouble()})',
-            style: displaySmall(context),
-          ),
-          Text(
-            'Headline Large(${headlineLarge(context).fontSize?.ceilToDouble()})',
-            style: headlineLarge(context),
-          ),
-          Text(
-            'Headline Medium(${headlineMedium(context).fontSize?.ceilToDouble()})',
-            style: headlineMedium(context),
-          ),
-          Text(
-            'Headline Small(${headlineSmall(context).fontSize?.ceilToDouble()})',
-            style: headlineSmall(context),
-          ),
-          Text(
-            'Title Large(${titleLarge(context).fontSize?.ceilToDouble()})',
-            style: titleLarge(context),
-          ),
-          Text(
-            'Title Medium(${titleMedium(context).fontSize?.ceilToDouble()})',
-            style: titleMedium(context),
-          ),
-          Text(
-            'Title Small(${titleSmall(context).fontSize?.ceilToDouble()})',
-            style: titleSmall(context),
-          ),
-          Text(
-            'Body Large(${bodyLarge(context).fontSize?.ceilToDouble()})',
-            style: bodyLarge(context),
-          ),
-          Text(
-            'Body Medium(${bodyMedium(context).fontSize?.ceilToDouble()})',
-            style: bodyMedium(context),
-          ),
-          Text(
-            'Body Small(${bodySmall(context).fontSize?.ceilToDouble()})',
-            style: bodySmall(context),
-          ),
-          Text(
-            'Label Large(${labelLarge(context).fontSize?.ceilToDouble()})',
-            style: labelLarge(context),
-          ),
-          Text(
-            'Label Medium(${labelMedium(context).fontSize?.ceilToDouble()})',
-            style: labelMedium(context),
-          ),
-          Text(
-            'Label Small(${labelSmall(context).fontSize?.ceilToDouble()})',
-            style: labelSmall(context),
-          ),
-          SizedBox(height: spacingExtraLarge),
+          SizedBox(height: AppSize.s32),
           Row(
             children: [
               Expanded(
@@ -104,7 +45,7 @@ class HomeScreen extends StatelessWidget {
                   },
                 ),
               ),
-              SizedBox(width: spacingDefault),
+              SizedBox(width: AppSize.s16),
               Expanded(
                 child: PrimaryButton(
                   text: 'Primary Button',
@@ -121,7 +62,7 @@ class HomeScreen extends StatelessWidget {
               ),
             ],
           ),
-          SizedBox(height: spacingExtraLarge),
+          SizedBox(height: AppSize.s32),
           GetBuilder<ThemeController>(builder: (con) {
             return Row(
               mainAxisAlignment: MainAxisAlignment.spaceEvenly,
@@ -144,9 +85,9 @@ class HomeScreen extends StatelessWidget {
               ],
             );
           }),
-          SizedBox(height: spacingExtraLarge),
+          SizedBox(height: AppSize.s32),
           const CustomTextField(hintText: 'Enter text', prefixIcon: Iconsax.search_normal),
-          SizedBox(height: spacingDefault),
+          SizedBox(height: AppSize.s16),
           CustomDropDown(
             hintText: 'Dropdown',
             items: const [
@@ -194,17 +135,10 @@ class ThemeModeWidget extends StatelessWidget {
                 width: 1.5.sp,
               ),
             ),
-            child: Icon(
-              icon,
-              size: 18.sp,
-              color: selected ? Theme.of(context).textTheme.bodyMedium?.color : Theme.of(context).hintColor,
-            ),
+            child: Icon(icon, size: 18.sp),
           ),
-          SizedBox(height: 8.sp),
-          Text(
-            text,
-            style: Theme.of(context).textTheme.bodySmall,
-          ),
+          SizedBox(height: AppSize.s8),
+          Text(text, style: context.font12),
         ],
       ),
     );

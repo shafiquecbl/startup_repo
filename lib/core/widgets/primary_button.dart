@@ -1,3 +1,4 @@
+import 'package:startup_repo/core/utils/app_text.dart';
 import 'package:startup_repo/imports.dart';
 
 class PrimaryButton extends StatelessWidget {
@@ -29,7 +30,7 @@ class PrimaryButton extends StatelessWidget {
           if (icon != null) ...[icon!, SizedBox(width: 8.sp)],
           Text(
             text.tr,
-            style: bodySmall(context).copyWith(fontWeight: FontWeight.w600, color: textColor),
+            style: context.font12.copyWith(fontWeight: FontWeight.w600, color: textColor),
           ),
         ],
       ),
@@ -64,7 +65,7 @@ class PrimaryOutlineButton extends StatelessWidget {
           if (text != null)
             Text(
               text!,
-              style: bodySmall(context).copyWith(fontWeight: FontWeight.w600, color: textColor),
+              style: context.font12.copyWith(fontWeight: FontWeight.w600, color: textColor),
             ),
         ],
       ),

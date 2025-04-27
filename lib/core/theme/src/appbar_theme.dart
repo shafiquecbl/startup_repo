@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:startup_repo/core/utils/colors.dart';
 
-AppBarTheme appBarThemeLight(BuildContext context) => AppBarTheme(
+AppBarTheme get appBarThemeLight => AppBarTheme(
       elevation: 0,
       scrolledUnderElevation: 0,
       titleSpacing: 16.sp,
@@ -14,7 +14,7 @@ AppBarTheme appBarThemeLight(BuildContext context) => AppBarTheme(
       iconTheme: const IconThemeData(color: textColorLight),
     );
 
-AppBarTheme appBarThemeDark(BuildContext context) => appBarThemeLight(context).copyWith(
+AppBarTheme get appBarThemeDark => appBarThemeLight.copyWith(
       color: backgroundColorDark,
       surfaceTintColor: backgroundColorDark,
       shadowColor: backgroundColorDark,

@@ -46,46 +46,44 @@ class MyApp extends StatelessWidget {
       designSize = const Size(411.4, 866.3); // Example for phones
     }
     return GetBuilder<LocalizationController>(builder: (localizeController) {
-      return GetBuilder<ThemeController>(
-        builder: (themeController) {
-          return ScreenUtilInit(
-            designSize: designSize,
-            minTextAdapt: true,
-            splitScreenMode: true,
-            fontSizeResolver: (size, util) => _screenSize(size, isTablet, isLargeTablet, util),
-            builder: (context, child) => MediaQuery(
-              data: MediaQuery.of(context).copyWith(
-                textScaler: TextScaler.linear(
-                  MediaQuery.of(context).textScaleFactor.clamp(1.0, 1.2),
-                ),
-              ),
-              child: GetMaterialApp(
-                title: AppConstants.appName,
-                debugShowCheckedModeBanner: false,
-                themeMode: themeController.themeMode,
-                theme: light(context),
-                darkTheme: dark(context),
-                locale: localizeController.locale,
-                translations: Messages(languages: languages),
-                fallbackLocale: Locale(
-                  AppConstants.languages.first.languageCode,
-                  AppConstants.languages.first.countryCode,
-                ),
-                navigatorObservers: [FlutterSmartDialog.observer],
-                builder: FlutterSmartDialog.init(
-                  loadingBuilder: (string) => const LoadingWidget(),
-                  builder: (context, child) {
-                    return ScrollConfiguration(
-                      behavior: CustomScrollBehavior(),
-                      child: child ?? const SizedBox(),
-                    );
-                  },
-                ),
-                home: const HomeScreen(),
-              ),
+      return ScreenUtilInit(
+        designSize: designSize,
+        minTextAdapt: true,
+        splitScreenMode: true,
+        fontSizeResolver: (size, util) => _screenSize(size, isTablet, isLargeTablet, util),
+        builder: (context, child) => MediaQuery(
+          data: MediaQuery.of(context).copyWith(
+            textScaler: TextScaler.linear(
+              MediaQuery.of(context).textScaleFactor.clamp(1.0, 1.2),
             ),
-          );
-        },
+          ),
+          child: GetBuilder<ThemeController>(builder: (themeController) {
+            return GetMaterialApp(
+              title: AppConstants.appName,
+              debugShowCheckedModeBanner: false,
+              themeMode: themeController.themeMode,
+              theme: light,
+              darkTheme: dark,
+              locale: localizeController.locale,
+              translations: Messages(languages: languages),
+              fallbackLocale: Locale(
+                AppConstants.languages.first.languageCode,
+                AppConstants.languages.first.countryCode,
+              ),
+              navigatorObservers: [FlutterSmartDialog.observer],
+              builder: FlutterSmartDialog.init(
+                loadingBuilder: (string) => const LoadingWidget(),
+                builder: (context, child) {
+                  return ScrollConfiguration(
+                    behavior: CustomScrollBehavior(),
+                    child: child ?? const SizedBox(),
+                  );
+                },
+              ),
+              home: const HomeScreen(),
+            );
+          }),
+        ),
       );
     });
   }
