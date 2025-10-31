@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
-import 'package:startup_repo/core/utils/colors.dart';
+import 'package:startup_repo/core/design/colors.dart';
 
 AppBarTheme get appBarThemeLight => AppBarTheme(
       elevation: 0,

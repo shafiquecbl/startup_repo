@@ -1,6 +1,3 @@
-import 'package:startup_repo/core/utils/app_padding.dart';
-import 'package:startup_repo/core/utils/app_radius.dart';
-import 'package:startup_repo/core/utils/design_system.dart';
 import '../../../../imports.dart';
 
 class LanguageScreen extends StatefulWidget {
@@ -28,7 +25,7 @@ class _LanguageScreenState extends State<LanguageScreen> {
                 suffixIcon: Iconsax.search_normal,
                 onChanged: con.searchLanguage,
               ),
-              SizedBox(height: AppSize.s16),
+              SizedBox(height: 16.sp),
               Expanded(
                 child: ListView.separated(
                   itemCount: con.languages.length,
@@ -58,7 +55,7 @@ class _LanguageScreenState extends State<LanguageScreen> {
                                 ),
                               ),
                             ),
-                            SizedBox(width: AppSize.s10),
+                            SizedBox(width: 10.sp),
                             Expanded(child: Text(language.languageName)),
                             LanguageRadioButton(selected: selected),
                           ],

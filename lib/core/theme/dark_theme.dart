@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:startup_repo/core/theme/src/dropdown_theme.dart';
 import 'package:startup_repo/core/theme/src/text_theme.dart';
-import 'package:startup_repo/core/utils/design_system.dart';
+import 'package:startup_repo/core/design/design_system.dart';
 import 'src/appbar_theme.dart';
 import 'src/bottom_sheet_theme.dart';
 import 'src/dialog_theme.dart';

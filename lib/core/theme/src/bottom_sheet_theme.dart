@@ -1,5 +1,4 @@
 import 'package:startup_repo/imports.dart';
-import '../../utils/app_radius.dart';
 
 BottomSheetThemeData get bottomSheetThemeLight => BottomSheetThemeData(
       shape: RoundedRectangleBorder(borderRadius: AppRadius.top(AppRadius.radius16)),

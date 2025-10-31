@@ -1,6 +1,3 @@
-import 'package:startup_repo/core/utils/app_padding.dart';
-import 'package:startup_repo/core/utils/app_size.dart';
-import 'package:startup_repo/core/utils/app_text.dart';
 import '../../imports.dart';
 
 Future showConfirmationSheet({
@@ -49,15 +46,15 @@ class ConfirmationSheet extends StatelessWidget {
               ),
             ),
           ),
-          SizedBox(height: AppSize.s16),
+          SizedBox(height: 16.sp),
           Text(title.tr, style: context.font16.copyWith(fontWeight: FontWeight.w700)),
-          SizedBox(height: AppSize.s16),
+          SizedBox(height: 16.sp),
           Text(
             subtitle.tr,
             textAlign: TextAlign.center,
             style: Theme.of(context).textTheme.bodyMedium,
           ),
-          SizedBox(height: AppSize.s24),
+          SizedBox(height: 24.sp),
           Row(
             mainAxisAlignment: MainAxisAlignment.end,
             children: [
@@ -68,7 +65,7 @@ class ConfirmationSheet extends StatelessWidget {
                   textColor: Theme.of(context).textTheme.bodyLarge!.color,
                 ),
               ),
-              SizedBox(width: AppSize.s16),
+              SizedBox(width: 16.sp),
               Expanded(child: PrimaryButton(text: actionText, onPressed: onAccept)),
             ],
           ),

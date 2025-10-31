@@ -1,5 +1,3 @@
-import 'package:startup_repo/core/utils/app_padding.dart';
-import 'package:startup_repo/core/utils/design_system.dart';
 import 'package:startup_repo/features/theme/presentation/controller/theme_controller.dart';
 import 'package:startup_repo/core/widgets/confirmation_dialog.dart';
 import 'package:startup_repo/core/widgets/confirmation_sheet.dart';
@@ -28,7 +26,7 @@ class HomeScreen extends StatelessWidget {
               Text('w900', style: context.font18.copyWith(fontWeight: FontWeight.w900)),
             ],
           ),
-          SizedBox(height: AppSize.s32),
+          SizedBox(height: 32.sp),
           Row(
             children: [
               Expanded(
@@ -45,7 +43,7 @@ class HomeScreen extends StatelessWidget {
                   },
                 ),
               ),
-              SizedBox(width: AppSize.s16),
+              SizedBox(width: 16.sp),
               Expanded(
                 child: PrimaryButton(
                   text: 'Primary Button',
@@ -62,7 +60,7 @@ class HomeScreen extends StatelessWidget {
               ),
             ],
           ),
-          SizedBox(height: AppSize.s32),
+          SizedBox(height: 32.sp),
           GetBuilder<ThemeController>(builder: (con) {
             return Row(
               mainAxisAlignment: MainAxisAlignment.spaceEvenly,
@@ -85,9 +83,9 @@ class HomeScreen extends StatelessWidget {
               ],
             );
           }),
-          SizedBox(height: AppSize.s32),
+          SizedBox(height: 32.sp),
           const CustomTextField(hintText: 'Enter text', prefixIcon: Iconsax.search_normal),
-          SizedBox(height: AppSize.s16),
+          SizedBox(height: 16.sp),
           CustomDropDown(
             hintText: 'Dropdown',
             items: const [
@@ -137,7 +135,7 @@ class ThemeModeWidget extends StatelessWidget {
             ),
             child: Icon(icon, size: 18.sp),
           ),
-          SizedBox(height: AppSize.s8),
+          SizedBox(height: 8.sp),
           Text(text, style: context.font12),
         ],
       ),

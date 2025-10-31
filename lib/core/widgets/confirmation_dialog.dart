@@ -1,5 +1,3 @@
-import 'package:startup_repo/core/utils/app_padding.dart';
-import 'package:startup_repo/core/utils/design_system.dart';
 import '../../imports.dart';
 
 Future showConfirmationDialog({
@@ -42,9 +40,9 @@ class ConfirmationDialog extends StatelessWidget {
               title.tr,
               style: context.font16.copyWith(fontWeight: FontWeight.w700),
             ),
-            Divider(height: AppSize.s24),
+            Divider(height: 24.sp),
             Text(subtitle.tr, textAlign: TextAlign.center, style: context.font14),
-            SizedBox(height: AppSize.s24),
+            SizedBox(height: 24.sp),
             Row(
               mainAxisAlignment: MainAxisAlignment.end,
               children: [
@@ -55,7 +53,7 @@ class ConfirmationDialog extends StatelessWidget {
                     textColor: context.textTheme.bodyLarge!.color,
                   ),
                 ),
-                SizedBox(width: AppSize.s16),
+                SizedBox(width: 16.sp),
                 Expanded(child: PrimaryButton(text: actionText, onPressed: onAccept)),
               ],
             ),

@@ -1,4 +1,4 @@
-import 'package:startup_repo/core/utils/app_text.dart';
+import 'package:startup_repo/core/design/app_text.dart';
 import 'package:startup_repo/imports.dart';
 
 class PrimaryButton extends StatelessWidget {

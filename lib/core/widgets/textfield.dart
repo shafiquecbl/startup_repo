@@ -1,4 +1,3 @@
-import 'package:startup_repo/core/utils/design_system.dart';
 import 'package:startup_repo/imports.dart';
 
 class CustomTextField extends StatelessWidget {
@@ -37,7 +36,7 @@ class CustomTextField extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Padding(
-      padding: padding ?? EdgeInsetsDirectional.only(top: labelText != null ? AppSize.s16 : 0),
+      padding: padding ?? EdgeInsetsDirectional.only(top: labelText != null ? 16.sp : 0),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         mainAxisAlignment: MainAxisAlignment.start,
@@ -48,7 +47,7 @@ class CustomTextField extends StatelessWidget {
               alignment: AlignmentDirectional.centerStart,
               child: Text(labelText ?? '', style: context.font14.copyWith(fontWeight: FontWeight.w700)),
             ),
-            SizedBox(height: AppSize.s8),
+            SizedBox(height: 8.sp),
           ],
           TextFormField(
             onTapOutside: (event) => FocusScope.of(context).unfocus(),
@@ -97,7 +96,7 @@ class CustomDropDown extends StatelessWidget {
             alignment: AlignmentDirectional.centerStart,
             child: Text(labelText ?? '', style: context.font14.copyWith(fontWeight: FontWeight.w700)),
           ),
-          SizedBox(height: AppSize.s8),
+          SizedBox(height: 8.sp),
         ],
         DropdownButtonFormField(
           decoration: InputDecoration(labelText: hintText),

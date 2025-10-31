@@ -1,4 +1,4 @@
-import 'package:startup_repo/core/utils/app_radius.dart';
+import 'package:startup_repo/core/design/app_radius.dart';
 import 'package:startup_repo/imports.dart';
 import 'package:startup_repo/core/theme/src/input_decoration_theme.dart';
 
