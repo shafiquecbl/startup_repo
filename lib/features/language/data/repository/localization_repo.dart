@@ -1,30 +1,27 @@
-import 'package:flutter/material.dart';
-import 'package:get/get.dart';
-import 'package:shared_preferences/shared_preferences.dart';
-import '../../../../core/utils/app_constants.dart';
+import '../../../../imports.dart';
 import 'localization_repo_interface.dart';
 
-class LocalizationRepo implements LocalizationRepoInterface {
+class LocalizationRepoImpl implements LocalizationRepo {
   final SharedPreferences prefs;
-  LocalizationRepo({required this.prefs});
+  LocalizationRepoImpl({required this.prefs});
 
   @override
   Locale loadCurrentLanguage() {
     return Locale(
-      prefs.getString(AppConstants.languageCode) ?? AppConstants.languages.first.languageCode,
-      prefs.getString(AppConstants.countryCode) ?? AppConstants.languages.first.countryCode,
+      prefs.getString(SharedKeys.languageCode) ?? appLanguages.first.languageCode,
+      prefs.getString(SharedKeys.countryCode) ?? appLanguages.first.countryCode,
     );
   }
 
   @override
   Future<void> saveLanguage(Locale locale) async {
     Get.updateLocale(locale);
-    await prefs.setString(AppConstants.languageCode, locale.languageCode);
-    await prefs.setString(AppConstants.countryCode, locale.countryCode!);
+    await prefs.setString(SharedKeys.languageCode, locale.languageCode);
+    await prefs.setString(SharedKeys.countryCode, locale.countryCode!);
   }
 
   @override
   List<Locale> get availableLanguages {
-    return AppConstants.languages.map((lang) => Locale(lang.languageCode, lang.countryCode)).toList();
+    return appLanguages.map((lang) => Locale(lang.languageCode, lang.countryCode)).toList();
   }
 }

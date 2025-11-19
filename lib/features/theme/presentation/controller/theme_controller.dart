@@ -1,9 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
-import '../../domain/service/theme_service_interface.dart';
+import '../../domain/service/theme_service.dart';
 
 class ThemeController extends GetxController implements GetxService {
-  final ThemeServiceInterface themeService;
+  final ThemeService themeService;
 
   ThemeController({required this.themeService}) {
     _loadCurrentTheme();

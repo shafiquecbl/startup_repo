@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 
-abstract class LocalizationRepoInterface {
+abstract class LocalizationRepo {
   Locale loadCurrentLanguage();
   Future<void> saveLanguage(Locale locale);
   List<Locale> get availableLanguages;

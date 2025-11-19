@@ -1,29 +1,22 @@
 // ignore_for_file: deprecated_member_use
 
-import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
-import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:flutter_smart_dialog/flutter_smart_dialog.dart';
-import 'package:get/get.dart';
 import 'package:startup_repo/core/widgets/loading.dart';
-import 'features/language/presentation/controller/localization_controller.dart';
+import 'package:startup_repo/imports.dart';
+import 'core/theme/design_helper.dart';
 import 'features/theme/presentation/controller/theme_controller.dart';
 import 'core/helper/get_di.dart' as di;
 import 'core/theme/dark_theme.dart';
 import 'core/theme/light_theme.dart';
-import 'core/utils/app_constants.dart';
 import 'core/utils/messages.dart';
 import 'core/utils/scroll_behavior.dart';
 import 'features/home/presentation/view/home.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
-  // disable landscape mode
   SystemChrome.setPreferredOrientations([DeviceOrientation.portraitUp]);
-
-  // initialize localization
   Map<String, Map<String, String>> languages = await di.init();
-
   runApp(MyApp(languages: languages));
 }
 
@@ -33,18 +26,9 @@ class MyApp extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    // Example criteria for device type detection
-    final bool isTablet = MediaQuery.of(context).size.shortestSide > 600;
-    final bool isLargeTablet = MediaQuery.of(context).size.shortestSide > 800;
-    // Define designSizes for different devices
-    Size designSize;
-    if (isLargeTablet) {
-      designSize = const Size(1024, 1366); // Example for large tablets
-    } else if (isTablet) {
-      designSize = const Size(768, 1024); // Example for regular tablets
-    } else {
-      designSize = const Size(411.4, 866.3); // Example for phones
-    }
+    final designSize = DesignHelper.getDesignSize(context);
+    final isTablet = MediaQuery.of(context).size.shortestSide > 600;
+    final isLargeTablet = MediaQuery.of(context).size.shortestSide > 800;
     return GetBuilder<LocalizationController>(builder: (localizeController) {
       return ScreenUtilInit(
         designSize: designSize,
@@ -67,8 +51,8 @@ class MyApp extends StatelessWidget {
               locale: localizeController.locale,
               translations: Messages(languages: languages),
               fallbackLocale: Locale(
-                AppConstants.languages.first.languageCode,
-                AppConstants.languages.first.countryCode,
+                appLanguages.first.languageCode,
+                appLanguages.first.countryCode,
               ),
               navigatorObservers: [FlutterSmartDialog.observer],
               builder: FlutterSmartDialog.init(

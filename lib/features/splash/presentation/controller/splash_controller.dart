@@ -1,9 +1,9 @@
 import 'package:get/get.dart';
 import '../../data/model/config_model.dart';
-import '../../domain/service/splash_service_interface.dart';
+import '../../domain/service/splash_service.dart';
 
 class SplashController extends GetxController implements GetxService {
-  final SplashServiceInterface settingsService;
+  final SplashService settingsService;
   SplashController({required this.settingsService});
 
   static SplashController get find => Get.find<SplashController>();
@@ -14,11 +14,6 @@ class SplashController extends GetxController implements GetxService {
   set settingModel(ConfigModel settingModel) {
     _settingModel = settingModel;
     update();
-  }
-
-  void initSharedData() {
-    settingsService.initSharedData();
-    getConfig();
   }
 
   Future<void> getConfig() async {

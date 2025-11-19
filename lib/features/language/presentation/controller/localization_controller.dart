@@ -1,11 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import '../../data/model/language.dart';
-import '../../domain/service/localization_service_interface.dart';
-import '../../../../core/utils/app_constants.dart';
+import '../../domain/service/localization_service.dart';
 
 class LocalizationController extends GetxController implements GetxService {
-  final LocalizationServiceInterface localizationService;
+  final LocalizationService localizationService;
   LocalizationController({required this.localizationService}) {
     loadCurrentLanguage();
   }
@@ -13,8 +12,8 @@ class LocalizationController extends GetxController implements GetxService {
   static LocalizationController get find => Get.find<LocalizationController>();
 
   Locale _locale = Locale(
-    AppConstants.languages[0].languageCode,
-    AppConstants.languages[0].countryCode,
+    appLanguages[0].languageCode,
+    appLanguages[0].countryCode,
   );
   bool _isLtr = true;
   List<LanguageModel> _languages = [];
@@ -28,7 +27,7 @@ class LocalizationController extends GetxController implements GetxService {
   void loadCurrentLanguage() async {
     Locale locale = localizationService.loadCurrentLanguage();
     setLanguage(locale);
-    _languages = List.from(AppConstants.languages);
+    _languages = List.from(languages);
     update();
   }
 
@@ -50,10 +49,10 @@ class LocalizationController extends GetxController implements GetxService {
 
   void searchLanguage(String query) {
     if (query.isEmpty) {
-      _languages = List.from(AppConstants.languages);
+      _languages = List.from(languages);
     } else {
       _selectedIndex = -1;
-      _languages = AppConstants.languages
+      _languages = languages
           .where((language) => language.languageName.toLowerCase().contains(query.toLowerCase()))
           .toList();
     }
