@@ -3,6 +3,7 @@ import 'dart:io';
 import 'dart:typed_data';
 import 'package:http/http.dart' as http;
 import 'package:startup_repo/imports.dart';
+import '../helper/connectivity.dart';
 import 'error.dart';
 import 'api_client.dart';
 
@@ -39,8 +40,16 @@ class ApiClientImpl extends GetxService implements ApiClient {
     debugPrint('====> API request canceled');
   }
 
-  Future<http.Response?> _request(String method, String uri,
-      {Map<String, dynamic>? body, Map<String, String>? headers, Map<String, String>? queryParams}) async {
+  Future<http.Response?> _request(
+    String method,
+    String uri, {
+    Map<String, dynamic>? body,
+    Map<String, String>? headers,
+    Map<String, String>? queryParams,
+  }) async {
+    bool online = await ConnectivityService.checkAndNotify();
+    if (!online) return null;
+    
     Uri url = Uri.parse('$baseUrl$uri').replace(queryParameters: queryParams);
     try {
       _printData(url.toString(), body: body);
