@@ -422,19 +422,23 @@ A tight scale with 4 steps:
 
 ```dart
 class AppRadius {
-  // BorderRadius (all corners)
+  // BorderRadius (all corners) — raw geometry
   static BorderRadius get r4 => BorderRadius.circular(4.sp);
   static BorderRadius get r8 => BorderRadius.circular(8.sp);
   static BorderRadius get r16 => BorderRadius.circular(16.sp);
   static BorderRadius get r24 => BorderRadius.circular(24.sp);
   static BorderRadius get r100 => BorderRadius.circular(100.sp);
 
-  // RoundedRectangleBorder shapes (for ThemeData, ButtonStyle, etc.)
-  static RoundedRectangleBorder get r8Shape => RoundedRectangleBorder(borderRadius: r8);
-  static RoundedRectangleBorder get r16Shape => RoundedRectangleBorder(borderRadius: r16);
-  static RoundedRectangleBorder get r24Shape => RoundedRectangleBorder(borderRadius: r24);
+  // Superellipse shapes (iOS-style smooth corners for ThemeData, ButtonStyle, etc.)
+  static RoundedSuperellipseBorder get r8Shape => RoundedSuperellipseBorder(borderRadius: r8);
+  static RoundedSuperellipseBorder get r16Shape => RoundedSuperellipseBorder(borderRadius: r16);
+  static RoundedSuperellipseBorder get r24Shape => RoundedSuperellipseBorder(borderRadius: r24);
 
-  // Partial corners
+  // Partial-corner shapes (superellipse)
+  static RoundedSuperellipseBorder topShape(double radius) => ...;
+  static RoundedSuperellipseBorder bottomShape(double radius) => ...;
+
+  // Partial corners (raw BorderRadius — for APIs that require it)
   static BorderRadius top(double radius) => ...;
   static BorderRadius bottom(double radius) => ...;
 }
@@ -442,9 +446,10 @@ class AppRadius {
 
 **Usage:**
 ```dart
-Container(decoration: BoxDecoration(borderRadius: AppRadius.r16))
+Container(decoration: ShapeDecoration(shape: AppRadius.r16Shape))  // preferred
 ElevatedButton(style: ButtonStyle(shape: AppRadius.r16Shape))
-BottomSheet(shape: RoundedRectangleBorder(borderRadius: AppRadius.top(16)))
+BottomSheet(shape: AppRadius.topShape(16))
+OutlineInputBorder(borderRadius: AppRadius.r16)                    // fallback
 ```
 
 #### **app_text.dart**

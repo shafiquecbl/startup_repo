@@ -42,7 +42,7 @@ class ConfirmationSheet extends StatelessWidget {
               height: 5,
               decoration: BoxDecoration(
                 color: Theme.of(context).dividerColor,
-                borderRadius: BorderRadius.circular(5),
+                borderRadius: AppRadius.r4,
               ),
             ),
           ),
@@ -59,11 +59,7 @@ class ConfirmationSheet extends StatelessWidget {
             mainAxisAlignment: MainAxisAlignment.end,
             children: [
               Expanded(
-                child: PrimaryOutlineButton(
-                  text: 'cancel'.tr,
-                  onPressed: Get.back,
-                  textColor: Theme.of(context).textTheme.bodyLarge!.color,
-                ),
+                child: PrimaryOutlineButton(text: 'cancel'.tr, onPressed: Get.back),
               ),
               SizedBox(width: 16.sp),
               Expanded(child: PrimaryButton(text: actionText, onPressed: onAccept)),

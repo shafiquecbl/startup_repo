@@ -1,28 +1,14 @@
-import 'package:startup_repo/core/design/app_text.dart';
 import 'package:startup_repo/imports.dart';
 
 class PrimaryButton extends StatelessWidget {
   final String text;
   final void Function()? onPressed;
   final Widget? icon;
-  final double? radius;
-  final Color? color;
-  final Color? textColor;
-  const PrimaryButton(
-      {required this.text, this.onPressed, this.icon, this.color, this.textColor, this.radius, super.key});
+  const PrimaryButton({required this.text, this.onPressed, this.icon, super.key});
 
   @override
   Widget build(BuildContext context) {
-    final Color backgroundColor = color ?? Theme.of(context).primaryColor;
-    final Color textColor = this.textColor ?? Colors.white;
     return ElevatedButton(
-      style: ElevatedButton.styleFrom(
-        backgroundColor: backgroundColor,
-        minimumSize: Size(100.sp, 55.sp),
-        elevation: 0,
-        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(radius ?? 16.sp)),
-        disabledBackgroundColor: backgroundColor,
-      ),
       onPressed: onPressed,
       child: Row(
         mainAxisSize: MainAxisSize.min,
@@ -30,7 +16,7 @@ class PrimaryButton extends StatelessWidget {
           if (icon != null) ...[icon!, SizedBox(width: 8.sp)],
           Text(
             text.tr,
-            style: context.font12.copyWith(fontWeight: FontWeight.w600, color: textColor),
+            style: context.font12.copyWith(fontWeight: FontWeight.w600),
           ),
         ],
       ),
@@ -43,20 +29,11 @@ class PrimaryOutlineButton extends StatelessWidget {
   final String? text;
   final void Function()? onPressed;
   final Widget? icon;
-  final double? radius;
-  final Color? textColor;
-  const PrimaryOutlineButton(
-      {required this.onPressed, this.text, this.icon, this.radius, this.textColor, super.key});
+  const PrimaryOutlineButton({required this.onPressed, this.text, this.icon, super.key});
 
   @override
   Widget build(BuildContext context) {
-    final Color textColor = this.textColor ?? Theme.of(context).primaryColor;
     return OutlinedButton(
-      style: OutlinedButton.styleFrom(
-        minimumSize: Size(100.sp, 55.sp),
-        side: BorderSide(color: Theme.of(context).dividerColor),
-        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular((radius ?? 16).sp)),
-      ),
       onPressed: onPressed,
       child: Row(
         mainAxisSize: MainAxisSize.min,
@@ -65,7 +42,7 @@ class PrimaryOutlineButton extends StatelessWidget {
           if (text != null)
             Text(
               text!,
-              style: context.font12.copyWith(fontWeight: FontWeight.w600, color: textColor),
+              style: context.font12.copyWith(fontWeight: FontWeight.w600),
             ),
         ],
       ),

@@ -46,13 +46,7 @@ class ConfirmationDialog extends StatelessWidget {
             Row(
               mainAxisAlignment: MainAxisAlignment.end,
               children: [
-                Expanded(
-                  child: PrimaryOutlineButton(
-                    text: 'cancel'.tr,
-                    onPressed: Get.back,
-                    textColor: context.textTheme.bodyLarge!.color,
-                  ),
-                ),
+                Expanded(child: PrimaryOutlineButton(text: 'cancel'.tr, onPressed: Get.back)),
                 SizedBox(width: 16.sp),
                 Expanded(child: PrimaryButton(text: actionText, onPressed: onAccept)),
               ],
