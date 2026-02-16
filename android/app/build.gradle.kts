@@ -4,17 +4,11 @@ import java.io.FileInputStream
 plugins {
     id("com.android.application")
     id("kotlin-android")
+    // The Flutter Gradle Plugin must be applied after the Android and Kotlin Gradle plugins.
     id("dev.flutter.flutter-gradle-plugin")
-    // id("com.google.gms.google-services") // Uncomment when using Firebase
+    // id("com.google.gms.google-services")
+    // id("com.google.firebase.firebase-perf")
     // id("com.google.firebase.crashlytics")
-}
-
-// Load local.properties
-val localProperties = Properties().apply {
-    val localPropsFile = rootProject.file("local.properties")
-    if (localPropsFile.exists()) {
-        FileInputStream(localPropsFile).use { load(it) }
-    }
 }
 
 // Load environment variables from .env
@@ -27,31 +21,32 @@ val env: Properties = Properties().apply {
     }
 }
 
+
 android {
     namespace = "com.example.startup_repo"
-    compileSdk = flutter.compileSdkVersion
-    ndkVersion = flutter.ndkVersion
+    compileSdk = 36
+    ndkVersion = "27.0.12077973"
 
     compileOptions {
-        sourceCompatibility = JavaVersion.VERSION_11
-        targetCompatibility = JavaVersion.VERSION_11
+        sourceCompatibility = JavaVersion.VERSION_17
+        targetCompatibility = JavaVersion.VERSION_17
+        isCoreLibraryDesugaringEnabled = true
     }
 
     kotlinOptions {
-        jvmTarget = JavaVersion.VERSION_11.toString()
+        jvmTarget = JavaVersion.VERSION_17.toString()
     }
-
-    sourceSets["main"].java.srcDirs("src/main/kotlin")
 
     defaultConfig {
         applicationId = env.getProperty("BUNDLE_ID_ANDROID")
         minSdk = env.getProperty("MIN_SDK_VERSION")?.toInt() ?: 21
-        targetSdk = env.getProperty("TARGET_SDK_VERSION")?.toInt() ?: 34
+        targetSdk = env.getProperty("TARGET_SDK_VERSION")?.toInt() ?: 35
         versionCode = env.getProperty("ANDROID_VERSION_CODE")?.toInt() ?: 1
         versionName = env.getProperty("ANDROID_VERSION_NAME") ?: "1.0"
         multiDexEnabled = true
 
-        resValue("string", "app_name", env.getProperty("APP_NAME") ?: "Startup Repo")
+        resValue("string", "app_name", env.getProperty("APP_NAME") ?: "Music Transfer")
+        
     }
 
     signingConfigs {
@@ -73,6 +68,12 @@ android {
             isShrinkResources = true
         }
     }
+    
+}
+
+dependencies {
+    implementation("androidx.multidex:multidex:2.0.1")
+    coreLibraryDesugaring("com.android.tools:desugar_jdk_libs:2.1.4")
 }
 
 flutter {

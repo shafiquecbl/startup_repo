@@ -14,7 +14,7 @@ import 'features/home/presentation/view/home.dart';
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
   SystemChrome.setPreferredOrientations([DeviceOrientation.portraitUp]);
-  Map<String, Map<String, String>> languages = await di.init();
+  final Map<String, Map<String, String>> languages = await di.init();
   runApp(MyApp(languages: languages));
 }
 
@@ -27,40 +27,39 @@ class MyApp extends StatelessWidget {
     final Size designSize = DesignHelper.getDesignSize(context);
     final bool isTablet = MediaQuery.of(context).size.shortestSide > 600;
     final bool isLargeTablet = MediaQuery.of(context).size.shortestSide > 800;
-    return GetBuilder<LocalizationController>(builder: (localizeController) {
-      return ScreenUtilInit(
-        designSize: designSize,
-        minTextAdapt: true,
-        splitScreenMode: true,
-        fontSizeResolver: (num size, ScreenUtil util) {
-          return DesignHelper.screenSize(size, isTablet, isLargeTablet, util);
-        },
-        builder: (context, child) => MediaQuery(
-          data: MediaQuery.of(context).copyWith(
-            textScaler: TextScaler.linear(
-              MediaQuery.of(context).textScaleFactor.clamp(1.0, 1.2),
+    return GetBuilder<LocalizationController>(
+      builder: (localizeController) {
+        return ScreenUtilInit(
+          designSize: designSize,
+          minTextAdapt: true,
+          splitScreenMode: true,
+          fontSizeResolver: (num size, ScreenUtil util) {
+            return DesignHelper.screenSize(size, isTablet, isLargeTablet, util);
+          },
+          builder: (context, child) => MediaQuery(
+            data: MediaQuery.of(
+              context,
+            ).copyWith(textScaler: TextScaler.linear(MediaQuery.of(context).textScaleFactor.clamp(1.0, 1.2))),
+            child: GetBuilder<ThemeController>(
+              builder: (themeController) {
+                return GetMaterialApp(
+                  title: AppConstants.appName,
+                  debugShowCheckedModeBanner: false,
+                  themeMode: themeController.themeMode,
+                  theme: light,
+                  darkTheme: dark,
+                  locale: localizeController.locale,
+                  translations: Messages(languages: languages),
+                  fallbackLocale: const Locale('en', 'US'),
+                  navigatorObservers: [FlutterSmartDialog.observer],
+                  builder: FlutterSmartDialog.init(loadingBuilder: (string) => const LoadingWidget()),
+                  home: const HomeScreen(),
+                );
+              },
             ),
           ),
-          child: GetBuilder<ThemeController>(builder: (themeController) {
-            return GetMaterialApp(
-              title: AppConstants.appName,
-              debugShowCheckedModeBanner: false,
-              themeMode: themeController.themeMode,
-              theme: light,
-              darkTheme: dark,
-              locale: localizeController.locale,
-              translations: Messages(languages: languages),
-              fallbackLocale: const Locale(
-                'en',
-                'US',
-              ),
-              navigatorObservers: [FlutterSmartDialog.observer],
-              builder: FlutterSmartDialog.init(loadingBuilder: (string) => const LoadingWidget()),
-              home: const HomeScreen(),
-            );
-          }),
-        ),
-      );
-    });
+        );
+      },
+    );
   }
 }

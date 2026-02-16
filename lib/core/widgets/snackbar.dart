@@ -3,11 +3,11 @@ import 'package:flutter_smart_dialog/flutter_smart_dialog.dart';
 class AppDialog {
   AppDialog._();
 
-  static showLoading<T>() => SmartDialog.showLoading<T>();
+  static Future<T?> showLoading<T>() => SmartDialog.showLoading<T>();
 
-  static hideLoading<T>() => SmartDialog.dismiss<T>();
+  static Future<void> hideLoading<T>() => SmartDialog.dismiss<T>();
 
-  static showToast(String text) {
+  static void showToast(String text) {
     SmartDialog.showToast(text, displayTime: const Duration(seconds: 3));
   }
 }
