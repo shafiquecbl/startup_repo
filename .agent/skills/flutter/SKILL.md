@@ -109,6 +109,7 @@ find "$PROJECT_DIR/lib" -name "*.dart" -exec \
 ### Step 5: Update pubspec.yaml
 
 Merge the boilerplate's dependencies into the new project's `pubspec.yaml`:
+- Add `project_type: startup_repo` after the `description` field (identifies this project)
 - Copy the `dependencies` and `dev_dependencies` sections
 - Copy the `assets` section
 - Copy the `fonts` section
