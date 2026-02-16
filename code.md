@@ -117,7 +117,8 @@ lib/
 │   ├── api/                     # HTTP client
 │   │   ├── api_client.dart           # Interface (abstract class)
 │   │   ├── api_client_impl.dart      # Implementation with http package
-│   │   └── error.dart                # Error models
+│   │   ├── api_result.dart           # Sealed result type (Success/Failure)
+│   │   └── error.dart                # Pluggable error parser
 │   │
 │   ├── design/                  # Design system utilities
 │   │   ├── design_system.dart        # Exports all design utilities
@@ -232,21 +233,47 @@ lib/
 
 The API client uses an **interface/implementation pattern** for flexibility and testability.
 
+#### **api_result.dart** — Sealed Result Type
+```dart
+sealed class ApiResult<T> {
+  const ApiResult();
+}
+
+class Success<T> extends ApiResult<T> {
+  final T data;
+  const Success(this.data);
+}
+
+class Failure<T> extends ApiResult<T> {
+  final String message;
+  final int? statusCode;
+  const Failure(this.message, {this.statusCode});
+}
+```
+
+**Usage with pattern matching:**
+```dart
+final result = await apiClient.get('users');
+if (result case Success(data: final response)) {
+  // use response.body
+}
+// Failure? Toast was already shown by API client.
+```
+
 #### **api_client.dart** (Interface)
 ```dart
 abstract class ApiClient {
   String? token;
   void updateHeader(String token, String languageCode);
   Future<void> cancelRequest();
-  Future<Response?> get(String uri, {Map<String, String>? headers, Map<String, String>? queryParams});
-  Future<Response?> post(String url, Map<String, dynamic> body, {Map<String, String>? headers});
-  Future<Response?> put(String url, Map<String, dynamic> body, {Map<String, String>? headers});
-  Future<Response?> delete(String url, {Map<String, String>? headers});
-  Future<Uint8List?> downloadImage(String uri);
+  Future<ApiResult<Response>> get(String uri, {Map<String, String>? headers, Map<String, String>? queryParams});
+  Future<ApiResult<Response>> post(String url, Map<String, dynamic> body, {Map<String, String>? headers});
+  Future<ApiResult<Response>> put(String url, Map<String, dynamic> body, {Map<String, String>? headers});
+  Future<ApiResult<Response>> delete(String url, {Map<String, String>? headers});
 }
 ```
 
-**Purpose:** Defines the contract for API operations.
+**Purpose:** All methods return `ApiResult<Response>` — a sealed type that forces callers to handle both success and failure.
 
 #### **api_client_impl.dart** (Implementation)
 ```dart
@@ -259,39 +286,33 @@ class ApiClientImpl extends GetxService implements ApiClient {
     token = prefs.getString(SharedKeys.token);
     updateHeader(token ?? '', prefs.getString(SharedKeys.languageCode));
   }
-  // ... implementation
 }
 ```
 
 **Key Features:**
+- **Sealed result pattern:** Returns `Success(response)` or `Failure(message)` — never null
 - **Automatic headers:** Sets Content-Type, Authorization, localization headers
-- **Token management:** Reads from SharedPreferences, updates headers
 - **Connectivity check:** Uses `ConnectivityService` before making requests
-- **Error handling:** Parses error responses, shows toasts
+- **Error handling:** Uses `ApiErrorParser` to parse error responses, shows toasts via `AppDialog`
 - **Request cancellation:** Can cancel in-flight requests
 - **Auto logout:** Detects "Unauthenticated" responses
 
-**Methods:**
-- `get()` - GET requests with optional query params
-- `post()` - POST with JSON body
-- `put()` - PUT with JSON body
-- `delete()` - DELETE requests
-- `downloadImage()` - Downloads image as bytes
-
-#### **error.dart**
+#### **error.dart** — Pluggable Error Parser
 ```dart
-class ErrorResponse {
-  final List<Error> errors;
-  factory ErrorResponse.fromJson(Map<String, dynamic> json) { ... }
-}
-
-class Error {
-  final String message;
-  factory Error.fromJson(Map<String, dynamic> json) { ... }
+class ApiErrorParser {
+  /// Extract a human-readable error message from an API response body.
+  /// Returns `null` if the body can't be parsed.
+  static String? parse(String responseBody) { ... }
 }
 ```
 
-**Purpose:** Standardized error parsing from API responses.
+**Supported formats** (tried in order, first match wins):
+- `{ "message": "Error text" }`
+- `{ "error": "Error text" }` or `{ "error": { "message": "..." } }`
+- `{ "errors": [{ "message": "..." }] }`
+- `{ "errors": { "field": ["msg1", "msg2"] } }` (Laravel validation)
+
+**Purpose:** Backend-agnostic error parsing — add new formats by appending to `_parsers`.
 
 ---
 
@@ -299,106 +320,121 @@ class Error {
 
 A comprehensive design system for consistent UI across the app.
 
-#### **colors.dart**
-Defines the complete color palette:
+#### **colors.dart** — Hybrid Color Model
+
+Colors use a **hybrid approach**: `static const` for brand colors (const-safe), instance fields for theme-varying colors.
+
 ```dart
-// Primary colors
-const Color primaryColor = Color(0xFF6949FF);
-const Color secondaryColor = Color(0xFFD27579);
+class AppColors {
+  // ─── Instance fields (vary by theme) ───
+  final Color background;
+  final Color card;
+  final Color shadow;
+  final Color divider;
+  final Color disabled;
+  final Color hint;
+  final Color text;
+  final Color icon;
 
-// Background colors (theme-specific)
-const Color backgroundColorLight = Color(0xFFFFFFFF);
-const Color backgroundColorDark = Color(0xFF1E1E1E);
+  const AppColors({required this.background, required this.card, ...});
 
-// Card colors
-const Color cardColorLight = Color(0xFFF5F5F5);
-const Color cardColorDark = Color(0xFF2A2A2A);
+  // ─── Brand colors (shared, const-safe) ───
+  static const Color primary = Color(0xFF6949FF);
+  static const Color secondary = Color(0xFFD27579);
+  static const Color transparent = Colors.transparent;
+  static const LinearGradient primaryGradient = LinearGradient(...);
+}
 
-// Shadow colors
-const Color shadowColorLight = Color(0xFFE8E8E8);
-const Color shadowColorDark = Color(0xFF3A3A3A);
+// Theme instances
+const AppColors lightColors = AppColors(
+  background: Color(0xFFFFFFFF),
+  card: Color(0xFFF5F5F5),
+  // ...
+);
 
-// Divider colors
-const Color dividerColorLight = Color(0xFFD0D5DD);
-const Color dividerColorDark = Color(0xFF3F3F3F);
-
-// Hint/placeholder colors
-const Color hintColorLight = Color(0xff606060);
-const Color hintColorDark = Color(0xFF909090);
-
-// Text colors
-const Color textColorLight = Colors.black;
-const Color textColorDark = Colors.white;
-
-// Icon colors
-const Color iconColorLight = Color(0xff606060);
-const Color iconColorDark = Color(0xFF909090);
-
-// Gradient
-LinearGradient get primaryGradient => LinearGradient(
-  colors: [secondaryColor, primaryColor],
-  stops: [0.2, 1.0],
-  begin: Alignment.bottomLeft,
-  end: Alignment.topRight,
+const AppColors darkColors = AppColors(
+  background: Color(0xFF1E1E1E),
+  card: Color(0xFF2A2A2A),
+  // ...
 );
 ```
 
-#### **app_padding.dart**
-Standardized padding system:
+**Usage:**
+```dart
+// Brand colors (const-safe) — same across themes
+const BoxDecoration(color: AppColors.primary)
+AppColors.primaryGradient
+
+// Theme-varying colors — access via instances
+lightColors.background
+darkColors.card
+```
+
+#### **app_padding.dart** — Spacing Scale
+
+Based on a **4px base unit** with 5 steps:
+
+| Token | Value | Usage                              |
+|-------|-------|------------------------------------|
+| `p4`  | 4     | Tight gaps, icon padding           |
+| `p8`  | 8     | Between related items              |
+| `p16` | 16    | Card padding, section gaps         |
+| `p24` | 24    | Screen edges, large gaps           |
+| `p32` | 32    | Modal padding, hero spacing        |
+
 ```dart
 class AppPadding {
-  // All sides padding
-  static EdgeInsets get padding4 => EdgeInsets.all(4.sp);
-  static EdgeInsets get padding8 => EdgeInsets.all(8.sp);
-  static EdgeInsets get padding12 => EdgeInsets.all(12.sp);
-  static EdgeInsets get padding16 => EdgeInsets.all(16.sp);
-  static EdgeInsets get padding20 => EdgeInsets.all(20.sp);
-  static EdgeInsets get padding24 => EdgeInsets.all(24.sp);
-  static EdgeInsets get padding32 => EdgeInsets.all(32.sp);
+  // All sides
+  static EdgeInsets get p4 => EdgeInsets.all(4.sp);
+  static EdgeInsets get p8 => EdgeInsets.all(8.sp);
+  static EdgeInsets get p16 => EdgeInsets.all(16.sp);
+  static EdgeInsets get p24 => EdgeInsets.all(24.sp);
+  static EdgeInsets get p32 => EdgeInsets.all(32.sp);
 
-  // Symmetric padding
-  static EdgeInsets vertical(double padding) => EdgeInsets.symmetric(vertical: padding.sp);
-  static EdgeInsets horizontal(double padding) => EdgeInsets.symmetric(horizontal: padding.sp);
+  // Symmetric
+  static EdgeInsets vertical(double value) => EdgeInsets.symmetric(vertical: value.sp);
+  static EdgeInsets horizontal(double value) => EdgeInsets.symmetric(horizontal: value.sp);
 
-  // Common presets
-  static EdgeInsets get paddingScreen => padding16;
-  static EdgeInsets get paddingCard => EdgeInsets.symmetric(horizontal: 16.sp, vertical: 12.sp);
+  // Semantic aliases
+  static EdgeInsets get screen => p16;
+  static EdgeInsets get card => EdgeInsets.symmetric(horizontal: 16.sp, vertical: 12.sp);
 }
 ```
 
 **Usage:**
 ```dart
-Padding(padding: AppPadding.padding16, child: ...)
-Padding(padding: AppPadding.horizontal(20), child: ...)
+Padding(padding: AppPadding.p16, child: ...)
+Padding(padding: AppPadding.vertical(12), child: ...)
+Padding(padding: AppPadding.screen, child: ...)  // same as p16
 ```
 
-#### **app_radius.dart**
-Standardized border radius:
+#### **app_radius.dart** — Border Radius Scale
+
+A tight scale with 4 steps:
+
+| Token  | Value | Usage                              |
+|--------|-------|------------------------------------|
+| `r4`   | 4     | Subtle rounding, tags              |
+| `r8`   | 8     | Chips, small buttons               |
+| `r16`  | 16    | Cards, inputs, buttons             |
+| `r24`  | 24    | Bottom sheets, modals              |
+| `r100` | 100   | Pills, circular avatars            |
+
 ```dart
 class AppRadius {
-  // Raw values
-  static double get radius4 => 4.r;
-  static double get radius8 => 8.r;
-  static double get radius12 => 12.r;
-  static double get radius16 => 16.r;
-  static double get radius24 => 24.r;
-  static double get radius100 => 100.r;
+  // BorderRadius (all corners)
+  static BorderRadius get r4 => BorderRadius.circular(4.sp);
+  static BorderRadius get r8 => BorderRadius.circular(8.sp);
+  static BorderRadius get r16 => BorderRadius.circular(16.sp);
+  static BorderRadius get r24 => BorderRadius.circular(24.sp);
+  static BorderRadius get r100 => BorderRadius.circular(100.sp);
 
-  // BorderRadius objects
-  static BorderRadius get circular4 => BorderRadius.circular(radius4);
-  static BorderRadius get circular8 => BorderRadius.circular(radius8);
-  static BorderRadius get circular12 => BorderRadius.circular(radius12);
-  static BorderRadius get circular16 => BorderRadius.circular(radius16);
-  static BorderRadius get circular24 => BorderRadius.circular(radius24);
-  static BorderRadius get circular100 => BorderRadius.circular(radius100);
+  // RoundedRectangleBorder shapes (for ThemeData, ButtonStyle, etc.)
+  static RoundedRectangleBorder get r8Shape => RoundedRectangleBorder(borderRadius: r8);
+  static RoundedRectangleBorder get r16Shape => RoundedRectangleBorder(borderRadius: r16);
+  static RoundedRectangleBorder get r24Shape => RoundedRectangleBorder(borderRadius: r24);
 
-  // Shapes (for buttons, etc.)
-  static get circular4Shape => RoundedRectangleBorder(borderRadius: circular4);
-  static get circular16Shape => RoundedRectangleBorder(borderRadius: circular16);
-  // ... more shapes
-
-  // Specific corners
-  static BorderRadius topLeft(double radius) => ...;
+  // Partial corners
   static BorderRadius top(double radius) => ...;
   static BorderRadius bottom(double radius) => ...;
 }
@@ -406,9 +442,9 @@ class AppRadius {
 
 **Usage:**
 ```dart
-Container(
-  decoration: BoxDecoration(borderRadius: AppRadius.circular16),
-)
+Container(decoration: BoxDecoration(borderRadius: AppRadius.r16))
+ElevatedButton(style: ButtonStyle(shape: AppRadius.r16Shape))
+BottomSheet(shape: RoundedRectangleBorder(borderRadius: AppRadius.top(16)))
 ```
 
 #### **app_text.dart**
@@ -537,36 +573,48 @@ pop();
 ### 4. Theme (`core/theme/`)
 
 #### **light_theme.dart** & **dark_theme.dart**
-Complete theme definitions using Material 3:
+Complete theme definitions using Material 3. Each sub-theme is a **parameterized function** that accepts `AppColors`, eliminating duplication:
 
 ```dart
 ThemeData get light => ThemeData(
   fontFamily: 'Poppins',
   useMaterial3: true,
   brightness: Brightness.light,
-  primaryColor: primaryColor,
-  scaffoldBackgroundColor: backgroundColorLight,
-  // ... all theme components
-  textTheme: lightTextTheme,
-  iconTheme: iconThemeLight,
-  appBarTheme: appBarThemeLight,
+  primaryColor: AppColors.primary,          // static const (brand)
+  scaffoldBackgroundColor: lightColors.background,  // instance (theme-varying)
+  // Sub-themes receive the color palette
+  textTheme: textTheme(lightColors),
+  iconTheme: iconTheme(lightColors),
+  appBarTheme: appBarTheme(lightColors),
+  inputDecorationTheme: inputDecorationTheme(lightColors),
+  dropdownMenuTheme: dropdownMenuTheme(lightColors),
+  dialogTheme: dialogTheme(lightColors),
+  bottomSheetTheme: bottomSheetTheme(lightColors),
+  dividerTheme: dividerTheme(lightColors),
+  // Shared (no color variation)
   elevatedButtonTheme: elevatedButtonThemeData,
-  // ... more
+  outlinedButtonTheme: outlinedButtonThemeData,
+  textButtonTheme: textButtonTheme,
 );
 ```
 
 **Theme Components (in `src/`):**
-- **text_theme.dart** - All text styles (responsive with ScreenUtil)
-- **elevated_button_theme.dart** - Primary button style (50.sp height, circular16, primary color)
-- **outline_button_theme.dart** - Outline button style
-- **textbuton_theme.dart** - Text button style (transparent, no padding)
-- **appbar_theme.dart** - App bar styling (no elevation, title spacing 16.sp)
-- **input_decoration_theme.dart** - Text field styling (filled, rounded, border states)
-- **dropdown_theme.dart** - Dropdown menu styling
-- **dialog_theme.dart** - Dialog styling (circular16, padding32)
-- **bottom_sheet_theme.dart** - Bottom sheet styling (top rounded corners)
-- **icon_theme.dart** - Icon color and size (22.sp)
-- **divider_theme.dart** - Divider styling (0.5 thickness)
+
+Each takes `AppColors` as a parameter — one function per component, no light/dark duplication:
+
+| File | Function | Description |
+|------|----------|-------------|
+| `text_theme.dart` | `textTheme(AppColors)` | All text styles (responsive with ScreenUtil) |
+| `appbar_theme.dart` | `appBarTheme(AppColors)` | App bar (no elevation, title spacing 16.sp) |
+| `input_decoration_theme.dart` | `inputDecorationTheme(AppColors)` | Text field (filled, rounded, border states) |
+| `dropdown_theme.dart` | `dropdownMenuTheme(AppColors)` | Dropdown menu styling |
+| `dialog_theme.dart` | `dialogTheme(AppColors)` | Dialog (r16 shape, p32 padding) |
+| `bottom_sheet_theme.dart` | `bottomSheetTheme(AppColors)` | Bottom sheet (top rounded corners) |
+| `icon_theme.dart` | `iconTheme(AppColors)` | Icon color and size (22.sp) |
+| `divider_theme.dart` | `dividerTheme(AppColors)` | Divider (0.5 thickness) |
+| `elevated_button_theme.dart` | `elevatedButtonThemeData` | Primary button (shared, uses `AppColors.primary`) |
+| `outline_button_theme.dart` | `outlinedButtonThemeData` | Outline button (shared) |
+| `textbuton_theme.dart` | `textButtonTheme` | Text button (transparent, no padding) |
 
 #### **design_helper.dart** - Responsive Design
 ```dart
@@ -652,7 +700,7 @@ class CustomScrollBehavior extends ScrollBehavior {
 PrimaryButton(
   text: 'Submit',
   icon: Icon(Iconsax.tick_circle),
-  color: primaryColor,        // optional
+  color: AppColors.primary,   // optional (defaults to theme primaryColor)
   textColor: Colors.white,    // optional
   radius: 16,                 // optional
   onPressed: () { ... },
@@ -662,8 +710,8 @@ PrimaryButton(
 PrimaryOutlineButton(
   text: 'Cancel',
   icon: Icon(Iconsax.close_circle),
-  textColor: primaryColor,    // optional
-  radius: 16,                 // optional
+  textColor: AppColors.primary,  // optional
+  radius: 16,                    // optional
   onPressed: () { ... },
 )
 ```
@@ -725,9 +773,11 @@ const Loading(size: 27)
 
 #### **snackbar.dart**
 ```dart
-showLoading();           // Show loading overlay
-hideLoading();           // Hide loading overlay
-showToast('Message');    // Show toast message
+class AppDialog {
+  static showLoading()        // Show loading overlay
+  static hideLoading()        // Hide loading overlay
+  static showToast('Message') // Show toast message
+}
 ```
 
 #### **network_image.dart**
@@ -924,7 +974,7 @@ class ConfigModel {
 **`data/repository/splash_repo.dart`**
 ```dart
 abstract class SplashRepo {
-  Future<Response?> getConfig();
+  Future<ApiResult<Response>> getConfig();
   Future<bool> saveFirstTime();
   bool getFirstTime();
 }
@@ -937,7 +987,7 @@ class SplashRepoImpl implements SplashRepo {
   final SharedPreferences prefs;
 
   @override
-  Future<Response?> getConfig() async => 
+  Future<ApiResult<Response>> getConfig() async => 
     await apiClient.get(AppConstants.configUrl);
 
   @override
@@ -955,12 +1005,11 @@ class SplashServiceImpl implements SplashService {
 
   @override
   Future<ConfigModel> getConfig() async {
-    Response? response = await splashRepo.getConfig();
-    if (response != null) {
+    final result = await splashRepo.getConfig();
+    if (result case Success(data: final response)) {
       return ConfigModel.fromJson(jsonDecode(response.body));
-    } else {
-      throw Exception("Failed to load settings");
     }
+    throw Exception('Failed to load settings');
   }
 }
 ```
@@ -1100,23 +1149,29 @@ ThemeController.find.setThemeMode(ThemeMode.dark);
 
 ### Spacing System
 
-Uses 4px base unit, scaled with ScreenUtil:
-- **4sp** - Micro spacing
-- **8sp** - Extra small
-- **12sp** - Small
-- **16sp** - Medium (default screen padding)
-- **20sp** - Large
-- **24sp** - Extra large
-- **32sp** - Section spacing
+Uses a **4px base unit** with 5 steps, scaled with ScreenUtil:
+
+| Token | Value | Usage                              |
+|-------|-------|------------------------------------|
+| `p4`  | 4     | Tight gaps, icon padding           |
+| `p8`  | 8     | Between related items              |
+| `p16` | 16    | Card padding, section gaps         |
+| `p24` | 24    | Screen edges, large gaps           |
+| `p32` | 32    | Modal padding, hero spacing        |
+
+Semantic aliases: `screen` (→ p16), `card` (16h × 12v)
 
 ### Border Radius
 
-- **4r** - Subtle rounding
-- **8r** - Small components
-- **12r** - Medium components
-- **16r** - Cards, buttons (most common)
-- **24r** - Large cards
-- **100r** - Circular (avatars, badges)
+| Token  | Value | Usage                              |
+|--------|-------|------------------------------------|
+| `r4`   | 4     | Subtle rounding, tags              |
+| `r8`   | 8     | Chips, small buttons               |
+| `r16`  | 16    | Cards, inputs, buttons (default)   |
+| `r24`  | 24    | Bottom sheets, modals              |
+| `r100` | 100   | Pills, circular avatars            |
+
+Shape variants: `r8Shape`, `r16Shape`, `r24Shape` for `ThemeData`/`ButtonStyle`
 
 ### Typography
 
@@ -1263,8 +1318,11 @@ class UserController extends GetxController {
   final UserService userService;
   
   Future<void> loadUsers() async {
-    List<User> users = await userService.getUsers();
-    update();
+    final result = await userService.getUsers();
+    if (result case Success(data: final users)) {
+      _users = users;
+      update();
+    }
   }
 }
 
@@ -1273,12 +1331,12 @@ class UserServiceImpl implements UserService {
   final UserRepo userRepo;
   
   @override
-  Future<List<User>> getUsers() async {
-    Response? response = await userRepo.fetchUsers();
-    if (response != null) {
-      return parseUsers(response.body);
+  Future<ApiResult<List<User>>> getUsers() async {
+    final result = await userRepo.fetchUsers();
+    if (result case Success(data: final response)) {
+      return Success(parseUsers(response.body));
     }
-    throw Exception("Failed to load users");
+    return result as Failure;
   }
 }
 
@@ -1287,7 +1345,7 @@ class UserRepoImpl implements UserRepo {
   final ApiClient apiClient;
   
   @override
-  Future<Response?> fetchUsers() async {
+  Future<ApiResult<Response>> fetchUsers() async {
     return await apiClient.get('/users');
   }
 }
@@ -1296,20 +1354,20 @@ class UserRepoImpl implements UserRepo {
 ### Error Handling
 
 **Built-in handling in ApiClientImpl:**
-- Network errors → Toast: "Please check your internet connection"
-- API errors → Parse `ErrorResponse`, show first error message
+- Network errors → `Failure('Please check your internet connection')` + toast
+- API errors → `ApiErrorParser.parse()` extracts message, shows toast, returns `Failure`
 - Unauthenticated → Show error, trigger logout
 
-**Custom handling in service:**
+**The caller never gets `null` — only `Success` or `Failure`:**
 ```dart
-try {
-  Response? response = await repo.getData();
-  if (response != null) {
-    return parseData(response.body);
-  }
-} catch (e) {
-  debugPrint('Error: $e');
-  rethrow;  // Or handle gracefully
+final result = await apiClient.get('users');
+switch (result) {
+  case Success(data: final response):
+    // handle response
+    break;
+  case Failure(message: final msg):
+    // toast already shown — do additional cleanup if needed
+    break;
 }
 ```
 
@@ -1340,31 +1398,35 @@ ThemeController.find.setThemeMode(ThemeMode.dark);
 
 ### Theme-Aware Widgets
 
-**Accessing theme:**
+**Accessing theme colors:**
 ```dart
-Theme.of(context).primaryColor
-Theme.of(context).textTheme.bodyLarge
-Theme.of(context).cardColor
+// Brand colors (const-safe, same across themes)
+AppColors.primary
+AppColors.primaryGradient
+
+// Theme-varying colors in sub-themes (via AppColors instance)
+colors.background
+colors.card
+colors.text
 ```
 
-**Design system colors:**
+**Design system colors (automatically adapts to theme):**
 ```dart
-// Automatically adapts to theme
-Container(color: Theme.of(context).cardColor)  // cardColorLight or cardColorDark
-Text(style: Theme.of(context).textTheme.bodyMedium)  // Correct color
+Theme.of(context).cardColor          // uses colors.card
+Theme.of(context).textTheme.bodyMedium  // correct text color
 ```
 
 ### Custom Theme Components
 
-**To modify button theme:**
+**To modify a sub-theme (e.g. button):**
 1. Edit `core/theme/src/elevated_button_theme.dart`
-2. Changes apply to both light and dark themes
-3. Rebuild app
+2. For theme-varying colors, accept `AppColors` parameter
+3. Changes apply to both light and dark themes
 
-**To add new theme component:**
+**To add a new sub-theme:**
 1. Create `core/theme/src/my_component_theme.dart`
-2. Export in `light_theme.dart` and `dark_theme.dart`
-3. Add to `ThemeData()`
+2. Write a function: `MyThemeData myTheme(AppColors colors) => ...`
+3. Call in both `light_theme.dart` and `dark_theme.dart` passing the colors instance
 
 ---
 
@@ -1577,7 +1639,7 @@ BUNDLE_ID = com.example.startupRepo
 | Package | Version | Purpose |
 |---------|---------|---------|
 | `flutter_test` | SDK | Unit testing |
-| `flutter_lints` | ^3.0.0 | Linting rules |
+| `flutter_lints` | ^5.0.0 | Linting rules |
 | `flutter_launcher_icons` | ^0.14.2 | Generate app icons |
 
 ### Commented (Firebase - Optional)
@@ -1604,7 +1666,7 @@ PrimaryButton(
   text: 'Submit',
   onPressed: () { },
   icon: Icon(Iconsax.tick_circle, size: 16.sp, color: Colors.white),
-  color: primaryColor,      // Optional
+  color: AppColors.primary,      // Optional
   textColor: Colors.white,  // Optional
   radius: 16,               // Optional
 )
@@ -1616,8 +1678,8 @@ PrimaryOutlineButton(
   text: 'Cancel',
   onPressed: () { },
   icon: Icon(Iconsax.close_circle, size: 16.sp),
-  textColor: primaryColor,  // Optional
-  radius: 16,               // Optional
+  textColor: AppColors.primary,  // Optional
+  radius: 16,                    // Optional
 )
 ```
 
@@ -1688,10 +1750,10 @@ showConfirmationSheet(
 #### Loading Overlay
 ```dart
 // Show
-showLoading();
+AppDialog.showLoading();
 
 // Hide
-hideLoading();
+AppDialog.hideLoading();
 ```
 
 #### Toast
@@ -1810,17 +1872,19 @@ class ProfileModel {
 
 **profile_repo.dart** (interface):
 ```dart
+import '../../../../core/api/api_result.dart';
 import 'package:http/http.dart';
 
 abstract class ProfileRepo {
-  Future<Response?> getProfile();
-  Future<Response?> updateProfile(Map<String, dynamic> data);
+  Future<ApiResult<Response>> getProfile();
+  Future<ApiResult<Response>> updateProfile(Map<String, dynamic> data);
 }
 ```
 
 **profile_repo_impl.dart** (implementation):
 ```dart
 import '../../../../core/api/api_client.dart';
+import '../../../../core/api/api_result.dart';
 import 'profile_repo.dart';
 
 class ProfileRepoImpl implements ProfileRepo {
@@ -1828,12 +1892,12 @@ class ProfileRepoImpl implements ProfileRepo {
   ProfileRepoImpl({required this.apiClient});
 
   @override
-  Future<Response?> getProfile() async {
+  Future<ApiResult<Response>> getProfile() async {
     return await apiClient.get('/profile');
   }
 
   @override
-  Future<Response?> updateProfile(Map<String, dynamic> data) async {
+  Future<ApiResult<Response>> updateProfile(Map<String, dynamic> data) async {
     return await apiClient.put('/profile', data);
   }
 }
@@ -1854,7 +1918,7 @@ abstract class ProfileService {
 **profile_service_impl.dart** (implementation):
 ```dart
 import 'dart:convert';
-import 'package:http/http.dart';
+import '../../../../core/api/api_result.dart';
 import '../../data/model/profile_model.dart';
 import '../../data/repository/profile_repo.dart';
 import 'profile_service.dart';
@@ -1865,8 +1929,8 @@ class ProfileServiceImpl implements ProfileService {
 
   @override
   Future<ProfileModel> getProfile() async {
-    Response? response = await profileRepo.getProfile();
-    if (response != null && response.statusCode == 200) {
+    final result = await profileRepo.getProfile();
+    if (result case Success(data: final response)) {
       return ProfileModel.fromJson(jsonDecode(response.body));
     }
     throw Exception('Failed to load profile');
@@ -1874,8 +1938,8 @@ class ProfileServiceImpl implements ProfileService {
 
   @override
   Future<bool> updateProfile(ProfileModel profile) async {
-    Response? response = await profileRepo.updateProfile(profile.toJson());
-    return response != null && response.statusCode == 200;
+    final result = await profileRepo.updateProfile(profile.toJson());
+    return result is Success;
   }
 }
 ```
@@ -1948,18 +2012,18 @@ class ProfileController extends GetxController {
   }
 
   Future<void> updateProfile(ProfileModel profile) async {
-    showLoading();
+    AppDialog.showLoading();
     try {
       bool success = await profileService.updateProfile(profile);
       if (success) {
         _profile = profile;
-        showToast('Profile updated successfully');
+        AppDialog.showToast('Profile updated successfully');
         update();
       }
     } catch (e) {
-      showToast('Failed to update profile');
+      AppDialog.showToast('Failed to update profile');
     }
-    hideLoading();
+    AppDialog.hideLoading();
   }
 }
 ```
@@ -1988,7 +2052,7 @@ class ProfileScreen extends StatelessWidget {
           }
 
           return ListView(
-            padding: AppPadding.padding16,
+            padding: AppPadding.p16,
             children: [
               Center(
                 child: CircleAvatar(
@@ -2071,7 +2135,7 @@ class AuthRepoImpl implements AuthRepo {
   final ApiClient apiClient;
 
   @override
-  Future<Response?> login(String email, String password) async {
+  Future<ApiResult<Response>> login(String email, String password) async {
     return await apiClient.post(
       AppConstants.loginUrl,
       {
@@ -2082,7 +2146,7 @@ class AuthRepoImpl implements AuthRepo {
   }
 
   @override
-  Future<Response?> register(Map<String, dynamic> data) async {
+  Future<ApiResult<Response>> register(Map<String, dynamic> data) async {
     return await apiClient.post(AppConstants.registerUrl, data);
   }
 }
@@ -2097,12 +2161,10 @@ class AuthServiceImpl implements AuthService {
 
   @override
   Future<AuthResponse> login(String email, String password) async {
-    Response? response = await authRepo.login(email, password);
-    
-    if (response != null && response.statusCode == 200) {
+    final result = await authRepo.login(email, password);
+    if (result case Success(data: final response)) {
       return AuthResponse.fromJson(jsonDecode(response.body));
     }
-    
     throw Exception('Login failed');
   }
 }
@@ -2115,7 +2177,7 @@ class AuthController extends GetxController {
   final AuthService authService;
 
   Future<void> login(String email, String password) async {
-    showLoading();
+    AppDialog.showLoading();
     
     try {
       AuthResponse response = await authService.login(email, password);
@@ -2133,10 +2195,10 @@ class AuthController extends GetxController {
       launchScreen(const HomeScreen(), pushAndRemove: true);
       
     } catch (e) {
-      showToast('Login failed: ${e.toString()}');
+      AppDialog.showToast('Login failed: ${e.toString()}');
     }
     
-    hideLoading();
+    AppDialog.hideLoading();
   }
 }
 ```
@@ -2145,7 +2207,7 @@ class AuthController extends GetxController {
 
 **GET:**
 ```dart
-Response? response = await apiClient.get(
+final result = await apiClient.get(
   'users',
   queryParams: {'page': '1', 'limit': '10'},
   headers: {'Custom-Header': 'value'},
@@ -2154,7 +2216,7 @@ Response? response = await apiClient.get(
 
 **POST:**
 ```dart
-Response? response = await apiClient.post(
+final result = await apiClient.post(
   'users',
   {'name': 'John', 'email': 'john@example.com'},
   headers: {'Custom-Header': 'value'},
@@ -2163,7 +2225,7 @@ Response? response = await apiClient.post(
 
 **PUT:**
 ```dart
-Response? response = await apiClient.put(
+final result = await apiClient.put(
   'users/123',
   {'name': 'John Updated'},
 );
@@ -2171,14 +2233,15 @@ Response? response = await apiClient.put(
 
 **DELETE:**
 ```dart
-Response? response = await apiClient.delete('users/123');
+final result = await apiClient.delete('users/123');
 ```
 
-**Download Image:**
+**Handling results:**
 ```dart
-Uint8List? imageBytes = await apiClient.downloadImage(
-  'https://example.com/image.jpg',
-);
+if (result case Success(data: final response)) {
+  final data = jsonDecode(response.body);
+  // use data
+}
 ```
 
 ---
@@ -2205,8 +2268,8 @@ Uint8List? imageBytes = await apiClient.downloadImage(
 
 ### 4. Design System
 - Always use design system constants (`AppPadding`, `AppRadius`, `context.font16`)
-- Avoid hard-coded values like `padding: EdgeInsets.all(16)` → use `AppPadding.padding16`
-- Use theme colors via `Theme.of(context)` for theme switching support
+- Avoid hard-coded values like `padding: EdgeInsets.all(16)` → use `AppPadding.p16`
+- Use `AppColors.primary` for brand colors, `colors.xxx` for theme-varying colors via `AppColors` instances
 
 ### 5. Error Handling
 - Always handle null responses from API
@@ -2356,6 +2419,6 @@ This boilerplate is designed to be extended. When adding features:
 
 ---
 
-**Last Updated:** 2024  
+**Last Updated:** 2026  
 **Maintainer:** [Your Team]  
 **Questions?** Check `development_flow.md` and `env.md` for additional setup details.

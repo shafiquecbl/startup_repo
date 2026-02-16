@@ -1,46 +1,62 @@
 import 'package:flutter/material.dart';
 
-const Color primaryColor = Color(0xFF6949FF);
-const Color secondaryColor = Color(0xFFD27579);
+const AppColors lightColors = AppColors(
+  background: Color(0xFFFFFFFF),
+  card: Color(0xFFF5F5F5),
+  shadow: Color(0xFFE8E8E8),
+  divider: Color(0xFFD0D5DD),
+  disabled: Color(0xFFA0A0A0),
+  hint: Color(0xFF606060),
+  text: Colors.black,
+  icon: Color(0xFF606060),
+);
 
-// background colors
-const Color backgroundColorLight = Color(0xFFFFFFFF);
-const Color backgroundColorDark = Color(0xFF1E1E1E);
+const AppColors darkColors = AppColors(
+  background: Color(0xFF1E1E1E),
+  card: Color(0xFF2A2A2A),
+  shadow: Color(0xFF3A3A3A),
+  divider: Color(0xFF3F3F3F),
+  disabled: Color(0xFFB0B0B0),
+  hint: Color(0xFF909090),
+  text: Colors.white,
+  icon: Color(0xFF909090),
+);
 
-// card colors
-const Color cardColorLight = Color(0xFFF5F5F5);
-const Color cardColorDark = Color(0xFF2A2A2A);
+/// Model-based color palette for the app.
+///
+/// Usage:
+///   - Brand colors (shared): `AppColors.primary`, `AppColors.secondary` (const-safe)
+///   - Theme colors: `lightColors.background`, `darkColors.card`, etc.
+class AppColors {
+  final Color background;
+  final Color card;
+  final Color shadow;
+  final Color divider;
+  final Color disabled;
+  final Color hint;
+  final Color text;
+  final Color icon;
 
-const Color transparent = Colors.transparent;
+  const AppColors({
+    required this.background,
+    required this.card,
+    required this.shadow,
+    required this.divider,
+    required this.disabled,
+    required this.hint,
+    required this.text,
+    required this.icon,
+  });
 
-// shadow colors
-const Color shadowColorLight = Color(0xFFE8E8E8);
-const Color shadowColorDark = Color(0xFF3A3A3A);
+  // ─── Brand colors (shared across themes, const-safe) ───────
+  static const Color primary = Color(0xFF6949FF);
+  static const Color secondary = Color(0xFFD27579);
+  static const Color transparent = Colors.transparent;
 
-// divider colors
-const Color dividerColorLight = Color(0xFFD0D5DD);
-const Color dividerColorDark = Color(0xFF3F3F3F);
-
-// disabled colors
-const Color disabledColorLight = Color(0xffA0A0A0);
-Color disabledColorDark = const Color(0xFFB0B0B0);
-
-// hint colors
-const Color hintColorLight = Color(0xff606060);
-const Color hintColorDark = Color(0xFF909090);
-
-// text colors
-const Color textColorLight = Colors.black;
-const Color textColorDark = Colors.white;
-
-// icon colors
-const Color iconColorLight = Color(0xff606060);
-const Color iconColorDark = Color(0xFF909090);
-
-// gradient
-LinearGradient get primaryGradient => const LinearGradient(
-      colors: [secondaryColor, primaryColor],
-      stops: [0.2, 1.0],
-      begin: Alignment.bottomLeft,
-      end: Alignment.topRight,
-    );
+  static const LinearGradient primaryGradient = LinearGradient(
+    colors: [secondary, primary],
+    stops: [0.2, 1.0],
+    begin: Alignment.bottomLeft,
+    end: Alignment.topRight,
+  );
+}

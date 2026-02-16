@@ -13,7 +13,7 @@ class PrimaryButton extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final Color backgroundColor = color ?? primaryColor;
+    final Color backgroundColor = color ?? Theme.of(context).primaryColor;
     final Color textColor = this.textColor ?? Colors.white;
     return ElevatedButton(
       style: ElevatedButton.styleFrom(
@@ -50,7 +50,7 @@ class PrimaryOutlineButton extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final Color textColor = this.textColor ?? primaryColor;
+    final Color textColor = this.textColor ?? Theme.of(context).primaryColor;
     return OutlinedButton(
       style: OutlinedButton.styleFrom(
         minimumSize: Size(100.sp, 55.sp),

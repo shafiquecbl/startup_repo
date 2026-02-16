@@ -1,22 +1,12 @@
-import 'package:startup_repo/core/design/app_radius.dart';
 import 'package:startup_repo/imports.dart';
 import 'package:startup_repo/core/theme/src/input_decoration_theme.dart';
 
-DropdownMenuThemeData get dropdownMenuThemeLight => DropdownMenuThemeData(
-      inputDecorationTheme: inputDecorationThemeLight,
-      textStyle: TextStyle(fontSize: 14.sp, color: hintColorLight),
+DropdownMenuThemeData dropdownMenuTheme(AppColors colors) => DropdownMenuThemeData(
+      inputDecorationTheme: inputDecorationTheme(colors),
+      textStyle: TextStyle(fontSize: 14.sp, color: colors.hint),
       menuStyle: MenuStyle(
-        backgroundColor: WidgetStateProperty.all(cardColorLight),
-        shape: WidgetStateProperty.all(AppRadius.circular16Shape),
-        surfaceTintColor: WidgetStateProperty.all(dividerColorLight),
-      ),
-    );
-
-DropdownMenuThemeData get dropdownMenuThemeDark => dropdownMenuThemeLight.copyWith(
-      inputDecorationTheme: inputDecorationThemeDark,
-      textStyle: TextStyle(fontSize: 14.sp, color: hintColorDark),
-      menuStyle: MenuStyle(
-        backgroundColor: WidgetStateProperty.all(cardColorDark),
-        surfaceTintColor: WidgetStateProperty.all(dividerColorDark),
+        backgroundColor: WidgetStateProperty.all(colors.card),
+        shape: WidgetStateProperty.all(AppRadius.r16Shape),
+        surfaceTintColor: WidgetStateProperty.all(colors.divider),
       ),
     );

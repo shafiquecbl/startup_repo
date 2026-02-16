@@ -1,29 +1,35 @@
 class ConfigModel {
-  String termsAndConditions;
-  String privacyPolicy;
-  String userAgreement;
-  String cancelAnytime;
+  final String termsAndConditions;
+  final String privacyPolicy;
+  final String userAgreement;
+  final String cancelAnytime;
 
-  ConfigModel({
+  const ConfigModel({
     required this.termsAndConditions,
     required this.privacyPolicy,
     required this.userAgreement,
     required this.cancelAnytime,
   });
 
-  // from json
   factory ConfigModel.fromJson(Map<String, dynamic> json) => ConfigModel(
-        termsAndConditions: json["terms_condition"]["value"],
-        privacyPolicy: json["privacy_policy"]["value"],
-        userAgreement: json["user_agreement"]["value"],
-        cancelAnytime: json["cancel_anytime"]["value"],
+        termsAndConditions: _extractValue(json, 'terms_condition'),
+        privacyPolicy: _extractValue(json, 'privacy_policy'),
+        userAgreement: _extractValue(json, 'user_agreement'),
+        cancelAnytime: _extractValue(json, 'cancel_anytime'),
       );
 
-  // to json
+  /// Safely extract nested `{ "key": { "value": "..." } }` pattern
+  static String _extractValue(Map<String, dynamic> json, String key) {
+    final dynamic entry = json[key];
+    if (entry is Map<String, dynamic>) return entry['value']?.toString() ?? '';
+    if (entry is String) return entry;
+    return '';
+  }
+
   Map<String, dynamic> toJson() => {
-        "terms_condition": {"value": termsAndConditions},
-        "privacy_policy": {"value": privacyPolicy},
-        "user_agreement": {"value": userAgreement},
-        "cancel_anytime": {"value": cancelAnytime},
+        'terms_condition': {'value': termsAndConditions},
+        'privacy_policy': {'value': privacyPolicy},
+        'user_agreement': {'value': userAgreement},
+        'cancel_anytime': {'value': cancelAnytime},
       };
 }

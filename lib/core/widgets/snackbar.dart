@@ -1,10 +1,13 @@
 import 'package:flutter_smart_dialog/flutter_smart_dialog.dart';
 
-showLoading() => SmartDialog.showLoading();
+class AppDialog {
+  AppDialog._();
 
-hideLoading() => SmartDialog.dismiss();
+  static showLoading<T>() => SmartDialog.showLoading<T>();
 
-showToast(String text) {
-  SmartDialog.showToast(text, displayTime: const Duration(seconds: 3));
+  static hideLoading<T>() => SmartDialog.dismiss<T>();
+
+  static showToast(String text) {
+    SmartDialog.showToast(text, displayTime: const Duration(seconds: 3));
+  }
 }
-

@@ -1,6 +1,6 @@
 import '../../imports.dart';
 
-Future showConfirmationSheet({
+Future<dynamic> showConfirmationSheet({
   required String title,
   required String subtitle,
   required String actionText,
@@ -31,7 +31,7 @@ class ConfirmationSheet extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Padding(
-      padding: AppPadding.padding16,
+      padding: AppPadding.p16,
       child: Column(
         mainAxisSize: MainAxisSize.min,
         crossAxisAlignment: CrossAxisAlignment.start,
@@ -61,7 +61,7 @@ class ConfirmationSheet extends StatelessWidget {
               Expanded(
                 child: PrimaryOutlineButton(
                   text: 'cancel'.tr,
-                  onPressed: pop,
+                  onPressed: Get.back,
                   textColor: Theme.of(context).textTheme.bodyLarge!.color,
                 ),
               ),

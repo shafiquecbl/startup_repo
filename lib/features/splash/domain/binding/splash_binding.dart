@@ -9,14 +9,12 @@ class SplashBinding extends Bindings {
   @override
   void dependencies() {
     // repo
-    SplashRepo splashRepoInterface = SplashRepoImpl(prefs: Get.find(), apiClient: Get.find());
-    Get.lazyPut(() => splashRepoInterface);
+    Get.lazyPut<SplashRepo>(() => SplashRepoImpl(prefs: Get.find(), apiClient: Get.find()));
 
     // service
-    SplashService splashServiceInterface = SplashServiceImpl(splashRepo: Get.find());
-    Get.lazyPut(() => splashServiceInterface);
+    Get.lazyPut<SplashService>(() => SplashServiceImpl(splashRepo: Get.find()));
 
     // controller
-    Get.lazyPut(() => SplashController(settingsService: Get.find()));
+    Get.lazyPut(() => SplashController(splashService: Get.find()));
   }
 }

@@ -11,7 +11,7 @@ class HomeScreen extends StatelessWidget {
     return Scaffold(
       appBar: AppBar(title: const Text('Home')),
       body: ListView(
-        padding: AppPadding.padding16,
+        padding: AppPadding.p16,
         children: [
           Column(
             children: <Widget>[
@@ -32,13 +32,13 @@ class HomeScreen extends StatelessWidget {
               Expanded(
                 child: PrimaryOutlineButton(
                   text: 'Outline Button',
-                  icon: Icon(Iconsax.video, size: 16.sp, color: primaryColor),
+                  icon: Icon(Iconsax.video, size: 16.sp, color: Theme.of(context).primaryColor),
                   onPressed: () {
                     showConfirmationSheet(
                       title: 'Are you sure?',
                       subtitle: 'This action cannot be undone.',
                       actionText: 'Yes',
-                      onAccept: pop,
+                      onAccept: Get.back,
                     );
                   },
                 ),
@@ -53,7 +53,7 @@ class HomeScreen extends StatelessWidget {
                       title: 'Are you sure?',
                       subtitle: 'This action cannot be undone.',
                       actionText: 'Yes',
-                      onAccept: pop,
+                      onAccept: Get.back,
                     );
                   },
                 ),
@@ -129,7 +129,7 @@ class ThemeModeWidget extends StatelessWidget {
             decoration: BoxDecoration(
               shape: BoxShape.circle,
               border: Border.all(
-                color: selected ? primaryColor : Theme.of(context).hintColor,
+                color: selected ? Theme.of(context).primaryColor : Theme.of(context).hintColor,
                 width: 1.5.sp,
               ),
             ),

@@ -14,10 +14,10 @@ Future<Map<String, Map<String, String>>> init() async {
   // Core
   final sharedPreferences = await SharedPreferences.getInstance();
   Get.lazyPut(() => sharedPreferences);
-  ApiClient apiClient = ApiClientImpl(prefs: Get.find(), baseUrl: AppConstants.baseUrl);
+  final ApiClient apiClient = ApiClientImpl(prefs: Get.find(), baseUrl: AppConstants.baseUrl);
   Get.lazyPut(() => apiClient);
 
-  List<Bindings> bindings = [ThemeBinding(), LanguageBinding(), SplashBinding()];
+  final List<Bindings> bindings = [ThemeBinding(), LanguageBinding(), SplashBinding()];
 
   for (Bindings binding in bindings) {
     binding.dependencies();
@@ -28,14 +28,14 @@ Future<Map<String, Map<String, String>>> init() async {
 }
 
 Future<Map<String, Map<String, String>>> _loadLanguages() async {
-  Map<String, Map<String, String>> languages = {};
+  final Map<String, Map<String, String>> languages = {};
 
   //
   for (LanguageModel languageModel in appLanguages) {
-    String jsonStringValues =
+    final String jsonStringValues =
         await rootBundle.loadString('assets/languages/${languageModel.languageCode}.json');
-    Map<String, dynamic> mappedJson = jsonDecode(jsonStringValues);
-    Map<String, String> json = {};
+    final Map<String, dynamic> mappedJson = jsonDecode(jsonStringValues);
+    final Map<String, String> json = {};
     mappedJson.forEach((key, value) {
       json[key] = value.toString();
     });

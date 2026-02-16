@@ -2,253 +2,207 @@
 
 // import 'dart:convert';
 // import 'dart:io';
-// import 'package:asia_job_swipe/data/model/response/notification_model.dart';
 // import 'package:firebase_messaging/firebase_messaging.dart';
 // import 'package:flutter/foundation.dart';
 // import 'package:flutter_local_notifications/flutter_local_notifications.dart';
 // import 'package:path_provider/path_provider.dart';
 // import 'package:http/http.dart' as http;
-// import '../controller/application_controller.dart';
-// import '../utils/app_constants.dart';
+// import 'package:startup_repo/core/utils/app_constants.dart';
 
+// /// Notification helper for Firebase Cloud Messaging + local notifications.
+// ///
+// /// Usage:
+// /// 1. Add firebase_messaging, flutter_local_notifications to pubspec.yaml
+// /// 2. Call `NotificationHelper.initialize()` in main.dart after Firebase.initializeApp()
+// /// 3. Implement navigation logic in `_handleNotification()`
 // class NotificationHelper {
+//   static final FlutterLocalNotificationsPlugin _fln = FlutterLocalNotificationsPlugin();
+
 //   static Future<void> initialize() async {
-//     await FirebaseMessaging.instance.getInitialMessage().then((message) {
-//       if (message != null) {
-//         handleNotification(message.data);
-//       }
-//     });
-//     FirebaseMessaging.onBackgroundMessage(myBackgroundMessageHandler);
-//     final flutterLocalNotificationsPlugin = FlutterLocalNotificationsPlugin();
+//     // Handle notification that launched the app (terminated state)
+//     final initialMessage = await FirebaseMessaging.instance.getInitialMessage();
+//     if (initialMessage != null) {
+//       _handleNotification(initialMessage.data);
+//     }
 
-//     // android
-//     var androidInitialize =
-//         const AndroidInitializationSettings('@mipmap/ic_launcher');
+//     // Background handler (must be top-level function)
+//     FirebaseMessaging.onBackgroundMessage(_backgroundHandler);
 
-//     // iOS
-//     var iOSInitialize = const DarwinInitializationSettings();
+//     // Platform-specific initialization
+//     const androidSettings = AndroidInitializationSettings('@mipmap/ic_launcher');
+//     const iosSettings = DarwinInitializationSettings();
+//     const settings = InitializationSettings(android: androidSettings, iOS: iosSettings);
 
-//     // initialization settings
-//     var initializationsSettings = InitializationSettings(
-//       android: androidInitialize,
-//       iOS: iOSInitialize,
-//       macOS: iOSInitialize,
+//     _fln.initialize(
+//       settings,
+//       onDidReceiveNotificationResponse: _onNotificationTapped,
+//       onDidReceiveBackgroundNotificationResponse: _onNotificationTapped,
 //     );
 
-//     FirebaseMessaging.onMessage.listen((RemoteMessage message) {
-//       // app is in foreground (app opened)
-//       handleNotification(message.data);
-//       showNotification(message, flutterLocalNotificationsPlugin, kIsWeb);
+//     // Foreground notifications
+//     FirebaseMessaging.onMessage.listen((message) {
+//       _showNotification(message);
 //     });
 
-//     // initialize
-//     flutterLocalNotificationsPlugin.initialize(
-//       initializationsSettings,
-//       onDidReceiveNotificationResponse:
-//           handleNotification1, // app is in background
-//       onDidReceiveBackgroundNotificationResponse:
-//           handleNotification1, // app is terminated
-//     );
-
-//     FirebaseMessaging.onMessageOpenedApp.listen((RemoteMessage message) {
-//       handleNotification1(
-//         const NotificationResponse(
-//             notificationResponseType:
-//                 NotificationResponseType.selectedNotificationAction),
-//         json: message.data,
-//       );
+//     // App opened from background via notification
+//     FirebaseMessaging.onMessageOpenedApp.listen((message) {
+//       _handleNotification(message.data);
 //     });
 //   }
 
-//   static Future<void> showNotification(RemoteMessage message,
-//       FlutterLocalNotificationsPlugin fln, bool data) async {
-//     String? title;
-//     String? body;
-//     String? orderID;
-//     String? image;
-//     String? type = '';
+//   /// Show local notification when app is in foreground
+//   static Future<void> _showNotification(RemoteMessage message) async {
+//     final title = message.notification?.title ?? message.data['title'] ?? '';
+//     final body = message.notification?.body ?? message.data['body'] ?? '';
+//     final image = _extractImageUrl(message);
 
-//     if (data) {
-//       title = message.data['title'];
-//       body = message.data['body'];
-//       orderID = message.data['order_id'];
-//       image = (message.data['image'] != null &&
-//               message.data['image'].isNotEmpty)
-//           ? message.data['image'].startsWith('http')
-//               ? message.data['image']
-//               : '${AppConstants.BASE_URL}/storage/app/public/notification/${message.data['image']}'
-//           : null;
-//     } else {
-//       title = message.notification!.title;
-//       body = message.notification!.body;
-//       orderID = message.notification!.titleLocKey;
-//       if (Platform.isAndroid) {
-//         image = (message.notification!.android!.imageUrl != null &&
-//                 message.notification!.android!.imageUrl!.isNotEmpty)
-//             ? message.notification!.android!.imageUrl!.startsWith('http')
-//                 ? message.notification!.android!.imageUrl
-//                 : '${AppConstants.BASE_URL}/storage/app/public/notification/${message.notification!.android!.imageUrl}'
-//             : null;
-//       } else if (Platform.isIOS) {
-//         image = (message.notification!.apple!.imageUrl != null &&
-//                 message.notification!.apple!.imageUrl!.isNotEmpty)
-//             ? message.notification!.apple!.imageUrl!.startsWith('http')
-//                 ? message.notification!.apple!.imageUrl
-//                 : '${AppConstants.BASE_URL}/storage/app/public/notification/${message.notification!.apple!.imageUrl}'
-//             : null;
-//       }
-//     }
-
-//     if (message.data['type'] != null) {
-//       type = message.data['type'];
-//     }
-
-//     Map<String, String> payloadData = {
-//       'title': title,
-//       'body': body,
-//       'order_id': orderID,
-//       'image': '$image',
-//       'type': type,
-//     };
-
-//     PayloadModel payload = PayloadModel.fromJson(payloadData);
+//     final payload = NotificationPayload(
+//       title: title,
+//       body: body,
+//       image: image,
+//       type: message.data['type'],
+//       data: message.data,
+//     );
 
 //     if (image != null && image.isNotEmpty) {
 //       try {
-//         await showBigPictureNotificationHiddenLargeIcon(payload, fln);
-//       } catch (e) {
-//         await showBigTextNotification(payload, fln);
+//         await _showImageNotification(payload);
+//         return;
+//       } catch (_) {
+//         // Fall through to text notification
 //       }
-//     } else {
-//       await showBigTextNotification(payload, fln);
 //     }
+//     await _showTextNotification(payload);
 //   }
 
-//   static Future<void> showBigTextNotification(
-//       PayloadModel payload, FlutterLocalNotificationsPlugin fln) async {
-//     final bigTextStyleInformation = BigTextStyleInformation(
-//       payload.body!,
-//       htmlFormatBigText: true,
-//       contentTitle: payload.title,
-//       htmlFormatContentTitle: true,
-//     );
+//   static String? _extractImageUrl(RemoteMessage message) {
+//     // Try data payload first
+//     final dataImage = message.data['image'];
+//     if (dataImage != null && dataImage.toString().isNotEmpty) {
+//       return dataImage.toString().startsWith('http')
+//           ? dataImage
+//           : '${AppConstants.baseUrl}/storage/app/public/notification/$dataImage';
+//     }
 
-//     final androidPlatformChannelSpecifics = AndroidNotificationDetails(
-//       AppConstants.APP_NAME,
-//       AppConstants.APP_NAME,
-//       importance: Importance.max,
-//       styleInformation: bigTextStyleInformation,
-//       priority: Priority.max,
-//       playSound: true,
-//       // sound: const RawResourceAndroidNotificationSound('notification'),
-//     );
-
-//     final platformChannelSpecifics =
-//         NotificationDetails(android: androidPlatformChannelSpecifics);
-
-//     await fln.show(
-//       0,
-//       payload.title,
-//       payload.body,
-//       platformChannelSpecifics,
-//       payload: jsonEncode(payload.toJson()),
-//     );
+//     // Try notification payload
+//     if (Platform.isAndroid) {
+//       return message.notification?.android?.imageUrl;
+//     } else if (Platform.isIOS) {
+//       return message.notification?.apple?.imageUrl;
+//     }
+//     return null;
 //   }
 
-//   static Future<void> showBigPictureNotificationHiddenLargeIcon(
-//       PayloadModel payload, FlutterLocalNotificationsPlugin fln) async {
-//     final String largeIconPath =
-//         await _downloadAndSaveFile(payload.image!, 'largeIcon');
-
-//     final String bigPicturePath =
-//         await _downloadAndSaveFile(payload.image!, 'bigPicture');
-
-//     final bigPictureStyleInformation = BigPictureStyleInformation(
-//       FilePathAndroidBitmap(bigPicturePath),
-//       hideExpandedLargeIcon: true,
-//       contentTitle: payload.title,
-//       htmlFormatContentTitle: true,
-//       summaryText: payload.body,
-//       htmlFormatSummaryText: true,
+//   static Future<void> _showTextNotification(NotificationPayload payload) async {
+//     final details = NotificationDetails(
+//       android: AndroidNotificationDetails(
+//         AppConstants.appName,
+//         AppConstants.appName,
+//         importance: Importance.max,
+//         priority: Priority.max,
+//         styleInformation: BigTextStyleInformation(
+//           payload.body,
+//           htmlFormatBigText: true,
+//           contentTitle: payload.title,
+//           htmlFormatContentTitle: true,
+//         ),
+//       ),
+//       iOS: const DarwinNotificationDetails(),
 //     );
 
-//     final androidPlatformChannelSpecifics = AndroidNotificationDetails(
-//       AppConstants.APP_NAME,
-//       AppConstants.APP_NAME,
-//       largeIcon: FilePathAndroidBitmap(largeIconPath),
-//       priority: Priority.max,
-//       playSound: true,
-//       styleInformation: bigPictureStyleInformation,
-//       importance: Importance.max,
-//       // sound: const RawResourceAndroidNotificationSound('notification'),
-//     );
-//     final platformChannelSpecifics = NotificationDetails(
-//       android: androidPlatformChannelSpecifics,
-//     );
-
-//     await fln.show(0, payload.title, payload.body, platformChannelSpecifics,
-//         payload: jsonEncode(payload.toJson()));
+//     await _fln.show(0, payload.title, payload.body, details, payload: payload.toRawJson());
 //   }
 
-//   static Future<String> _downloadAndSaveFile(
-//       String url, String fileName) async {
-//     final Directory directory = await getApplicationDocumentsDirectory();
-//     final String filePath = '${directory.path}/$fileName';
-//     final http.Response response = await http.get(Uri.parse(url));
-//     final File file = File(filePath);
+//   static Future<void> _showImageNotification(NotificationPayload payload) async {
+//     final largeIconPath = await _downloadAndSaveFile(payload.image!, 'largeIcon');
+//     final bigPicturePath = await _downloadAndSaveFile(payload.image!, 'bigPicture');
+
+//     final details = NotificationDetails(
+//       android: AndroidNotificationDetails(
+//         AppConstants.appName,
+//         AppConstants.appName,
+//         importance: Importance.max,
+//         priority: Priority.max,
+//         largeIcon: FilePathAndroidBitmap(largeIconPath),
+//         styleInformation: BigPictureStyleInformation(
+//           FilePathAndroidBitmap(bigPicturePath),
+//           hideExpandedLargeIcon: true,
+//           contentTitle: payload.title,
+//           htmlFormatContentTitle: true,
+//           summaryText: payload.body,
+//           htmlFormatSummaryText: true,
+//         ),
+//       ),
+//       iOS: const DarwinNotificationDetails(),
+//     );
+
+//     await _fln.show(0, payload.title, payload.body, details, payload: payload.toRawJson());
+//   }
+
+//   static Future<String> _downloadAndSaveFile(String url, String fileName) async {
+//     final directory = await getApplicationDocumentsDirectory();
+//     final filePath = '${directory.path}/$fileName';
+//     final response = await http.get(Uri.parse(url));
+//     final file = File(filePath);
 //     await file.writeAsBytes(response.bodyBytes);
 //     return filePath;
 //   }
 
-//   static Future<dynamic> myBackgroundMessageHandler(
-//       RemoteMessage message) async {
-//     debugPrint(
-//         "onBackground: ${message.notification!.title}/${message.notification!.body}/${message.notification!.titleLocKey}");
+//   @pragma('vm:entry-point')
+//   static Future<void> _backgroundHandler(RemoteMessage message) async {
+//     debugPrint('Background notification: ${message.notification?.title}');
 //   }
 
-//   static void handleNotification(Map<String, dynamic> data) {
-//     // handle logic here
+//   static void _onNotificationTapped(NotificationResponse response) {
+//     if (response.payload == null) return;
+//     final payload = NotificationPayload.fromRawJson(response.payload!);
+//     _handleNotification(payload.data ?? {});
 //   }
 
-//   static void handleNotification1(NotificationResponse data,
-//       {Map<String, dynamic>? json}) {
-//     // handle logic here
+//   /// TODO: Implement your navigation logic here
+//   static void _handleNotification(Map<String, dynamic> data) {
+//     debugPrint('Notification tapped: $data');
+//     // Example:
+//     // final type = data['type'];
+//     // if (type == 'order') {
+//     //   AppNav.push(OrderDetailScreen(orderId: data['order_id']));
+//     // }
 //   }
 // }
 
-// class PayloadModel {
-//   PayloadModel({
-//     this.title,
-//     this.body,
-//     this.orderId,
+// /// Notification payload model
+// class NotificationPayload {
+//   final String title;
+//   final String body;
+//   final String? image;
+//   final String? type;
+//   final Map<String, dynamic>? data;
+
+//   const NotificationPayload({
+//     required this.title,
+//     required this.body,
 //     this.image,
 //     this.type,
+//     this.data,
 //   });
 
-//   String? title;
-//   String? body;
-//   String? orderId;
-//   String? image;
-//   String? type;
+//   factory NotificationPayload.fromRawJson(String str) => NotificationPayload.fromJson(jsonDecode(str));
 
-//   factory PayloadModel.fromRawJson(String str) =>
-//       PayloadModel.fromJson(json.decode(str));
+//   String toRawJson() => jsonEncode(toJson());
 
-//   String toRawJson() => json.encode(toJson());
-
-//   factory PayloadModel.fromJson(Map<String, dynamic> json) => PayloadModel(
-//         title: json["title"],
-//         body: json["body"],
-//         orderId: json["order_id"],
-//         image: json["image"],
-//         type: json["type"],
+//   factory NotificationPayload.fromJson(Map<String, dynamic> json) => NotificationPayload(
+//         title: json['title'] ?? '',
+//         body: json['body'] ?? '',
+//         image: json['image'],
+//         type: json['type'],
+//         data: json['data'] != null ? Map<String, dynamic>.from(json['data']) : null,
 //       );
 
 //   Map<String, dynamic> toJson() => {
-//         "title": title,
-//         "body": body,
-//         "order_id": orderId,
-//         "image": image,
-//         "type": type,
+//         'title': title,
+//         'body': body,
+//         'image': image,
+//         'type': type,
+//         'data': data,
 //       };
 // }

@@ -5,9 +5,9 @@ import 'package:startup_repo/core/design/colors.dart';
 
 OutlinedButtonThemeData get outlinedButtonThemeData => OutlinedButtonThemeData(
       style: ButtonStyle(
-        elevation: WidgetStateProperty.all(0), // No shadow
-        minimumSize: WidgetStateProperty.all(Size(double.infinity, 50.sp)), // Full width
-        shape: WidgetStateProperty.all(AppRadius.circular16Shape),
-        textStyle: WidgetStatePropertyAll(TextStyle(fontSize: 14.sp, color: primaryColor)),
+        elevation: WidgetStateProperty.all(0),
+        minimumSize: WidgetStateProperty.all(Size(double.infinity, 50.sp)),
+        shape: WidgetStateProperty.all(AppRadius.r16Shape),
+        textStyle: WidgetStatePropertyAll(TextStyle(fontSize: 14.sp, color: AppColors.primary)),
       ),
     );

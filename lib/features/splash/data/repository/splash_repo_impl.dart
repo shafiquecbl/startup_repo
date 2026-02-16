@@ -1,4 +1,5 @@
 import '../../../../core/api/api_client.dart';
+import '../../../../core/api/api_result.dart';
 import '../../../../imports.dart';
 import 'splash_repo.dart';
 
@@ -8,7 +9,7 @@ class SplashRepoImpl implements SplashRepo {
   SplashRepoImpl({required this.prefs, required this.apiClient});
 
   @override
-  Future<Response?> getConfig() async => await apiClient.get(AppConstants.configUrl);
+  Future<ApiResult<Response>> getConfig() async => await apiClient.get(AppConstants.configUrl);
 
   @override
   Future<bool> saveFirstTime() async => await prefs.setBool(SharedKeys.onBoardingSkip, false);

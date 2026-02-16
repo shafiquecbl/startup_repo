@@ -1,5 +1,5 @@
 import 'dart:convert';
-import 'package:http/http.dart';
+import 'package:startup_repo/core/api/api_result.dart';
 import '../../data/model/config_model.dart';
 import '../../data/repository/splash_repo.dart';
 import 'splash_service.dart';
@@ -9,22 +9,25 @@ class SplashServiceImpl implements SplashService {
   SplashServiceImpl({required this.splashRepo});
 
   @override
-  Future<ConfigModel> getConfig() async {
-    Response? response = await splashRepo.getConfig();
-    if (response != null) {
-      return ConfigModel.fromJson(jsonDecode(response.body));
-    } else {
-      throw Exception("Failed to load settings");
+  Future<ApiResult<ConfigModel>> getConfig() async {
+    final result = await splashRepo.getConfig();
+    return switch (result) {
+      Success(data: final response) => _parseConfig(response.body),
+      Failure(:final message, :final statusCode) => Failure(message, statusCode: statusCode),
+    };
+  }
+
+  ApiResult<ConfigModel> _parseConfig(String body) {
+    try {
+      return Success(ConfigModel.fromJson(jsonDecode(body)));
+    } catch (_) {
+      return const Failure('Failed to parse config');
     }
   }
 
   @override
-  Future<bool> saveFirstTime() {
-    return splashRepo.saveFirstTime();
-  }
+  Future<bool> saveFirstTime() => splashRepo.saveFirstTime();
 
   @override
-  bool getFirstTime() {
-    return splashRepo.getFirstTime();
-  }
+  bool getFirstTime() => splashRepo.getFirstTime();
 }

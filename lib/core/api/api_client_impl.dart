@@ -1,11 +1,11 @@
 import 'dart:convert';
 import 'dart:io';
-import 'dart:typed_data';
-import 'package:http/http.dart' as http;
 import 'package:startup_repo/imports.dart';
-import '../helper/connectivity.dart';
-import 'error.dart';
-import 'api_client.dart';
+import 'package:startup_repo/features/language/data/model/language.dart';
+import 'package:startup_repo/core/helper/connectivity.dart';
+import 'package:startup_repo/core/api/api_result.dart';
+import 'package:startup_repo/core/api/api_client.dart';
+import 'package:startup_repo/core/api/error.dart';
 
 class ApiClientImpl extends GetxService implements ApiClient {
   final SharedPreferences prefs;
@@ -17,8 +17,8 @@ class ApiClientImpl extends GetxService implements ApiClient {
     updateHeader(token ?? '', prefs.getString(SharedKeys.languageCode));
   }
 
-  http.Client? _client;
-  Map<String, String> _mainHeaders = {"Content-Type": "application/json", 'Accept': 'application/json'};
+  Client? _client;
+  Map<String, String> _mainHeaders = {'Content-Type': 'application/json', 'Accept': 'application/json'};
 
   @override
   String? token;
@@ -40,21 +40,23 @@ class ApiClientImpl extends GetxService implements ApiClient {
     debugPrint('====> API request canceled');
   }
 
-  Future<http.Response?> _request(
+  Future<ApiResult<Response>> _request(
     String method,
     String uri, {
     Map<String, dynamic>? body,
     Map<String, String>? headers,
     Map<String, String>? queryParams,
   }) async {
-    bool online = await ConnectivityService.checkAndNotify();
-    if (!online) return null;
-    
-    Uri url = Uri.parse('$baseUrl$uri').replace(queryParameters: queryParams);
+    if (!await ConnectivityService.isConnected()) {
+      ConnectivityService.showOfflineDialog();
+      return const Failure('No internet connection');
+    }
+
+    final Uri url = Uri.parse('$baseUrl$uri').replace(queryParameters: queryParams);
     try {
       _printData(url.toString(), body: body);
-      _client = http.Client();
-      http.Response response;
+      _client = Client();
+      Response response;
 
       final requestHeaders = {..._mainHeaders, if (headers != null) ...headers};
       switch (method) {
@@ -71,76 +73,79 @@ class ApiClientImpl extends GetxService implements ApiClient {
           response = await _client!.delete(url, headers: requestHeaders);
           break;
         default:
-          throw UnsupportedError("HTTP method not supported");
+          throw UnsupportedError('HTTP method not supported');
       }
-      return await _handleResponse(response);
+      return _handleResponse(response);
     } catch (e) {
-      _socketException(e);
-      return null;
+      return _handleException<Response>(e);
     } finally {
       _client = null;
     }
   }
 
   @override
-  Future<http.Response?> get(String uri, {Map<String, String>? headers, Map<String, String>? queryParams}) =>
+  Future<ApiResult<Response>> get(
+    String uri, {
+    Map<String, String>? headers,
+    Map<String, String>? queryParams,
+  }) =>
       _request('GET', uri, headers: headers, queryParams: queryParams);
 
   @override
-  Future<http.Response?> post(String uri, Map<String, dynamic> body, {Map<String, String>? headers}) =>
+  Future<ApiResult<Response>> post(
+    String uri,
+    Map<String, dynamic> body, {
+    Map<String, String>? headers,
+  }) =>
       _request('POST', uri, body: body, headers: headers);
 
   @override
-  Future<http.Response?> put(String uri, Map<String, dynamic> body, {Map<String, String>? headers}) =>
+  Future<ApiResult<Response>> put(
+    String uri,
+    Map<String, dynamic> body, {
+    Map<String, String>? headers,
+  }) =>
       _request('PUT', uri, body: body, headers: headers);
 
   @override
-  Future<http.Response?> delete(String uri, {Map<String, String>? headers}) =>
+  Future<ApiResult<Response>> delete(
+    String uri, {
+    Map<String, String>? headers,
+  }) =>
       _request('DELETE', uri, headers: headers);
-
-  @override
-  Future<Uint8List?> downloadImage(String uri) async {
-    try {
-      _printData(uri);
-      final response =
-          await http.get(Uri.parse(uri), headers: _mainHeaders).timeout(Duration(seconds: timeoutInSeconds));
-      return response.statusCode == 200
-          ? Uint8List.fromList(response.bodyBytes)
-          : _handleError(jsonDecode(response.body));
-    } catch (e) {
-      _socketException(e);
-      return null;
-    }
-  }
 
   void _printData(String url, {Map<String, dynamic>? body}) {
     debugPrint('====> API Call: $url, ====> Headers: $_mainHeaders');
     if (body != null) debugPrint('====> Body: $body');
   }
 
-  Future<http.Response?> _handleResponse(http.Response response) async {
-    hideLoading();
-    return response.statusCode == 200 ? response : _handleError(jsonDecode(response.body));
-  }
-
-  dynamic _handleError(Map<String, dynamic> body) {
-    if (body.containsKey('message')) {
-      String message = body['message'];
-      showToast(message);
-      if (message == "Unauthenticated") {
-        // logout
-      }
+  ApiResult<Response> _handleResponse(Response response) {
+    if (response.statusCode >= 200 && response.statusCode < 300) {
+      return Success(response);
     }
-    ErrorResponse response = ErrorResponse.fromJson(body);
-    showToast(response.errors.first.message);
-    return null;
+    return _handleError(response);
   }
 
-  void _socketException(Object e) {
+  Failure<Response> _handleError(Response response) {
+    final String message = ApiErrorParser.parse(response.body) ?? 'Something went wrong';
+    AppDialog.showToast(message);
+
+    if (message == 'Unauthenticated') {
+      // TODO: logout
+    }
+
+    return Failure(message, statusCode: response.statusCode);
+  }
+
+  Failure<T> _handleException<T>(Object e) {
     if (e is SocketException) {
-      showToast('Please check your internet connection');
+      const String message = 'Please check your internet connection';
+      AppDialog.showToast(message);
+      return const Failure(message);
     } else {
-      showToast('Something went wrong');
+      const String message = 'Something went wrong';
+      AppDialog.showToast(message);
+      return Failure(message);
     }
   }
 }

@@ -78,7 +78,7 @@ class CustomTextField extends StatelessWidget {
 }
 
 class CustomDropDown extends StatelessWidget {
-  final List<DropdownMenuItem> items;
+  final List<DropdownMenuItem<dynamic>> items;
   final Function(dynamic) onChanged;
   final String? labelText;
   final String? hintText;

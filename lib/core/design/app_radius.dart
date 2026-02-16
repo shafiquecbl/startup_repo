@@ -1,42 +1,48 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 
-/// A utility class to standardize border radius throughout the app
+/// Standardized border radius scale for the app.
+///
+/// A tight scale with 4 steps that cover 95% of UI shapes:
+///
+/// | Token  | Value | Usage                              |
+/// |--------|-------|------------------------------------|
+/// | `r4`   | 4     | Subtle rounding, tags              |
+/// | `r8`   | 8     | Chips, small buttons               |
+/// | `r16`  | 16    | Cards, inputs, buttons             |
+/// | `r24`  | 24    | Bottom sheets, modals              |
+/// | `r100` | 100   | Pills, circular avatars            |
+///
+/// **Shape variants** (`r8Shape`, `r16Shape`, `r24Shape`) return
+/// `RoundedRectangleBorder` for use in `ThemeData`, `ButtonStyle`, etc.
+///
+/// **Partial corners** (`top()`, `bottom()`) apply radius to specific sides.
+///
+/// Example:
+/// ```dart
+/// Container(decoration: BoxDecoration(borderRadius: AppRadius.r16))
+/// ElevatedButton(style: ButtonStyle(shape: AppRadius.r16Shape))
+/// BottomSheet(shape: RoundedRectangleBorder(borderRadius: AppRadius.top(16)))
+/// ```
 class AppRadius {
-  // Circular border radius values
-  static double get radius4 => 4.r;
-  static double get radius8 => 8.r;
-  static double get radius12 => 12.r;
-  static double get radius16 => 16.r;
-  static double get radius24 => 24.r;
-  static double get radius100 => 100.r;
+  AppRadius._();
 
-  // BorderRadius objects (all corners equal)
-  static BorderRadius get circular4 => BorderRadius.circular(radius4);
-  static BorderRadius get circular8 => BorderRadius.circular(radius8);
-  static BorderRadius get circular12 => BorderRadius.circular(radius12);
-  static BorderRadius get circular16 => BorderRadius.circular(radius16);
-  static BorderRadius get circular24 => BorderRadius.circular(radius24);
-  static BorderRadius get circular100 => BorderRadius.circular(radius100);
+  // BorderRadius (all corners)
+  static BorderRadius get r4 => BorderRadius.circular(4.sp);
+  static BorderRadius get r8 => BorderRadius.circular(8.sp);
+  static BorderRadius get r16 => BorderRadius.circular(16.sp);
+  static BorderRadius get r24 => BorderRadius.circular(24.sp);
+  static BorderRadius get r100 => BorderRadius.circular(100.sp);
 
-  // shape
-  static get circular4Shape => RoundedRectangleBorder(borderRadius: circular4);
-  static get circular8Shape => RoundedRectangleBorder(borderRadius: circular8);
-  static get circular12Shape => RoundedRectangleBorder(borderRadius: circular12);
-  static get circular16Shape => RoundedRectangleBorder(borderRadius: circular16);
-  static get circular24Shape => RoundedRectangleBorder(borderRadius: circular24);
-  static get circular100Shape => RoundedRectangleBorder(borderRadius: circular100);
+  // RoundedRectangleBorder shapes (for ThemeData, ButtonStyle, etc.)
+  static RoundedRectangleBorder get r8Shape => RoundedRectangleBorder(borderRadius: r8);
+  static RoundedRectangleBorder get r16Shape => RoundedRectangleBorder(borderRadius: r16);
+  static RoundedRectangleBorder get r24Shape => RoundedRectangleBorder(borderRadius: r24);
 
-  // Specific corners
-  static BorderRadius topLeft(double radius) => BorderRadius.only(topLeft: Radius.circular(radius.r));
-  static BorderRadius topRight(double radius) => BorderRadius.only(topRight: Radius.circular(radius.r));
-  static BorderRadius bottomLeft(double radius) => BorderRadius.only(bottomLeft: Radius.circular(radius.r));
-  static BorderRadius bottomRight(double radius) => BorderRadius.only(bottomRight: Radius.circular(radius.r));
-
-  // Common combinations
+  // Partial corners
   static BorderRadius top(double radius) =>
-      BorderRadius.only(topLeft: Radius.circular(radius), topRight: Radius.circular(radius));
+      BorderRadius.only(topLeft: Radius.circular(radius.sp), topRight: Radius.circular(radius.sp));
 
   static BorderRadius bottom(double radius) =>
-      BorderRadius.only(bottomLeft: Radius.circular(radius), bottomRight: Radius.circular(radius));
+      BorderRadius.only(bottomLeft: Radius.circular(radius.sp), bottomRight: Radius.circular(radius.sp));
 }

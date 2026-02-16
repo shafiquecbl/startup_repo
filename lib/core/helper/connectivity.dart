@@ -18,8 +18,8 @@ class ConnectivityService {
       builder: (_) => Material(
         child: Container(
           height: 100.sp,
-          padding: AppPadding.padding16.copyWith(top: 32),
-          decoration: const BoxDecoration(color: primaryColor),
+          padding: AppPadding.p16.copyWith(top: 32),
+          decoration: const BoxDecoration(color: AppColors.primary),
           child: Row(
             children: [
               const Icon(Icons.wifi_off, color: Colors.white),

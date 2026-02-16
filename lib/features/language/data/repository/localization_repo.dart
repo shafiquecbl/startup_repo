@@ -1,4 +1,5 @@
 import '../../../../imports.dart';
+import '../../../language/data/model/language.dart';
 import 'localization_repo_interface.dart';
 
 class LocalizationRepoImpl implements LocalizationRepo {

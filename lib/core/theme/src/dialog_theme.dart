@@ -1,9 +1,7 @@
 import 'package:startup_repo/imports.dart';
 
-DialogTheme get dialogThemeLight => DialogTheme(
-      shape: AppRadius.circular16Shape,
-      backgroundColor: backgroundColorLight,
-      insetPadding: AppPadding.padding32,
+DialogThemeData dialogTheme(AppColors colors) => DialogThemeData(
+      shape: AppRadius.r16Shape,
+      backgroundColor: colors.background,
+      insetPadding: AppPadding.p32,
     );
-
-DialogTheme get dialogThemeDark => dialogThemeLight.copyWith(backgroundColor: backgroundColorDark);

@@ -1,4 +1,6 @@
+import 'package:flutter/material.dart';
+
 abstract class ThemeRepo {
-  String loadCurrentTheme();
-  Future<bool> saveThemeMode(String themeMode);
+  ThemeMode loadCurrentTheme();
+  Future<bool> saveThemeMode(ThemeMode themeMode);
 }

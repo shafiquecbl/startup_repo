@@ -1,6 +1,6 @@
 import '../../imports.dart';
 
-Future showConfirmationDialog({
+Future<dynamic> showConfirmationDialog({
   required String title,
   required String subtitle,
   required String actionText,
@@ -32,7 +32,7 @@ class ConfirmationDialog extends StatelessWidget {
   Widget build(BuildContext context) {
     return Dialog(
       child: Padding(
-        padding: AppPadding.padding16,
+        padding: AppPadding.p16,
         child: Column(
           mainAxisSize: MainAxisSize.min,
           children: [
@@ -49,7 +49,7 @@ class ConfirmationDialog extends StatelessWidget {
                 Expanded(
                   child: PrimaryOutlineButton(
                     text: 'cancel'.tr,
-                    onPressed: pop,
+                    onPressed: Get.back,
                     textColor: context.textTheme.bodyLarge!.color,
                   ),
                 ),

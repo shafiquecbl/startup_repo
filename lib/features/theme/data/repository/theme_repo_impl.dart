@@ -6,12 +6,13 @@ class ThemeRepoImpl implements ThemeRepo {
   ThemeRepoImpl({required this.prefs});
 
   @override
-  String loadCurrentTheme() {
-    return prefs.getString(SharedKeys.theme) ?? 'system';
+  ThemeMode loadCurrentTheme() {
+    final value = prefs.getString(SharedKeys.theme) ?? 'system';
+    return ThemeMode.values.byName(value);
   }
 
   @override
-  Future<bool> saveThemeMode(String themeMode) async {
-    return await prefs.setString(SharedKeys.theme, themeMode);
+  Future<bool> saveThemeMode(ThemeMode themeMode) async {
+    return await prefs.setString(SharedKeys.theme, themeMode.name);
   }
 }

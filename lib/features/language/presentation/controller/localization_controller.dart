@@ -1,11 +1,11 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import '../../data/model/language.dart';
-import '../../domain/service/localization_service.dart';
+import '../../data/repository/localization_repo_interface.dart';
 
 class LocalizationController extends GetxController implements GetxService {
-  final LocalizationService localizationService;
-  LocalizationController({required this.localizationService}) {
+  final LocalizationRepo localizationRepo;
+  LocalizationController({required this.localizationRepo}) {
     loadCurrentLanguage();
   }
 
@@ -24,10 +24,10 @@ class LocalizationController extends GetxController implements GetxService {
   List<LanguageModel> get languages => _languages;
   int get selectedIndex => _selectedIndex;
 
-  void loadCurrentLanguage() async {
-    Locale locale = localizationService.loadCurrentLanguage();
+  void loadCurrentLanguage() {
+    final Locale locale = localizationRepo.loadCurrentLanguage();
     setLanguage(locale);
-    _languages = List.from(languages);
+    _languages = List.from(appLanguages);
     update();
   }
 
@@ -39,7 +39,7 @@ class LocalizationController extends GetxController implements GetxService {
   }
 
   Future<void> saveLanguage(Locale locale) async {
-    await localizationService.saveLanguage(locale);
+    await localizationRepo.saveLanguage(locale);
   }
 
   void setSelectIndex(int index) {
@@ -49,10 +49,10 @@ class LocalizationController extends GetxController implements GetxService {
 
   void searchLanguage(String query) {
     if (query.isEmpty) {
-      _languages = List.from(languages);
+      _languages = List.from(appLanguages);
     } else {
       _selectedIndex = -1;
-      _languages = languages
+      _languages = appLanguages
           .where((language) => language.languageName.toLowerCase().contains(query.toLowerCase()))
           .toList();
     }
