@@ -161,7 +161,8 @@ lib/
 │       ├── confirmation_dialog.dart  # Confirmation dialog
 │       ├── confirmation_sheet.dart   # Bottom sheet confirmation
 │       ├── loading.dart              # Loading indicators
-│       ├── network_image.dart        # Cached network image
+│       ├── app_image.dart             # Unified image (network + asset)
+│       ├── app_state_widgets.dart      # Empty/Error state widgets
 │       ├── primary_button.dart       # Primary & outline buttons
 │       ├── shimmer.dart              # Shimmer effect
 │       ├── snackbar.dart             # Toast/loading helpers
@@ -554,24 +555,35 @@ class ConnectivityService {
 
 **Usage:** Automatically called by `ApiClientImpl` before each request.
 
-#### **navigation.dart** - Navigation Helpers
-```dart
-// Navigate to screen
-Future<dynamic> launchScreen(Widget child, {
-  bool pushAndRemove = false,  // Clear stack
-  bool replace = false,        // Replace current
-}) async { ... }
+#### **navigation.dart** — Constructor-Based Navigation
 
-// Go back
-void pop() => Get.back();
+We use **constructor-based navigation** — parameters are passed directly via
+screen constructors for compile-time type safety:
+
+```dart
+class AppNav {
+  static Future<T?> push<T>(Widget child) async { ... }
+  static Future<T?> pushReplacement<T>(Widget child) async { ... }
+  static Future<T?> pushAndRemoveUntil<T>(Widget child) async { ... }
+}
 ```
 
 **Usage:**
 ```dart
-launchScreen(HomeScreen());
-launchScreen(LoginScreen(), pushAndRemove: true);
-pop();
+AppNav.push(ProfileScreen(userId: '123'));      // type-safe params
+AppNav.pushReplacement(const HomeScreen());     // const when no params
+AppNav.pushAndRemoveUntil(const LoginScreen()); // clear stack
+Get.back();                                     // pop
 ```
+
+**Why constructor-based (not named routes):**
+
+| | Constructor-based (ours) | Named routes |
+|---|---|---|
+| Type safety | ✅ Compiler catches missing params | ❌ Runtime errors |
+| Refactoring | ✅ Rename → all callers update | ❌ String-based |
+| Discoverability | ✅ IDE shows params | ❌ Must remember keys |
+| const support | ✅ Works | ❌ Not possible |
 
 ---
 
@@ -785,14 +797,15 @@ class AppDialog {
 }
 ```
 
-#### **network_image.dart**
+#### **app_image.dart**
 ```dart
-PrimaryNetworkImage(
-  url: 'https://example.com/image.jpg',
-  fit: BoxFit.cover,
-)
+// Network image with border radius
+AppImage(url: 'https://example.com/image.jpg', borderRadius: AppRadius.r16)
+
+// Asset image
+AppImage(asset: Images.logo, width: 120.sp)
 ```
-**Features:** Cached, shimmer placeholder, error placeholder
+**Features:** Network + asset, cached, shimmer loading, error fallback, built-in clipping
 
 #### **shimmer.dart**
 ```dart
@@ -1782,10 +1795,8 @@ const Loading(size: 27)
 
 #### Cached Network Image
 ```dart
-PrimaryNetworkImage(
-  url: 'https://example.com/image.jpg',
-  fit: BoxFit.cover,
-)
+AppImage(url: 'https://example.com/image.jpg', borderRadius: AppRadius.r16)
+AppImage(asset: Images.logo, width: 120.sp)
 ```
 **Features:**
 - Automatic caching
@@ -2270,33 +2281,61 @@ if (result case Success(data: final response)) {
 - Keep files under 300 lines
 - Use meaningful names (`user_profile_screen.dart`, not `screen1.dart`)
 - Group related files in folders
+- **⚠️ ALWAYS use class-based widgets** — never function/method widgets
+
+```dart
+// ❌ WRONG — Function widget
+Widget _buildHeader() => Container(...);
+
+// ✅ CORRECT — Class-based widget
+class HeaderWidget extends StatelessWidget {
+  const HeaderWidget({super.key});
+  @override
+  Widget build(BuildContext context) => Container(...);
+}
+```
 
 ### 4. Design System
 - Always use design system constants (`AppPadding`, `AppRadius`, `context.font16`)
 - Avoid hard-coded values like `padding: EdgeInsets.all(16)` → use `AppPadding.p16`
 - Use `AppColors.primary` for brand colors, `colors.xxx` for theme-varying colors via `AppColors` instances
+- **Token snapping:** If a design specifies a value outside the token scale (e.g. 12px padding), snap to the nearest token (`p8` or `p16`). Never create one-off tokens.
 
-### 5. Error Handling
+### 5. Design-First Workflow
+When building multiple screens or a new feature set:
+1. **Audit first** — Study the full design before writing any screen code
+2. **Identify shared patterns** — Cards, list tiles, headers, badges, empty states
+3. **Build shared widgets first** — Before any screen code
+4. **Then assemble screens** — As compositions of shared + feature-specific widgets
+
+**Widget placement:**
+- Used in ≥2 features → `lib/core/widgets/`
+- Used in 1 feature only → `lib/features/<name>/presentation/view/widgets/`
+
+**Widget naming:** Name by what it **is**, not where it's **used** (`StatusBadge`, not `HomeScreenBadge`)
+
+### 6. Error Handling
 - Always handle null responses from API
 - Show user-friendly error messages
 - Use try-catch in async operations
 - Log errors for debugging (`debugPrint`)
 
-### 6. Navigation
-- Use `launchScreen()` helper for consistent animations
-- Use `pushAndRemove: true` for logout/login flows
-- Always import screen widgets, not route strings
+### 7. Navigation
+- Use `AppNav` for all forward navigation (never `Get.to()` directly)
+- Pass data via **constructor parameters** (never `Get.arguments`)
+- Use `const` when screen has no parameters
+- Never create route tables or named routes (unless web is required)
 
-### 7. Localization
+### 8. Localization
 - Use `.tr` for all user-facing strings
 - Add translations to all language files
 - Test with multiple languages
 - Use descriptive keys (`'email_required'` not `'er1'`)
 
-### 8. Performance
+### 9. Performance
 - Use `const` constructors where possible
 - Avoid rebuilding entire screens (use `GetBuilder` on specific widgets)
-- Cache network images (already handled by `PrimaryNetworkImage`)
+- Cache network images (already handled by `AppImage`)
 - Dispose controllers properly (automatic with GetX bindings)
 
 ---

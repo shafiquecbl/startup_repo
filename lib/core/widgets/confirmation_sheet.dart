@@ -1,32 +1,29 @@
 import '../../imports.dart';
 
-Future<dynamic> showConfirmationSheet({
-  required String title,
-  required String subtitle,
-  required String actionText,
-  required Function() onAccept,
-}) {
-  return showModalBottomSheet(
-    context: Get.context!,
-    builder: (context) => ConfirmationSheet(
-      title: title,
-      subtitle: subtitle,
-      actionText: actionText,
-      onAccept: onAccept,
-    ),
-  );
-}
-
 class ConfirmationSheet extends StatelessWidget {
   final String title, subtitle, actionText;
-  final Function() onAccept;
-  const ConfirmationSheet({
+  final VoidCallback onAccept;
+  const ConfirmationSheet._({
     required this.title,
     required this.subtitle,
     required this.actionText,
     required this.onAccept,
-    super.key,
   });
+
+  /// Shows a confirmation bottom sheet with title, subtitle, and action buttons.
+  /// Uses the themed `showModalBottomSheet` — shape comes from `BottomSheetThemeData`.
+  static Future<T?> show<T>({
+    required String title,
+    required String subtitle,
+    required String actionText,
+    required VoidCallback onAccept,
+  }) {
+    return showModalBottomSheet<T>(
+      context: Get.context!,
+      builder: (_) =>
+          ConfirmationSheet._(title: title, subtitle: subtitle, actionText: actionText, onAccept: onAccept),
+    );
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -40,20 +37,13 @@ class ConfirmationSheet extends StatelessWidget {
             child: Container(
               width: 40,
               height: 5,
-              decoration: BoxDecoration(
-                color: Theme.of(context).dividerColor,
-                borderRadius: AppRadius.r4,
-              ),
+              decoration: BoxDecoration(color: Theme.of(context).dividerColor, borderRadius: AppRadius.r4),
             ),
           ),
           SizedBox(height: 16.sp),
           Text(title.tr, style: context.font16.copyWith(fontWeight: FontWeight.w700)),
           SizedBox(height: 16.sp),
-          Text(
-            subtitle.tr,
-            textAlign: TextAlign.center,
-            style: Theme.of(context).textTheme.bodyMedium,
-          ),
+          Text(subtitle.tr, textAlign: TextAlign.center, style: Theme.of(context).textTheme.bodyMedium),
           SizedBox(height: 24.sp),
           Row(
             mainAxisAlignment: MainAxisAlignment.end,
@@ -62,7 +52,9 @@ class ConfirmationSheet extends StatelessWidget {
                 child: PrimaryOutlineButton(text: 'cancel'.tr, onPressed: Get.back),
               ),
               SizedBox(width: 16.sp),
-              Expanded(child: PrimaryButton(text: actionText, onPressed: onAccept)),
+              Expanded(
+                child: PrimaryButton(text: actionText, onPressed: onAccept),
+              ),
             ],
           ),
         ],

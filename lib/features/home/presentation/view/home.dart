@@ -34,7 +34,7 @@ class HomeScreen extends StatelessWidget {
                   text: 'Outline Button',
                   icon: Icon(Iconsax.video, size: 16.sp, color: Theme.of(context).primaryColor),
                   onPressed: () {
-                    showConfirmationSheet(
+                    ConfirmationSheet.show(
                       title: 'Are you sure?',
                       subtitle: 'This action cannot be undone.',
                       actionText: 'Yes',
@@ -49,7 +49,7 @@ class HomeScreen extends StatelessWidget {
                   text: 'Primary Button',
                   icon: Icon(Iconsax.video, size: 16.sp, color: Colors.white),
                   onPressed: () {
-                    showConfirmationDialog(
+                    ConfirmationDialog.show(
                       title: 'Are you sure?',
                       subtitle: 'This action cannot be undone.',
                       actionText: 'Yes',
@@ -61,49 +61,42 @@ class HomeScreen extends StatelessWidget {
             ],
           ),
           SizedBox(height: 32.sp),
-          GetBuilder<ThemeController>(builder: (con) {
-            return Row(
-              mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-              children: [
-                ThemeModeWidget(
-                  text: 'system',
-                  themeMode: ThemeMode.system,
-                  selected: con.themeMode == ThemeMode.system,
-                ),
-                ThemeModeWidget(
-                  text: 'light',
-                  themeMode: ThemeMode.light,
-                  selected: con.themeMode == ThemeMode.light,
-                ),
-                ThemeModeWidget(
-                  text: 'dark',
-                  themeMode: ThemeMode.dark,
-                  selected: con.themeMode == ThemeMode.dark,
-                ),
-              ],
-            );
-          }),
+          GetBuilder<ThemeController>(
+            builder: (con) {
+              return Row(
+                mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                children: [
+                  ThemeModeWidget(
+                    text: 'system',
+                    themeMode: ThemeMode.system,
+                    selected: con.themeMode == ThemeMode.system,
+                  ),
+                  ThemeModeWidget(
+                    text: 'light',
+                    themeMode: ThemeMode.light,
+                    selected: con.themeMode == ThemeMode.light,
+                  ),
+                  ThemeModeWidget(
+                    text: 'dark',
+                    themeMode: ThemeMode.dark,
+                    selected: con.themeMode == ThemeMode.dark,
+                  ),
+                ],
+              );
+            },
+          ),
           SizedBox(height: 32.sp),
           const CustomTextField(hintText: 'Enter text', prefixIcon: Iconsax.search_normal),
           SizedBox(height: 16.sp),
           CustomDropDown(
             hintText: 'Dropdown',
             items: const [
-              DropdownMenuItem(
-                value: 'Item 1',
-                child: Text('Item 1'),
-              ),
-              DropdownMenuItem(
-                value: 'Item 2',
-                child: Text('Item 2'),
-              ),
-              DropdownMenuItem(
-                value: 'Item 3',
-                child: Text('Item 3'),
-              ),
+              DropdownMenuItem(value: 'Item 1', child: Text('Item 1')),
+              DropdownMenuItem(value: 'Item 2', child: Text('Item 2')),
+              DropdownMenuItem(value: 'Item 3', child: Text('Item 3')),
             ],
             onChanged: (value) {},
-          )
+          ),
         ],
       ),
     );

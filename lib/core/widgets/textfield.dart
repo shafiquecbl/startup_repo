@@ -15,23 +15,26 @@ class CustomTextField extends StatelessWidget {
   final TextInputType? keyboardType;
   final TextInputAction? textInputAction;
   final void Function()? onTap;
+  final FocusNode? focusNode;
 
-  const CustomTextField(
-      {this.controller,
-      this.hintText,
-      this.labelText,
-      this.obscureText = false,
-      this.padding,
-      this.validator,
-      this.onChanged,
-      this.onSaved,
-      this.onSubmitted,
-      this.keyboardType,
-      this.textInputAction,
-      this.onTap,
-      this.prefixIcon,
-      this.suffixIcon,
-      super.key});
+  const CustomTextField({
+    this.controller,
+    this.hintText,
+    this.labelText,
+    this.obscureText = false,
+    this.padding,
+    this.validator,
+    this.onChanged,
+    this.onSaved,
+    this.onSubmitted,
+    this.keyboardType,
+    this.textInputAction,
+    this.onTap,
+    this.prefixIcon,
+    this.suffixIcon,
+    this.focusNode,
+    super.key,
+  });
 
   @override
   Widget build(BuildContext context) {
@@ -60,6 +63,7 @@ class CustomTextField extends StatelessWidget {
             keyboardType: keyboardType,
             textInputAction: textInputAction,
             onTap: onTap,
+            focusNode: focusNode,
             decoration: InputDecoration(
               prefixIcon: prefixIcon != null
                   ? Icon(prefixIcon, size: 20.sp, color: Theme.of(context).hintColor)
@@ -82,8 +86,13 @@ class CustomDropDown extends StatelessWidget {
   final Function(dynamic) onChanged;
   final String? labelText;
   final String? hintText;
-  const CustomDropDown(
-      {required this.items, this.labelText, required this.onChanged, this.hintText, super.key});
+  const CustomDropDown({
+    required this.items,
+    this.labelText,
+    required this.onChanged,
+    this.hintText,
+    super.key,
+  });
 
   @override
   Widget build(BuildContext context) {

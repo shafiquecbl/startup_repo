@@ -1,32 +1,28 @@
 import '../../imports.dart';
 
-Future<dynamic> showConfirmationDialog({
-  required String title,
-  required String subtitle,
-  required String actionText,
-  required Function() onAccept,
-}) {
-  return showDialog(
-    context: Get.context!,
-    builder: (context) => ConfirmationDialog(
-      title: title,
-      subtitle: subtitle,
-      actionText: actionText,
-      onAccept: onAccept,
-    ),
-  );
-}
-
 class ConfirmationDialog extends StatelessWidget {
   final String title, subtitle, actionText;
-  final Function() onAccept;
-  const ConfirmationDialog({
+  final VoidCallback onAccept;
+  const ConfirmationDialog._({
     required this.title,
     required this.subtitle,
     required this.actionText,
     required this.onAccept,
-    super.key,
   });
+
+  /// Shows a confirmation dialog with title, subtitle, and action buttons.
+  static Future<T?> show<T>({
+    required String title,
+    required String subtitle,
+    required String actionText,
+    required VoidCallback onAccept,
+  }) {
+    return showDialog<T>(
+      context: Get.context!,
+      builder: (_) =>
+          ConfirmationDialog._(title: title, subtitle: subtitle, actionText: actionText, onAccept: onAccept),
+    );
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -36,19 +32,20 @@ class ConfirmationDialog extends StatelessWidget {
         child: Column(
           mainAxisSize: MainAxisSize.min,
           children: [
-            Text(
-              title.tr,
-              style: context.font16.copyWith(fontWeight: FontWeight.w700),
-            ),
+            Text(title.tr, style: context.font16.copyWith(fontWeight: FontWeight.w700)),
             Divider(height: 24.sp),
             Text(subtitle.tr, textAlign: TextAlign.center, style: context.font14),
             SizedBox(height: 24.sp),
             Row(
               mainAxisAlignment: MainAxisAlignment.end,
               children: [
-                Expanded(child: PrimaryOutlineButton(text: 'cancel'.tr, onPressed: Get.back)),
+                Expanded(
+                  child: PrimaryOutlineButton(text: 'cancel'.tr, onPressed: Get.back),
+                ),
                 SizedBox(width: 16.sp),
-                Expanded(child: PrimaryButton(text: actionText, onPressed: onAccept)),
+                Expanded(
+                  child: PrimaryButton(text: actionText, onPressed: onAccept),
+                ),
               ],
             ),
           ],
