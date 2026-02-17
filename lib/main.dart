@@ -2,13 +2,13 @@ import 'package:flutter/services.dart';
 import 'package:flutter_smart_dialog/flutter_smart_dialog.dart';
 import 'package:startup_repo/imports.dart';
 import 'core/theme/design_helper.dart';
+import 'features/food_home/presentation/view/food_home_screen.dart';
 import 'features/theme/presentation/controller/theme_controller.dart';
 import 'features/language/presentation/controller/localization_controller.dart';
 import 'core/helper/get_di.dart' as di;
 import 'core/theme/dark_theme.dart';
 import 'core/theme/light_theme.dart';
 import 'core/utils/messages.dart';
-import 'features/home/presentation/view/home.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -52,7 +52,7 @@ class MyApp extends StatelessWidget {
                   fallbackLocale: const Locale('en', 'US'),
                   navigatorObservers: [FlutterSmartDialog.observer],
                   builder: FlutterSmartDialog.init(loadingBuilder: (string) => const LoadingWidget()),
-                  home: const HomeScreen(),
+                  home: const FoodHomeScreen(),
                 );
               },
             ),

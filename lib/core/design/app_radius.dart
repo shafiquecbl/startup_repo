@@ -55,13 +55,9 @@ class AppRadius {
       RoundedSuperellipseBorder(borderRadius: bottom(radius));
 
   // Partial corners (raw BorderRadius — for APIs that require it)
-  static BorderRadius top(double radius) => BorderRadius.only(
-        topLeft: Radius.circular(radius.sp),
-        topRight: Radius.circular(radius.sp),
-      );
+  static BorderRadius top(double radius) =>
+      BorderRadius.only(topLeft: Radius.circular(radius.sp), topRight: Radius.circular(radius.sp));
 
-  static BorderRadius bottom(double radius) => BorderRadius.only(
-        bottomLeft: Radius.circular(radius.sp),
-        bottomRight: Radius.circular(radius.sp),
-      );
+  static BorderRadius bottom(double radius) =>
+      BorderRadius.only(bottomLeft: Radius.circular(radius.sp), bottomRight: Radius.circular(radius.sp));
 }
