@@ -9,7 +9,7 @@ class SplashRepoImpl implements SplashRepo {
   SplashRepoImpl({required this.prefs, required this.apiClient});
 
   @override
-  Future<ApiResult<Response>> getConfig() async => await apiClient.get(AppConstants.configUrl);
+  Future<ApiResult<Response>> getConfig() async => await apiClient.get(Endpoints.config);
 
   @override
   Future<bool> saveFirstTime() async => await prefs.setBool(SharedKeys.onBoardingSkip, false);

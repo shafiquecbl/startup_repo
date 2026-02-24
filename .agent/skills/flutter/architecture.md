@@ -106,6 +106,25 @@ class Failure<T> extends ApiResult<T> { final String message; final int? statusC
 
 **Never return `null`. Never return `Response?`. Always return `ApiResult`.**
 
+### Endpoints (`core/utils/endpoints.dart`)
+
+All API endpoint paths live in the `Endpoints` class — **never hardcode paths in repos**:
+
+```dart
+class Endpoints {
+  Endpoints._();
+
+  static const String config = 'config';
+  static const String foodHome = 'api/food/home';
+  static const String foodDetail = 'api/food/'; // + {id}
+}
+```
+
+**Rules:**
+- **NEVER** put endpoint strings in `AppConstants` — they belong in `Endpoints`
+- `AppConstants` is only for app-level config (name, base URL)
+- Group endpoints by feature with comments
+
 ### Repository Pattern
 
 ```dart
@@ -119,7 +138,7 @@ class FeatureRepoImpl implements FeatureRepo {
 
   @override
   Future<ApiResult<Response>> getData() async =>
-    await apiClient.get('endpoint');
+    await apiClient.get(Endpoints.featureData);
 }
 ```
 

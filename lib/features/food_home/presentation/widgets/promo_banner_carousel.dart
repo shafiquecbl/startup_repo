@@ -13,7 +13,7 @@ class PromoBannerCarousel extends StatefulWidget {
 
 class _PromoBannerCarouselState extends State<PromoBannerCarousel> {
   late final PageController _pageController;
-  int _currentPage = 0;
+  final ValueNotifier<int> _currentPage = ValueNotifier<int>(0);
   Timer? _autoScrollTimer;
 
   @override
@@ -26,7 +26,7 @@ class _PromoBannerCarouselState extends State<PromoBannerCarousel> {
   void _startAutoScroll() {
     _autoScrollTimer = Timer.periodic(const Duration(seconds: 4), (_) {
       if (!mounted) return;
-      final int nextPage = (_currentPage + 1) % widget.banners.length;
+      final int nextPage = (_currentPage.value + 1) % widget.banners.length;
       _pageController.animateToPage(
         nextPage,
         duration: const Duration(milliseconds: 400),
@@ -39,6 +39,7 @@ class _PromoBannerCarouselState extends State<PromoBannerCarousel> {
   void dispose() {
     _autoScrollTimer?.cancel();
     _pageController.dispose();
+    _currentPage.dispose();
     super.dispose();
   }
 
@@ -53,8 +54,8 @@ class _PromoBannerCarouselState extends State<PromoBannerCarousel> {
           child: PageView.builder(
             controller: _pageController,
             itemCount: widget.banners.length,
-            onPageChanged: (index) => setState(() => _currentPage = index),
-            itemBuilder: (context, index) {
+            onPageChanged: (int index) => _currentPage.value = index,
+            itemBuilder: (BuildContext context, int index) {
               final PromoBanner banner = widget.banners[index];
               return Padding(
                 padding: EdgeInsets.symmetric(horizontal: 4.sp),
@@ -109,21 +110,26 @@ class _PromoBannerCarouselState extends State<PromoBannerCarousel> {
 
         // Dots indicator
         SizedBox(height: 8.sp),
-        Row(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: List.generate(
-            widget.banners.length,
-            (index) => AnimatedContainer(
-              duration: const Duration(milliseconds: 300),
-              margin: EdgeInsets.symmetric(horizontal: 3.sp),
-              height: 6.sp,
-              width: _currentPage == index ? 20.sp : 6.sp,
-              decoration: BoxDecoration(
-                color: _currentPage == index ? AppColors.primary : AppColors.primary.withAlpha(50),
-                borderRadius: AppRadius.r100,
+        ValueListenableBuilder<int>(
+          valueListenable: _currentPage,
+          builder: (BuildContext context, int currentPage, _) {
+            return Row(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: List.generate(
+                widget.banners.length,
+                (int index) => AnimatedContainer(
+                  duration: const Duration(milliseconds: 300),
+                  margin: EdgeInsets.symmetric(horizontal: 3.sp),
+                  height: 6.sp,
+                  width: currentPage == index ? 20.sp : 6.sp,
+                  decoration: BoxDecoration(
+                    color: currentPage == index ? AppColors.primary : AppColors.primary.withAlpha(50),
+                    borderRadius: AppRadius.r100,
+                  ),
+                ),
               ),
-            ),
-          ),
+            );
+          },
         ),
       ],
     );

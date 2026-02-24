@@ -5,6 +5,63 @@
 
 ---
 
+## ⚠️ Rule 0: No `setState` — Use `ValueNotifier`
+
+**NEVER use `setState()` in any widget.** For local UI state (page index, toggle,
+animation), use `ValueNotifier` + `ValueListenableBuilder`. For shared state, use
+`GetBuilder<Controller>`.
+
+```dart
+// ❌ WRONG — setState causes full rebuild of entire widget
+class _MyWidgetState extends State<MyWidget> {
+  int _currentPage = 0;
+
+  @override
+  Widget build(BuildContext context) {
+    return PageView(
+      onPageChanged: (int index) => setState(() => _currentPage = index),
+      // ...
+    );
+  }
+}
+
+// ✅ CORRECT — ValueNotifier rebuilds only the listening subtree
+class _MyWidgetState extends State<MyWidget> {
+  final ValueNotifier<int> _currentPage = ValueNotifier<int>(0);
+
+  @override
+  void dispose() {
+    _currentPage.dispose();
+    super.dispose();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return Column(
+      children: [
+        PageView(
+          onPageChanged: (int index) => _currentPage.value = index,
+          // ...
+        ),
+        ValueListenableBuilder<int>(
+          valueListenable: _currentPage,
+          builder: (BuildContext context, int page, _) {
+            return DotsIndicator(currentPage: page);
+          },
+        ),
+      ],
+    );
+  }
+}
+```
+
+**Why:** `setState` rebuilds the entire `build()` method. `ValueNotifier` rebuilds
+only the `ValueListenableBuilder` subtree — better performance and more explicit.
+
+**Reference:** `food_home/presentation/widgets/promo_banner_carousel.dart`
+
+---
+
 ## ⚠️ Rule 1: Class-Based Only — No Exceptions
 
 **NEVER use function/method-based widgets.** Every reusable piece of UI MUST be a

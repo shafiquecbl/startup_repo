@@ -220,17 +220,17 @@ class FoodRepoImpl extends FoodRepo {
 
   @override
   Future<ApiResult<Response>> fetchHome() async =>
-    await client.get(AppConstants.foodHome);  // 'api/food/home'
+    await client.get(Endpoints.foodHome);  // 'api/food/home'
 
   @override
   Future<ApiResult<Response>> fetchFoodDetail(String id) async =>
-    await client.get('${AppConstants.foodDetail}$id');
+    await client.get('${Endpoints.foodDetail}$id');
 }
 ```
 
 **Rules:**
 - Repo is a **thin pass-through** — no logic, just API calls
-- Define endpoint paths in `AppConstants` (e.g. `static const String foodHome = 'api/food/home'`)
+- Define endpoint paths in `Endpoints` (e.g. `static const String foodHome = 'api/food/home'`)
 - Always return `ApiResult<Response>` (never nullable)
 
 **Reference:** `food_home/data/repository/food_repo.dart` + `food_repo_impl.dart`
@@ -434,7 +434,7 @@ When backend delivers the API:
 - [ ] Created feature directory scaffold
 - [ ] Models with `fromJson` / `toJson` / `const` constructors
 - [ ] Dummy data with realistic values + container class
-- [ ] Repo interface + impl with endpoint paths in `AppConstants`
+- [ ] Repo interface + impl with endpoint paths in `Endpoints`
 - [ ] Service with dummy fallback pattern
 - [ ] Binding wiring repo → service → controller
 - [ ] Controller with `// DUMMY:` / `// REAL:` swap comments

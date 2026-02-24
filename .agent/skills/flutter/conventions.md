@@ -90,6 +90,9 @@ This exports: `material.dart`, `get`, `http`, `iconsax`, `shared_preferences`,
 12. **Constructor-based navigation** — pass data via screen constructors, not named routes.
 13. **Theme-first widgets** — use built-in Flutter widgets with ThemeData, don't recreate them.
 14. **Static `.show()` pattern** — dialogs/sheets use `ClassName.show()`, not loose functions.
+15. **Explicit types everywhere** — always declare types for variables, parameters, and return values. `final bool selected = false;` not `final selected = false;`.
+16. **No `setState`** — use `ValueNotifier` + `ValueListenableBuilder` for local UI state, `GetBuilder` for shared state.
+17. **Endpoints class** — all API paths in `Endpoints` (`core/utils/endpoints.dart`), never in `AppConstants`.
 
 ---
 
@@ -112,3 +115,6 @@ This exports: `material.dart`, `get`, `http`, `iconsax`, `shared_preferences`,
 - [ ] Uses built-in widgets with theme (not custom recreations)
 - [ ] Dialogs/sheets use static `.show()` pattern
 - [ ] Loading/empty/error states use `LoadingWidget`, `EmptyStateWidget`, `ErrorStateWidget`
+- [ ] All variables and params have explicit types (no type inference for declarations)
+- [ ] No `setState` usage — uses `ValueNotifier` or `GetBuilder` instead
+- [ ] Endpoints use `Endpoints.xxx` (never `AppConstants` for API paths)

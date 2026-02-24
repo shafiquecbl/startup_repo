@@ -54,5 +54,8 @@ Developer: "No, we don't use Get.put() — always Get.lazyPut()"
 | 2026-02-17 | State widgets | Created `EmptyStateWidget`, `ErrorStateWidget`, skeleton loading widgets |
 | 2026-02-17 | Feature workflow | Added Dummy-Data-First workflow — build complete features with dummy data, generate API spec docs for backend devs |
 | 2026-02-17 | Feature organization | Split monolithic `food/` into independent `food_home/`, `food_detail/`, `cart/` features with cross-feature imports |
+| 2026-02-24 | State management | Banned `setState` — use `ValueNotifier` + `ValueListenableBuilder` for local UI state, `GetBuilder` for shared state |
+| 2026-02-24 | API layer | Moved all endpoint paths from `AppConstants` to dedicated `Endpoints` class in `core/utils/endpoints.dart` |
+| 2026-02-24 | Code style | Enforced explicit types on all variables, parameters, and return values — no type inference for declarations |
 
 <!-- Add new entries below this line -->
