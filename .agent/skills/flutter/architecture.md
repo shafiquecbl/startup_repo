@@ -1,102 +1,111 @@
 # Architecture & API Client
 
-> **When to read:** Before creating any new feature, modifying a controller/service/repo,
-> or writing API integration code.
+> Read before creating/modifying any feature, service, repo, or controller.
 
 ---
 
-## Architecture — The Golden Rule
-
-**Clean Architecture + Feature-First.** Every feature is self-contained:
+## Feature Structure
 
 ```
 lib/features/<feature>/
 ├── data/
-│   ├── model/          # Data models (fromJson, toJson)
-│   └── repository/     # Interface + Implementation (API calls)
+│   ├── model/          # fromJson, toJson, const constructors
+│   │   └── dummy/      # dummy_<feature>_data.dart
+│   └── repository/     # abstract + impl (API calls only)
 ├── domain/
-│   ├── binding/        # GetX DI wiring
-│   └── service/        # Interface + Implementation (business logic)
+│   ├── binding/        # Get.lazyPut wiring
+│   └── service/        # abstract + impl (business logic)
 └── presentation/
-    ├── controller/     # GetxController (state, methods)
-    └── view/           # Widgets (UI only)
+    ├── controller/     # GetxController
+    └── view/           # widgets (UI only)
 ```
 
-**The Chain:** `Controller → Service → Repository → ApiClient`
+**Chain:** `Controller → Service → Repository → ApiClient`
 
-### Rules
+---
 
-- **Controller** holds state and calls service. Never touches ApiClient directly.
-- **Service** contains business logic, transforms data. Calls repository.
-- **Repository** is a thin pass-through to ApiClient. No logic here.
-- **Binding** wires everything via `Get.lazyPut`. Registered in `get_di.dart`.
-- **View** is dumb UI. Uses `GetBuilder<Controller>` to rebuild. No business logic.
-
-### Binding Pattern (always follow this)
-
-```dart
-class FeatureBinding extends Bindings {
-  @override
-  void dependencies() {
-    // repo
-    Get.lazyPut<FeatureRepo>(() => FeatureRepoImpl(apiClient: Get.find()));
-    // service
-    Get.lazyPut<FeatureService>(() => FeatureServiceImpl(featureRepo: Get.find()));
-    // controller
-    Get.lazyPut(() => FeatureController(featureService: Get.find()));
-  }
-}
-```
-
-Then add `FeatureBinding()` to the `bindings` list in `get_di.dart`.
-
-### Controller Pattern
+## Controller
 
 ```dart
 class FeatureController extends GetxController {
   final FeatureService featureService;
   FeatureController({required this.featureService});
 
-  // Static finder — the preferred way to access controllers
   static FeatureController get find => Get.find<FeatureController>();
 
-  // Private state with public getters
   FeatureModel? _data;
   FeatureModel? get data => _data;
 
   bool _isLoading = false;
   bool get isLoading => _isLoading;
-  set isLoading(bool value) {
-    _isLoading = value;
-    update(); // notify listeners
-  }
+  set isLoading(bool value) { _isLoading = value; update(); }
 
-  Future<void> loadData() async {
+  Future<void> load() async {
     isLoading = true;
-    final result = await featureService.getData();
-    if (result case Success(data: final data)) {
-      _data = data;
-    }
-    // Failure? Toast was already shown by API client. Nothing to do.
+    _data = await featureService.getData(); // null = failed, toast already shown
     isLoading = false;
   }
 }
 ```
 
-Key conventions:
-- **Static `find` getter** on every controller
-- **Private fields** with public getters (`_data` / `data`)
-- **Loading setter** that calls `update()` automatically
-- **Pattern matching** on `ApiResult` with `case Success(data: final x)`
-- **Failure comment:** `// Failure? Toast was already shown by API client.`
+---
+
+## Service — Returns the Model, NOT ApiResult
+
+```dart
+// ✅ DEFAULT — unwrap in service, controller gets clean model
+Future<FeatureModel?> getData() async {
+  final ApiResult<Response> result = await featureRepo.getData();
+  if (result case Success(data: final response)) {
+    return FeatureModel.fromJson(jsonDecode(response.body));
+  }
+  return null; // Failure — API client already showed toast
+}
+
+// Use List<Model> (empty on failure) or Model (dummy fallback) as appropriate.
+// Reference: food_home/domain/service/food_service_impl.dart
+```
+
+```dart
+// ⚠️ EXCEPTION — return ApiResult<Model> ONLY when controller must react to failure
+// (e.g., config load failure → redirect). Reference: splash_service_impl.dart
+```
+
+| Scenario | Return type |
+|----------|-------------|
+| Failure = show empty state | `Model?` |
+| Failure = show empty list | `List<Model>` |
+| Failure = show dummy data | `Model` (never null) |
+| Failure = block the flow | `ApiResult<Model>` ⚠️ |
 
 ---
 
-## API Client — Sealed Results, Never Null
+## Repository — Thin Pass-Through Only
 
-### Return Type
+```dart
+// ✅ No logic. Only API calls. Always ApiResult<Response>.
+Future<ApiResult<Response>> getData() async =>
+    await apiClient.get(Endpoints.featureData);
+```
 
-All API methods return `ApiResult<Response>` — a **sealed class**:
+---
+
+## Endpoints (`core/utils/endpoints.dart`)
+
+```dart
+// ✅ All API paths here — grouped by feature
+class Endpoints {
+  Endpoints._();
+  static const String config = 'config';
+  static const String foodHome = 'api/food/home';
+}
+
+// ❌ NEVER put endpoint paths in AppConstants
+```
+
+---
+
+## ApiResult — Sealed, Never Null
 
 ```dart
 sealed class ApiResult<T> { const ApiResult(); }
@@ -104,70 +113,22 @@ class Success<T> extends ApiResult<T> { final T data; }
 class Failure<T> extends ApiResult<T> { final String message; final int? statusCode; }
 ```
 
-**Never return `null`. Never return `Response?`. Always return `ApiResult`.**
+- **Repo always returns `ApiResult<Response>`** — never nullable
+- Error toast is shown automatically by `ApiClientImpl` — callers never need try/catch
 
-### Endpoints (`core/utils/endpoints.dart`)
+---
 
-All API endpoint paths live in the `Endpoints` class — **never hardcode paths in repos**:
-
-```dart
-class Endpoints {
-  Endpoints._();
-
-  static const String config = 'config';
-  static const String foodHome = 'api/food/home';
-  static const String foodDetail = 'api/food/'; // + {id}
-}
-```
-
-**Rules:**
-- **NEVER** put endpoint strings in `AppConstants` — they belong in `Endpoints`
-- `AppConstants` is only for app-level config (name, base URL)
-- Group endpoints by feature with comments
-
-### Repository Pattern
+## Binding
 
 ```dart
-abstract class FeatureRepo {
-  Future<ApiResult<Response>> getData();
-}
-
-class FeatureRepoImpl implements FeatureRepo {
-  final ApiClient apiClient;
-  FeatureRepoImpl({required this.apiClient});
-
+class FeatureBinding extends Bindings {
   @override
-  Future<ApiResult<Response>> getData() async =>
-    await apiClient.get(Endpoints.featureData);
-}
-```
-
-### Service Pattern — Transform Results
-
-Services unwrap `ApiResult<Response>` into `ApiResult<Model>`:
-
-```dart
-@override
-Future<ApiResult<FeatureModel>> getData() async {
-  final result = await featureRepo.getData();
-  return switch (result) {
-    Success(data: final response) => _parse(response.body),
-    Failure(:final message, :final statusCode) => Failure(message, statusCode: statusCode),
-  };
-}
-
-ApiResult<FeatureModel> _parse(String body) {
-  try {
-    return Success(FeatureModel.fromJson(jsonDecode(body)));
-  } catch (_) {
-    return const Failure('Failed to parse data');
+  void dependencies() {
+    Get.lazyPut<FeatureRepo>(() => FeatureRepoImpl(apiClient: Get.find()));
+    Get.lazyPut<FeatureService>(() => FeatureServiceImpl(featureRepo: Get.find()));
+    Get.lazyPut(() => FeatureController(featureService: Get.find()));
   }
 }
 ```
 
-### Error Handling
-
-- `ApiClientImpl` handles **all** error display automatically via `AppDialog.showToast()`
-- `ApiErrorParser` extracts messages from multiple backend formats
-- Callers **never need try/catch** for API errors — just check `Success` vs `Failure`
-- The only exception: `showLoading()` / `hideLoading()` pairs in controllers
+Add `FeatureBinding()` to the `bindings` list in `get_di.dart`.

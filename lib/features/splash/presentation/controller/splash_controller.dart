@@ -1,5 +1,4 @@
 import 'package:get/get.dart';
-import 'package:startup_repo/core/api/api_result.dart';
 import '../../data/model/config_model.dart';
 import '../../domain/service/splash_service.dart';
 
@@ -21,11 +20,8 @@ class SplashController extends GetxController implements GetxService {
 
   Future<void> getConfig() async {
     isLoading = true;
-    final result = await splashService.getConfig();
-    if (result case Success(data: final config)) {
-      _settingModel = config;
-    }
-    // Failure? Toast was already shown by API client. Nothing to do.
+    // Service returns ConfigModel? — null means failure (toast already shown)
+    _settingModel = await splashService.getConfig();
     isLoading = false;
   }
 

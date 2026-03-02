@@ -9,20 +9,16 @@ class SplashServiceImpl implements SplashService {
   SplashServiceImpl({required this.splashRepo});
 
   @override
-  Future<ApiResult<ConfigModel>> getConfig() async {
+  Future<ConfigModel?> getConfig() async {
     final result = await splashRepo.getConfig();
-    return switch (result) {
-      Success(data: final response) => _parseConfig(response.body),
-      Failure(:final message, :final statusCode) => Failure(message, statusCode: statusCode),
-    };
-  }
-
-  ApiResult<ConfigModel> _parseConfig(String body) {
-    try {
-      return Success(ConfigModel.fromJson(jsonDecode(body)));
-    } catch (_) {
-      return const Failure('Failed to parse config');
+    if (result case Success(data: final response)) {
+      try {
+        return ConfigModel.fromJson(jsonDecode(response.body));
+      } catch (_) {
+        return null;
+      }
     }
+    return null; // Failure — API client already showed the toast
   }
 
   @override
