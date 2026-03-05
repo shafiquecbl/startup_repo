@@ -27,7 +27,7 @@ lib/features/<feature>/
 ## Controller
 
 ```dart
-class FeatureController extends GetxController {
+class FeatureController extends GetxController implements GetxService {
   final FeatureService featureService;
   FeatureController({required this.featureService});
 
@@ -132,3 +132,9 @@ class FeatureBinding extends Bindings {
 ```
 
 Add `FeatureBinding()` to the `bindings` list in `get_di.dart`.
+
+**Critical:** A feature is not DI-complete until both are true:
+1. Controller implements `GetxService`
+2. Binding is registered in `core/helper/get_di.dart`
+
+Missing either one causes runtime `Get.find()` failures.

@@ -90,6 +90,10 @@ const SkeletonLine(height: 14)
 const SkeletonListTile()
 ```
 
+For feature-level skeletons, keep dedicated files under:
+`features/<feature>/presentation/shimmers/`.
+Consolidate related shimmers into one file when they are tightly related (e.g., list + stats + details for same feature).
+
 ---
 
 ## AppImage

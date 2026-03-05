@@ -57,5 +57,9 @@ Developer: "No, we don't use Get.put() — always Get.lazyPut()"
 | 2026-02-24 | State management | Banned `setState` — use `ValueNotifier` + `ValueListenableBuilder` for local UI state, `GetBuilder` for shared state |
 | 2026-02-24 | API layer | Moved all endpoint paths from `AppConstants` to dedicated `Endpoints` class in `core/utils/endpoints.dart` |
 | 2026-02-24 | Code style | Enforced explicit types on all variables, parameters, and return values — no type inference for declarations |
+| 2026-03-05 | GetX DI | Every controller must `implement GetxService`, and each feature binding must be registered in `core/helper/get_di.dart` |
+| 2026-03-05 | Enums | Move stable UI mapping logic into enums (example: `OrderStatus.deliveryStep`) to remove duplicated widget methods |
+| 2026-03-05 | Production cleanup | Remove TODO/dead commented paths from active flows; use working behavior or explicit safe fallback |
+| 2026-03-05 | File organization | Avoid over-fragmenting UI files; split for reuse/complexity, consolidate tiny single-use widgets |
 
 <!-- Add new entries below this line -->

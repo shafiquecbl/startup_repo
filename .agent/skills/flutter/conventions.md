@@ -57,3 +57,6 @@ Feature-local files (models, repos, own widgets) still use relative imports.
 - [ ] Endpoints use `Endpoints.xxx` (not `AppConstants`)
 - [ ] Class-based widgets only (no `Widget _buildX()`)
 - [ ] `dispose()` called for all controllers, focus nodes, notifiers
+- [ ] No TODO/dead commented code in active production paths
+- [ ] Controller extends `GetxController implements GetxService`
+- [ ] Feature binding exists **and** is registered in `core/helper/get_di.dart`

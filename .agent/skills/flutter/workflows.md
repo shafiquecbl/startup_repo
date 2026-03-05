@@ -14,6 +14,7 @@
 | 4. Plan widgets | `core/widgets/` if used in ≥2 features, else `view/widgets/` |
 | 5. Build widgets first | Then assemble screens from widgets |
 | 6. Consistency review | All spacings/radii/colors use tokens, same `Scaffold` structure |
+| 7. Production cleanup | Remove TODO/dead commented paths from active flows before sign-off |
 
 **Snap rule:** Design says 12px padding → use `p8` or `p16`. Never create a one-off value.
 
@@ -48,6 +49,15 @@ lib/features/<feature>/
 ```
 
 ### Build Order: Model → Dummy → Repo → Service → Binding → Controller → UI
+
+### File Split Heuristic (avoid over-fragmentation)
+
+Keep a widget in its own file only if one is true:
+- reused in 2+ places
+- over ~70 lines or has meaningful logic
+- likely to be tested independently
+
+Otherwise, colocate as a private class in the parent file (still class-based, never `Widget _buildX`).
 
 #### Model
 ```dart
