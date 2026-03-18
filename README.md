@@ -274,15 +274,21 @@ Reading design_system.md and the boilerplate...
 
 The boilerplate provides:
 - context.font14, context.font16 etc. for text styles (AppText extension)
-- AppColors.current.divider, AppColors.current.hint for theme colors
+- context.theme.dividerColor, context.theme.hintColor etc. for theme colors
 - Theme.of(context) IS correct inside core/design/ — that's where
   the extensions are defined
 
 The BAD pattern is feature-level files doing this:
   final ThemeData theme = Theme.of(context);
   final Color textColor = theme.textTheme.titleMedium?.color;
+  final Color hintColor = theme.hintColor;
 
-Now I know what to fix and what to replace it with. Let me find every occurrence.
+The CORRECT replacement is direct access:
+  context.theme.dividerColor (not a local variable)
+  context.theme.hintColor (not a local variable)
+  context.font14 (for text styles)
+
+Now I know what to fix and what to replace it with.
 ```
 
 **Step 2 — DISCOVER (where is the problem?):**
@@ -295,78 +301,77 @@ Checklist saved: .agent/plan/checklists/theme-cleanup.md
 
 **Step 3 — ANALYZE (what is wrong in each place?):**
 ```
-AI: Now I need to read each file to understand what specifically needs to change.
-Not every file needs the same fix...
+AI: Now I need to read each file with LINE NUMBERS to document
+the specific fix per occurrence...
 
 Analyzing lib/core/design/app_text.dart — 15 matches.
-This IS the extension that provides context.fontXX. This is the
+This IS the extension that provides context.fontXX.
 APPROVED pattern. Marking as SKIP.
 
 Analyzing lib/core/widgets/app_image.dart — 1 match.
-L64: Theme.of(context).cardColor used for shimmer placeholder.
-Fix: replace with AppColors.current.card
+L64: Theme.of(context).cardColor → replace with context.theme.cardColor
 
-Analyzing lib/features/cart/presentation/view/cart_screen.dart — 2 matches.
-L23: extracts full ThemeData into local variable
-L45: uses theme.dividerColor, L67: uses theme.textTheme.bodyMedium
-Fix: remove L23, replace L45 with AppColors.current.divider,
-replace L67 with context.font14
+Analyzing lib/features/cart/presentation/view/cart_screen.dart — 3 lines.
+L23: `final ThemeData theme = Theme.of(context);` → DELETE
+L45: `theme.dividerColor` → `context.theme.dividerColor`
+L67: `theme.textTheme.bodyMedium` → `context.font14`
 
 Analyzing lib/features/food_detail/presentation/widgets/food_detail_info.dart
-— 4 matches. Extracts ThemeData then derives textColor, bodyColor,
-hintColor, dividerColor as locals. Used 8 times total.
-Fix: remove extraction block, map each derived color to its
-boilerplate-approved replacement.
+L12: extracts ThemeData + derives textColor, bodyColor, hintColor, dividerColor
+L28,L35,L41,L58: textColor used 4 times → context.font14.color
+L33,L47: bodyColor used 2 times → context.font12.color
+L52: hintColor → context.theme.hintColor
+L61: dividerColor → context.theme.dividerColor
 
-[continues analyzing all 22 files, writing findings into checklist]
-
-Analysis complete. 1 file skipped (core/design — approved usage).
-21 files need fixes. All analysis written to the checklist.
+[continues for all 22 files]
 ```
 
-**Step 4 — PLAN (the checklist, with context per file):**
+**Step 4 — PLAN (the checklist, with line-level analysis per file):**
 
-The AI has already written this into `plan/checklists/theme-cleanup.md` during analysis:
+The AI writes this into `plan/checklists/theme-cleanup.md`:
 
 ```markdown
 # Checklist: theme-cleanup
 
-> Pattern: `Theme.of`
+> Pattern: local ThemeData extraction in feature files
+> Correct replacement: context.theme.X for colors, context.fontXX for text
 > Total: 21 files to fix (1 skipped — core/design is approved)
 > Progress: 0/21 files done
 
 ## [skip] lib/core/design/app_text.dart
-APPROVED — this defines the context.fontXX extension
+APPROVED — this defines the context.fontXX extension. Do not touch.
 
 ## [ ] lib/core/widgets/app_image.dart
-- L64: Theme.of(context).cardColor
-- Fix: AppColors.current.card
+- L64: `Theme.of(context).cardColor` → `context.theme.cardColor`
+- Depends on: nothing
 
 ## [ ] lib/features/cart/presentation/view/cart_screen.dart
-- L23: full ThemeData extraction
-- L45: theme.dividerColor → AppColors.current.divider
-- L67: theme.textTheme.bodyMedium → context.font14
+- L23: `final ThemeData theme = Theme.of(context);` → DELETE
+- L45: `theme.dividerColor` → `context.theme.dividerColor`
+- L67: `theme.textTheme.bodyMedium` → `context.font14`
+- Depends on: nothing
 
 ## [ ] lib/features/food_detail/presentation/widgets/food_detail_info.dart
-- L12: ThemeData + 4 derived color locals
-- textColor (4 uses) → context.font14.color
-- bodyColor (2 uses) → context.font12.color
-- hintColor (1 use) → AppColors.current.hint
-- dividerColor (1 use) → AppColors.current.divider
+- L12: `final ThemeData theme = Theme.of(context);` + 4 derived locals → DELETE entire block
+- L28,L35,L41,L58: `textColor` → `context.font14.color`
+- L33,L47: `bodyColor` → `context.font12.color`
+- L52: `hintColor` → `context.theme.hintColor`
+- L61: `dividerColor` → `context.theme.dividerColor`
+- Depends on: nothing
 
-... 17 more files with specific analysis ...
+... 17 more files with same line-level detail ...
 ```
 
 **Step 5 — EXECUTE (one file at a time):**
 ```
-AI: Starting with app_image.dart (simplest — 1 match).
+AI: Starting with app_image.dart (simplest — 1 line change).
 
-[fixes the file, runs dart analyze, passes]
+[fixes L64, runs dart analyze, passes]
 
 Marked [x] in checklist. Progress: 1/21.
 Next: cart_screen.dart...
 
-[fixes cart_screen.dart, runs dart analyze, passes]
+[deletes L23, fixes L45 and L67, runs dart analyze, passes]
 
 Marked [x]. Progress: 2/21.
 ```
@@ -375,7 +380,7 @@ Marked [x]. Progress: 2/21.
 ```
 Theme cleanup: 2/21 files done.
 Checklist: plan/checklists/theme-cleanup.md
-All 21 files already analyzed with specific fixes documented.
+All 21 files already analyzed with line-level fixes documented.
 Next: cart_item_card.dart
 No blockers.
 ```
@@ -388,10 +393,11 @@ AI: Reading checklist at plan/checklists/theme-cleanup.md
 Progress: 2/21 files done. All remaining files already analyzed.
 Next: lib/features/cart/presentation/widgets/cart_item_card.dart
 
-The analysis says: L18 extracts theme.dividerColor.
-Fix: replace with AppColors.current.divider.
+The checklist says:
+- L18: `final ThemeData theme = Theme.of(context);` → DELETE
+- L34: `theme.dividerColor` → `context.theme.dividerColor`
 
-[applies fix, no re-reading or re-analyzing needed]
+[applies fix directly — no re-reading or re-analyzing needed]
 ```
 
 **Step 6 — VERIFY (after all 21 files done):**
@@ -404,13 +410,13 @@ AI: All 21 files fixed. Running full verification.
 > node .agent/brain/tools/brain.js index --incremental
 
 Logging decision: "Removed Theme.of(context) extraction pattern from all
-feature files. Approved usage remains in core/design/app_text.dart."
+feature files. Approved usage remains in core/design/app_text.dart.
+Replacement pattern: context.theme.X for colors, context.fontXX for text."
 
 Theme cleanup complete. Archiving checklist to plan/history.md.
 ```
 
-The key insight: the analysis from Step 3 is written INTO the checklist. If the session dies after analyzing 15 files but fixing only 3, the next session doesn't re-analyze — it reads the checklist and picks up at file 4.
-
+The key insight: the analysis from Step 3 is written INTO the checklist with line numbers and exact replacements. If the session dies after analyzing 15 files but fixing only 3, the next session doesn't re-analyze — it reads the checklist and picks up at file 4.
 ---
 
 ## Brain CLI Reference

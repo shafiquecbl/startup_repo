@@ -46,31 +46,36 @@ brain.js status                      # db stats
 (Prefix all commands with `node .agent/brain/tools/`)
 
 ## Execution — The Lifecycle of Every Task
-Every task — fixing a pattern, building a feature, migrating a project — follows this sequence. Never skip a step. The depth of each step scales with the task.
+Every task follows this sequence. Never skip a step. Depth scales with the task.
 
 ### 1. UNDERSTAND — What is right?
-Before looking at what's wrong, know what's correct. Read the skill rules. Read the boilerplate. Read past decisions. If the task is "remove Theme.of extraction" — first understand what the boilerplate-approved pattern IS.
+Before looking at what's wrong, know what's correct. Read the skill rules. Read the boilerplate. Read past decisions. Document the SPECIFIC correct patterns — not vague descriptions.
+Bad: "use theme-driven composition." Good: "`context.theme.dividerColor` for divider colors, `context.theme.hintColor` for hints."
 
 ### 2. DISCOVER — Where is the problem?
-Find every occurrence. Use `brain.js scan` for pattern-based tasks. Use `brain.js search` + manual audit for architectural tasks. For new features, discover what already exists that you can reuse. Write findings to `plan/checklists/`.
+Find every occurrence. Use `brain.js scan` for pattern-based tasks. Use `brain.js search` + manual audit for architectural tasks. For new features, discover what already exists that you can reuse.
 
 ### 3. ANALYZE — What specifically is wrong in each place?
-Read each file. Understand context. Don't just list files — document WHAT is wrong and WHAT the fix should be per file. Two files with the same bad pattern may need completely different fixes. Write this analysis into the checklist so it survives session boundaries.
+Read each file. Document with LINE NUMBERS what is wrong and what the specific fix is. Don't say "local theme drives multiple colors" — say "L18: `final ThemeData theme = Theme.of(context)` → DELETE. L34: `theme.cardColor` → `context.theme.cardColor`."
 
 ### 4. PLAN — Write the execution checklist
-The checklist is NOT a flat `[ ] fix file.dart` list. Each item should capture:
-- What file
-- What's wrong (specific lines/patterns found in step 2-3)
-- What the fix is (specific replacement based on step 1)
-- Dependencies (fix parent before child)
+Combine steps 2-3 into a TRACKABLE checklist in `plan/checklists/`. Every file MUST have a `## [ ]` checkbox. Analysis goes INSIDE each checkbox item. Format:
 
-For large projects: break into batches/sprints. Define what "done" looks like for each batch.
+```
+## [ ] lib/features/cart/presentation/view/cart_screen.dart
+- L23: `final ThemeData theme = Theme.of(context);` → DELETE
+- L45: `theme.dividerColor` → `context.theme.dividerColor`
+- L67: `theme.textTheme.bodyMedium` → `context.font14`
+- Depends on: nothing
+```
+
+When fixed, change `[ ]` to `[x]`. This is how progress is tracked across sessions.
 
 ### 5. EXECUTE — Fix one item at a time
-Pick the next `[ ]` item. Apply the fix. Run `dart analyze`. Mark `[x]`. Move to the next. Never attempt multiple files at once. If the session ends here, the checklist shows exactly where you stopped.
+Pick the next `[ ]` item. Apply the fix. Run `dart analyze`. Mark `[x]`. Move to next. Never attempt multiple files at once.
 
 ### 6. VERIFY — Confirm everything works together
-After all items done: run `dart analyze` on the full project. Check for broken imports, missing rebuilds, regressions. Update the database: `brain.js index --incremental`. Log decisions. Write handoff.
+After all items `[x]`: run `dart analyze` on full project. Run `brain.js index --incremental`. Log decisions. Write handoff.
 
 ### Session boundaries
 Can happen between ANY steps. The checklist + handoff capture your exact position:
