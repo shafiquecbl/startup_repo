@@ -333,31 +333,38 @@ The AI writes this into `plan/checklists/theme-cleanup.md`:
 ```markdown
 # Checklist: theme-cleanup
 
-> Pattern: local ThemeData extraction in feature files
-> Correct replacement: context.theme.X for colors, context.fontXX for text
-> Total: 21 files to fix (1 skipped — core/design is approved)
-> Progress: 0/21 files done
+> **Status:** 0/21 files done
+> **Pattern:** local ThemeData extraction in feature files
+> **Correct pattern:** `context.theme.dividerColor`, `context.theme.hintColor`, `context.font14`
 
-## [skip] lib/core/design/app_text.dart
-APPROVED — this defines the context.fontXX extension. Do not touch.
+---
 
-## [ ] lib/core/widgets/app_image.dart
-- L64: `Theme.of(context).cardColor` → `context.theme.cardColor`
-- Depends on: nothing
+### lib/core/design/app_text.dart
+**SKIP** — this defines the `context.fontXX` extension. Approved usage.
 
-## [ ] lib/features/cart/presentation/view/cart_screen.dart
-- L23: `final ThemeData theme = Theme.of(context);` → DELETE
-- L45: `theme.dividerColor` → `context.theme.dividerColor`
-- L67: `theme.textTheme.bodyMedium` → `context.font14`
-- Depends on: nothing
+---
 
-## [ ] lib/features/food_detail/presentation/widgets/food_detail_info.dart
-- L12: `final ThemeData theme = Theme.of(context);` + 4 derived locals → DELETE entire block
-- L28,L35,L41,L58: `textColor` → `context.font14.color`
-- L33,L47: `bodyColor` → `context.font12.color`
-- L52: `hintColor` → `context.theme.hintColor`
-- L61: `dividerColor` → `context.theme.dividerColor`
-- Depends on: nothing
+### lib/core/widgets/app_image.dart
+- [ ] L64: `Theme.of(context).cardColor` → `context.theme.cardColor`
+- **Depends on:** nothing
+
+---
+
+### lib/features/cart/presentation/view/cart_screen.dart
+- [ ] L23: `final ThemeData theme = Theme.of(context);` → DELETE
+- [ ] L45: `theme.dividerColor` → `context.theme.dividerColor`
+- [ ] L67: `theme.textTheme.bodyMedium` → `context.font14`
+- **Depends on:** nothing
+
+---
+
+### lib/features/food_detail/presentation/widgets/food_detail_info.dart
+- [ ] L12: `final ThemeData theme = Theme.of(context);` + 4 derived locals → DELETE block
+- [ ] L28, L35, L41, L58: `textColor` → `context.font14.color`
+- [ ] L33, L47: `bodyColor` → `context.font12.color`
+- [ ] L52: `hintColor` → `context.theme.hintColor`
+- [ ] L61: `dividerColor` → `context.theme.dividerColor`
+- **Depends on:** nothing
 
 ... 17 more files with same line-level detail ...
 ```
@@ -368,12 +375,12 @@ AI: Starting with app_image.dart (simplest — 1 line change).
 
 [fixes L64, runs dart analyze, passes]
 
-Marked [x] in checklist. Progress: 1/21.
+Marked ✅ in checklist. Progress: 1/21.
 Next: cart_screen.dart...
 
 [deletes L23, fixes L45 and L67, runs dart analyze, passes]
 
-Marked [x]. Progress: 2/21.
+Marked ✅. Progress: 2/21.
 ```
 
 **Session ends here.** AI writes handoff:

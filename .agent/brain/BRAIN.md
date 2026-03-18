@@ -59,17 +59,35 @@ Find every occurrence. Use `brain.js scan` for pattern-based tasks. Use `brain.j
 Read each file. Document with LINE NUMBERS what is wrong and what the specific fix is. Don't say "local theme drives multiple colors" — say "L18: `final ThemeData theme = Theme.of(context)` → DELETE. L34: `theme.cardColor` → `context.theme.cardColor`."
 
 ### 4. PLAN — Write the execution checklist
-Combine steps 2-3 into a TRACKABLE checklist in `plan/checklists/`. Every file MUST have a `## [ ]` checkbox. Analysis goes INSIDE each checkbox item. Format:
+Combine steps 2-3 into a TRACKABLE checklist in `plan/checklists/`. Use this format:
 
-```
-## [ ] lib/features/cart/presentation/view/cart_screen.dart
-- L23: `final ThemeData theme = Theme.of(context);` → DELETE
-- L45: `theme.dividerColor` → `context.theme.dividerColor`
-- L67: `theme.textTheme.bodyMedium` → `context.font14`
-- Depends on: nothing
+```markdown
+# Checklist: theme-cleanup
+
+> **Status:** 2/21 files done
+> **Pattern:** local ThemeData extraction in feature files
+> **Correct pattern:** `context.theme.dividerColor`, `context.font14`
+
+---
+
+### lib/core/design/app_text.dart
+**SKIP** — this defines the `context.fontXX` extension. Approved usage.
+
+---
+
+### ~~lib/core/widgets/app_image.dart~~ ✅
+- ~~L64: `Theme.of(context).cardColor` → `context.theme.cardColor`~~
+
+---
+
+### lib/features/cart/presentation/view/cart_screen.dart
+- [ ] L23: `final ThemeData theme = Theme.of(context);` → DELETE
+- [ ] L45: `theme.dividerColor` → `context.theme.dividerColor`
+- [ ] L67: `theme.textTheme.bodyMedium` → `context.font14`
+- **Depends on:** nothing
 ```
 
-When fixed, change `[ ]` to `[x]`. This is how progress is tracked across sessions.
+Rules: strikethrough + ✅ for done files. `- [ ]` checkboxes for pending items. `---` between files. Progress count at the top.
 
 ### 5. EXECUTE — Fix one item at a time
 Pick the next `[ ]` item. Apply the fix. Run `dart analyze`. Mark `[x]`. Move to next. Never attempt multiple files at once.
