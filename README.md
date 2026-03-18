@@ -64,15 +64,20 @@ cd ../../.. && node .agent/brain/tools/brain.js index
 
 ## How It Works
 
-Every AI tool reads `AGENTS.md` at the project root, which points to `.agent/brain/BRAIN.md` — a 60-line orchestrator file that tells the AI:
+Every AI tool reads `AGENTS.md` at the project root, which points to `.agent/brain/BRAIN.md` — the orchestrator that teaches the AI two things:
 
-1. **Push back** before blindly following instructions
-2. **Search** the database before creating anything new
-3. **Read** the skill rules before writing code
-4. **Plan** before building features that touch 3+ files
-5. **Hand off** at end of session so the next session picks up seamlessly
+**Rules** — push back on bad requests, search before creating, follow skills, hand off at session end.
 
-The AI uses a **CLI tool** (`brain.js`) to search a local SQLite database that indexes your entire codebase — every widget, controller, service, model, and their relationships.
+**Discipline** — every task follows the same lifecycle, regardless of size:
+
+1. **Understand** — know what's correct before touching what's wrong
+2. **Discover** — find every occurrence (scan, search, audit)
+3. **Analyze** — read each case, document what's wrong AND what the fix is
+4. **Plan** — write a checklist with context per item (not flat `[ ] file.dart`)
+5. **Execute** — fix one item at a time, mark done, never batch
+6. **Verify** — full project check after everything is fixed
+
+The analysis is written into the checklist, so if a session ends after analyzing 15 files but fixing only 3, the next session picks up at file 4 without re-analyzing.
 
 ### Directory Structure
 
@@ -84,7 +89,7 @@ your-project/
 │
 └── .agent/
     ├── brain/                       ← TOOL (shared, syncs across projects)
-    │   ├── BRAIN.md                 ← The orchestrator (60 lines)
+    │   ├── BRAIN.md                 ← The orchestrator (87 lines)
     │   ├── skills/flutter/          ← Flutter rules + conventions
     │   │   ├── SKILL.md             ← 10 cardinal rules (always loaded)
     │   │   ├── architecture.md      ← Feature structure, API layer
@@ -93,13 +98,14 @@ your-project/
     │   │   ├── conventions.md       ← Naming, imports, navigation
     │   │   ├── workflows.md         ← How to build features & screens
     │   │   └── learning_log.md      ← Corrections (syncs to all projects)
-    │   ├── tools/brain.js           ← CLI tool (search, remember, index)
+    │   ├── tools/brain.js           ← CLI tool (search, scan, remember, index)
     │   ├── templates/               ← First-init templates
     │   └── sync.js                  ← Cross-project sync script
     │
     ├── context/registry.md          ← YOUR PROJECT's component map
     ├── memory/                      ← YOUR PROJECT's decisions & handoffs
     ├── plan/                        ← YOUR PROJECT's active plan & history
+    │   └── checklists/              ← Execution tracking per task
     └── brain.db                     ← SQLite database (gitignored)
 ```
 
@@ -253,6 +259,158 @@ I've also updated .agent/memory/decisions.md so future sessions
 know about this choice. Should I start migrating ApiClient to Dio?
 ```
 
+### Example 8: Large task — the full lifecycle
+
+Every task follows 6 steps: Understand → Discover → Analyze → Plan → Execute → Verify. Here's a real example from a migration project.
+
+**The task:** "Remove the boilerplate-invalid `Theme.of(context)` local extraction pattern across the project."
+
+**Step 1 — UNDERSTAND (what is right?):**
+```
+You: Remove the Theme.of(context) extraction pattern across the project
+
+AI: Before I touch anything, let me understand the correct pattern.
+Reading design_system.md and the boilerplate...
+
+The boilerplate provides:
+- context.font14, context.font16 etc. for text styles (AppText extension)
+- AppColors.current.divider, AppColors.current.hint for theme colors
+- Theme.of(context) IS correct inside core/design/ — that's where
+  the extensions are defined
+
+The BAD pattern is feature-level files doing this:
+  final ThemeData theme = Theme.of(context);
+  final Color textColor = theme.textTheme.titleMedium?.color;
+
+Now I know what to fix and what to replace it with. Let me find every occurrence.
+```
+
+**Step 2 — DISCOVER (where is the problem?):**
+```
+AI: > node .agent/brain/tools/brain.js scan "Theme.of" --name theme-cleanup
+
+Scan complete: 56 matches in 22 files
+Checklist saved: .agent/plan/checklists/theme-cleanup.md
+```
+
+**Step 3 — ANALYZE (what is wrong in each place?):**
+```
+AI: Now I need to read each file to understand what specifically needs to change.
+Not every file needs the same fix...
+
+Analyzing lib/core/design/app_text.dart — 15 matches.
+This IS the extension that provides context.fontXX. This is the
+APPROVED pattern. Marking as SKIP.
+
+Analyzing lib/core/widgets/app_image.dart — 1 match.
+L64: Theme.of(context).cardColor used for shimmer placeholder.
+Fix: replace with AppColors.current.card
+
+Analyzing lib/features/cart/presentation/view/cart_screen.dart — 2 matches.
+L23: extracts full ThemeData into local variable
+L45: uses theme.dividerColor, L67: uses theme.textTheme.bodyMedium
+Fix: remove L23, replace L45 with AppColors.current.divider,
+replace L67 with context.font14
+
+Analyzing lib/features/food_detail/presentation/widgets/food_detail_info.dart
+— 4 matches. Extracts ThemeData then derives textColor, bodyColor,
+hintColor, dividerColor as locals. Used 8 times total.
+Fix: remove extraction block, map each derived color to its
+boilerplate-approved replacement.
+
+[continues analyzing all 22 files, writing findings into checklist]
+
+Analysis complete. 1 file skipped (core/design — approved usage).
+21 files need fixes. All analysis written to the checklist.
+```
+
+**Step 4 — PLAN (the checklist, with context per file):**
+
+The AI has already written this into `plan/checklists/theme-cleanup.md` during analysis:
+
+```markdown
+# Checklist: theme-cleanup
+
+> Pattern: `Theme.of`
+> Total: 21 files to fix (1 skipped — core/design is approved)
+> Progress: 0/21 files done
+
+## [skip] lib/core/design/app_text.dart
+APPROVED — this defines the context.fontXX extension
+
+## [ ] lib/core/widgets/app_image.dart
+- L64: Theme.of(context).cardColor
+- Fix: AppColors.current.card
+
+## [ ] lib/features/cart/presentation/view/cart_screen.dart
+- L23: full ThemeData extraction
+- L45: theme.dividerColor → AppColors.current.divider
+- L67: theme.textTheme.bodyMedium → context.font14
+
+## [ ] lib/features/food_detail/presentation/widgets/food_detail_info.dart
+- L12: ThemeData + 4 derived color locals
+- textColor (4 uses) → context.font14.color
+- bodyColor (2 uses) → context.font12.color
+- hintColor (1 use) → AppColors.current.hint
+- dividerColor (1 use) → AppColors.current.divider
+
+... 17 more files with specific analysis ...
+```
+
+**Step 5 — EXECUTE (one file at a time):**
+```
+AI: Starting with app_image.dart (simplest — 1 match).
+
+[fixes the file, runs dart analyze, passes]
+
+Marked [x] in checklist. Progress: 1/21.
+Next: cart_screen.dart...
+
+[fixes cart_screen.dart, runs dart analyze, passes]
+
+Marked [x]. Progress: 2/21.
+```
+
+**Session ends here.** AI writes handoff:
+```
+Theme cleanup: 2/21 files done.
+Checklist: plan/checklists/theme-cleanup.md
+All 21 files already analyzed with specific fixes documented.
+Next: cart_item_card.dart
+No blockers.
+```
+
+**Next session:**
+```
+You: Continue the theme cleanup
+
+AI: Reading checklist at plan/checklists/theme-cleanup.md
+Progress: 2/21 files done. All remaining files already analyzed.
+Next: lib/features/cart/presentation/widgets/cart_item_card.dart
+
+The analysis says: L18 extracts theme.dividerColor.
+Fix: replace with AppColors.current.divider.
+
+[applies fix, no re-reading or re-analyzing needed]
+```
+
+**Step 6 — VERIFY (after all 21 files done):**
+```
+AI: All 21 files fixed. Running full verification.
+
+> dart analyze → 0 issues
+> node .agent/brain/tools/brain.js scan "Theme.of" --name theme-verify
+  Only matches in core/design/ (approved usage) — clean.
+> node .agent/brain/tools/brain.js index --incremental
+
+Logging decision: "Removed Theme.of(context) extraction pattern from all
+feature files. Approved usage remains in core/design/app_text.dart."
+
+Theme cleanup complete. Archiving checklist to plan/history.md.
+```
+
+The key insight: the analysis from Step 3 is written INTO the checklist. If the session dies after analyzing 15 files but fixing only 3, the next session doesn't re-analyze — it reads the checklist and picks up at file 4.
+
 ---
 
 ## Brain CLI Reference
@@ -264,6 +422,12 @@ The AI runs these commands via terminal. You can also run them manually.
 node .agent/brain/tools/brain.js search "loading"
 node .agent/brain/tools/brain.js search --type widget "button"
 node .agent/brain/tools/brain.js search --type controller "cart"
+
+# Scan & checklist (for large tasks)
+node .agent/brain/tools/brain.js scan "Theme.of" --name theme-cleanup
+node .agent/brain/tools/brain.js scan "setState" --name remove-setstate
+node .agent/brain/tools/brain.js scan "EdgeInsets\." --name hardcoded-spacing
+node .agent/brain/tools/brain.js scan "Colors\." --name hardcoded-colors
 
 # Add knowledge
 node .agent/brain/tools/brain.js node add widget "AppPrice" "Formatted price display" --file lib/core/widgets/app_price.dart
@@ -282,7 +446,8 @@ node .agent/brain/tools/brain.js relate controller_cart uses service_cart "Const
 node .agent/brain/tools/brain.js index                # full codebase scan
 node .agent/brain/tools/brain.js index --incremental  # only changed files
 
-# Info
+# Maintenance
+node .agent/brain/tools/brain.js prune                # archive nodes with deleted files
 node .agent/brain/tools/brain.js status               # database stats
 node .agent/brain/tools/brain.js registry              # regenerate registry.md
 ```
@@ -371,10 +536,10 @@ For the full technical design document, see [ARCHITECTURE.md](.agent/brain/ARCHI
 
 | Component | Purpose | Size |
 |-----------|---------|------|
-| `BRAIN.md` | Orchestrator — push-back rules, workflow, CLI reference | 60 lines |
+| `BRAIN.md` | Orchestrator — push-back rules, execution lifecycle, CLI reference | 87 lines |
 | `SKILL.md` | Flutter cardinal rules (always loaded) | 25 lines |
-| `brain.js` | CLI tool — search, remember, task, index | 429 lines |
-| `sync.js` | Cross-project sync script | 237 lines |
+| `brain.js` | CLI tool — search, scan, remember, task, index, prune | 533 lines |
+| `sync.js` | Cross-project sync script | 238 lines |
 | `brain.db` | SQLite database (auto-generated, gitignored) | ~76 KB |
 
 **Token budget:** Always-loaded context is ~830 tokens. Maximum at any time is ~5,000 tokens. This is deliberately small — research shows that overloading AI context with instructions actually reduces performance.

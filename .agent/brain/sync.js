@@ -35,6 +35,7 @@ const DATA_DIRS = [
   { dir: path.join(AGENT_DIR, 'memory'), files: { 'decisions.md': 'decisions.md', 'pending_promotions.md': 'pending_promotions.md' } },
   { dir: path.join(AGENT_DIR, 'memory', 'handoffs'), files: {} },
   { dir: path.join(AGENT_DIR, 'plan'), files: { 'active.md': 'active.md', 'history.md': 'history.md' } },
+  { dir: path.join(AGENT_DIR, 'plan', 'checklists'), files: {} },
 ];
 
 // ============================================================
