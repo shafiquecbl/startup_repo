@@ -1,0 +1,13 @@
+# Database (regenerated from code, project-specific)
+brain.db
+brain.db-wal
+brain.db-shm
+
+# Node modules (installed via npm install)
+brain/tools/node_modules/
+
+# Sync backup
+.brain-backup/
+
+# Handoff archives
+memory/handoffs/archive/
