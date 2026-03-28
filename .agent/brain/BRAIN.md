@@ -18,6 +18,14 @@
 **Feature** (3-10 files): + registry.md + decisions.md + relevant skill detail file
 **Project/migration**: + active plan + checklists + full skill files + handoff history
 
+## Keep Context Clean
+Your context window is limited. Every file you read, every search result, every error log competes for space. Protect it:
+- **Use brain.js instead of manual grep/find** — CLI returns compact results, raw grep floods context
+- **Offload exploration** — when researching how something works, use subagents or separate tool calls that return summaries, not raw file contents
+- **One task per focus** — don't explore 5 files "just in case." Read what you need for the current checklist item
+- **If context feels heavy** (~20+ tool calls without writing to plan/checklist) — stop, write your progress to the checklist, summarize what you know, then continue with a cleaner window
+- **Never read an entire file to find one function** — use brain.js search or targeted line ranges
+
 ## Skill Files
 Always load `.agent/brain/skills/flutter/SKILL.md` (cardinal rules).
 Detail files on-demand only:
@@ -92,8 +100,12 @@ Rules: strikethrough + ✅ for done files. `- [ ]` checkboxes for pending items.
 ### 5. EXECUTE — Fix one item at a time
 Pick the next `[ ]` item. Apply the fix. Run `dart analyze`. Mark `[x]`. Move to next. Never attempt multiple files at once.
 
-### 6. VERIFY — Confirm everything works together
+**If something goes sideways — STOP.** Don't push through a broken approach. If a fix causes 3+ new errors, or the approach from step 3 turns out to be wrong, or you realize the plan missed something: stop executing, update the checklist with what you learned, re-analyze the affected items, then continue. A bad line of code leads to 1000 bad lines. Re-planning costs 5 minutes. Debugging a wrong approach costs hours.
+
+### 6. VERIFY — Confirm it works AND it's right
 After all items `[x]`: run `dart analyze` on full project. Run `brain.js index --incremental`. Log decisions. Write handoff.
+
+**Self-review before presenting:** For non-trivial changes (new features, architectural work), pause and ask: "Is there a more elegant way?" If a fix feels hacky — if you wouldn't be proud showing it to a staff engineer — refactor before marking done. But balance this: skip the elegance pass for simple, obvious fixes. Don't over-engineer a one-line color change.
 
 ### Session boundaries
 Can happen between ANY steps. The checklist + handoff capture your exact position:
