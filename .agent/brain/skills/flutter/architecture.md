@@ -48,6 +48,39 @@ class FeatureController extends GetxController implements GetxService {
 }
 ```
 
+### Large Controllers — Mixin Composition
+
+When controller > **~150 lines** or has **3+ concerns**, split into mixins:
+
+```
+presentation/
+├── controller/feature_controller.dart  # thin orchestrator only
+└── mixin/
+    ├── auth_mixin.dart    # one concern per file
+    └── timer_mixin.dart
+```
+
+```dart
+// Controller just wires + calls lifecycle hooks
+class FeatureController extends GetxController
+    with AuthMixin, TimerMixin implements GetxService {
+  @override final FeatureService featureService; // satisfies mixin contracts
+  static FeatureController get find => Get.find<FeatureController>();
+  @override void onClose() { disposeTimer(); super.onClose(); }
+}
+
+// Mixin owns one concern
+mixin TimerMixin on GetxController {
+  FeatureService get featureService;    // contract — controller provides
+  Future<void> stopListener();          // contract — other mixin provides
+  Timer? _timer;
+  void disposeTimer() => _timer?.cancel(); // controller calls in onClose()
+}
+```
+
+**Rules:** Never call `Get.find` inside a mixin. Every mixin with resources must have `disposeXxx()`.
+**Reference:** `ycab_user/features/ride_booking/presentation/`
+
 ---
 
 ## Service — Returns the Model, NOT ApiResult
@@ -61,9 +94,7 @@ Future<FeatureModel?> getData() async {
   }
   return null; // Failure — API client already showed toast
 }
-
 // Use List<Model> (empty on failure) or Model (dummy fallback) as appropriate.
-// Reference: food_home/domain/service/food_service_impl.dart
 ```
 
 ```dart
@@ -90,16 +121,40 @@ Future<ApiResult<Response>> getData() async =>
 
 ---
 
+## Models — Request / Response / Route Params
+
+When passing **3+ params** to a method or navigating with data — use a typed model.
+
+| Use | Suffix | Has |
+|-----|--------|-----|
+| Data sent to API | `XxxRequestModel` | `toJson()` |
+| Data from API | `XxxModel` | `fromJson()` |
+| Screen navigation data | `XxxRouteParamsModel` | nothing |
+
+```dart
+// ❌ service.signup(name, email, password, phone)
+// ✅
+class SignupRequestModel {
+  final String name; final String email; final String password;
+  const SignupRequestModel({required this.name, required this.email, required this.password});
+  Map<String, dynamic> toJson() => {'name': name, 'email': email, 'password': password};
+}
+Future<void> signup({required SignupRequestModel request}) async { ... }
+```
+
+File placement: `data/model/<feature>_route_models.dart` for request + route param models.
+**Reference:** `ycab_user/features/ride_booking/data/model/book_ride_route_models.dart`
+
+---
+
 ## Endpoints (`core/utils/endpoints.dart`)
 
 ```dart
-// ✅ All API paths here — grouped by feature
 class Endpoints {
   Endpoints._();
   static const String config = 'config';
   static const String foodHome = 'api/food/home';
 }
-
 // ❌ NEVER put endpoint paths in AppConstants
 ```
 
@@ -114,7 +169,7 @@ class Failure<T> extends ApiResult<T> { final String message; final int? statusC
 ```
 
 - **Repo always returns `ApiResult<Response>`** — never nullable
-- Error toast is shown automatically by `ApiClientImpl` — callers never need try/catch
+- Error toast shown automatically by `ApiClientImpl` — callers never need try/catch
 
 ---
 
@@ -131,10 +186,4 @@ class FeatureBinding extends Bindings {
 }
 ```
 
-Add `FeatureBinding()` to the `bindings` list in `get_di.dart`.
-
-**Critical:** A feature is not DI-complete until both are true:
-1. Controller implements `GetxService`
-2. Binding is registered in `core/helper/get_di.dart`
-
-Missing either one causes runtime `Get.find()` failures.
+Add `FeatureBinding()` to `get_di.dart`. Controller must implement `GetxService` or `Get.find()` will fail.
