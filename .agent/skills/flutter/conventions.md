@@ -56,7 +56,7 @@ Feature-local files (models, repos, own widgets) still use relative imports.
 - **Explicit types** — `final bool x = false`, never `final x = false`
 - **Return types** — every method must have explicit return type
 - **`Get.lazyPut`** — never `Get.put()`
-- **`dart format`** — run before analyze; use `analysis_options.yaml` page width
+- **`dart format --page-width 110`** — run before analyze on changed Dart files
 - **`dart analyze`** — run after every file change, zero errors
 - **`.tr`** — all user-facing strings must be translated
 - **`const`** — use wherever possible
@@ -66,7 +66,7 @@ Feature-local files (models, repos, own widgets) still use relative imports.
 ## Pre-Submit Checklist
 
 - [ ] `dart analyze` — zero errors
-- [ ] `dart format` ran on changed Dart files
+- [ ] `dart format --page-width 110` ran on changed Dart files
 - [ ] No `setState` (use `ValueNotifier` or `GetBuilder`)
 - [ ] No hardcoded colors/sizes (use tokens)
 - [ ] No `Get.to()` / `Get.arguments` (use `AppNav` + constructors)

@@ -20,7 +20,7 @@
 16. **Mixin composition for large controllers** — split after ~150 lines or 3+ concerns
 17. **Stable UI mapping in enums/models** — keep enums in `features/<feature>/data/enum/`
 18. **Production cleanup** — no stale TODOs/dead commented paths in active flows
-19. **dart format before analyze** — format changed Dart files using `analysis_options.yaml` page width
+19. **dart format before analyze** — run `dart format --page-width 110` on changed Dart files
 20. **dart analyze after every file** — zero errors before proceeding
 21. **Search before creating** — reuse existing code before making widgets/components
 22. **Dialogs/sheets use static `.show()` APIs** — no loose `showDialog()`/`showModalBottomSheet()` in views
