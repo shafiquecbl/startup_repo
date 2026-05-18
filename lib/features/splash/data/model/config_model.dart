@@ -12,11 +12,11 @@ class ConfigModel {
   });
 
   factory ConfigModel.fromJson(Map<String, dynamic> json) => ConfigModel(
-        termsAndConditions: _extractValue(json, 'terms_condition'),
-        privacyPolicy: _extractValue(json, 'privacy_policy'),
-        userAgreement: _extractValue(json, 'user_agreement'),
-        cancelAnytime: _extractValue(json, 'cancel_anytime'),
-      );
+    termsAndConditions: _extractValue(json, 'terms_condition'),
+    privacyPolicy: _extractValue(json, 'privacy_policy'),
+    userAgreement: _extractValue(json, 'user_agreement'),
+    cancelAnytime: _extractValue(json, 'cancel_anytime'),
+  );
 
   /// Safely extract nested `{ "key": { "value": "..." } }` pattern
   static String _extractValue(Map<String, dynamic> json, String key) {
@@ -27,9 +27,9 @@ class ConfigModel {
   }
 
   Map<String, dynamic> toJson() => {
-        'terms_condition': {'value': termsAndConditions},
-        'privacy_policy': {'value': privacyPolicy},
-        'user_agreement': {'value': userAgreement},
-        'cancel_anytime': {'value': cancelAnytime},
-      };
+    'terms_condition': {'value': termsAndConditions},
+    'privacy_policy': {'value': privacyPolicy},
+    'user_agreement': {'value': userAgreement},
+    'cancel_anytime': {'value': cancelAnytime},
+  };
 }

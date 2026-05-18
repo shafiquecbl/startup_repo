@@ -88,30 +88,18 @@ class ApiClientImpl extends GetxService implements ApiClient {
     String uri, {
     Map<String, String>? headers,
     Map<String, String>? queryParams,
-  }) =>
-      _request('GET', uri, headers: headers, queryParams: queryParams);
+  }) => _request('GET', uri, headers: headers, queryParams: queryParams);
 
   @override
-  Future<ApiResult<Response>> post(
-    String uri,
-    Map<String, dynamic> body, {
-    Map<String, String>? headers,
-  }) =>
+  Future<ApiResult<Response>> post(String uri, Map<String, dynamic> body, {Map<String, String>? headers}) =>
       _request('POST', uri, body: body, headers: headers);
 
   @override
-  Future<ApiResult<Response>> put(
-    String uri,
-    Map<String, dynamic> body, {
-    Map<String, String>? headers,
-  }) =>
+  Future<ApiResult<Response>> put(String uri, Map<String, dynamic> body, {Map<String, String>? headers}) =>
       _request('PUT', uri, body: body, headers: headers);
 
   @override
-  Future<ApiResult<Response>> delete(
-    String uri, {
-    Map<String, String>? headers,
-  }) =>
+  Future<ApiResult<Response>> delete(String uri, {Map<String, String>? headers}) =>
       _request('DELETE', uri, headers: headers);
 
   void _printData(String url, {Map<String, dynamic>? body}) {

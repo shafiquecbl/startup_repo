@@ -32,7 +32,7 @@ const DEFAULT_SOURCE = path.join(
 // Data directories — NEVER synced, NEVER overwritten
 const DATA_DIRS = [
   { dir: path.join(AGENT_DIR, 'context'), files: { 'registry.md': 'registry.md' } },
-  { dir: path.join(AGENT_DIR, 'memory'), files: { 'decisions.md': 'decisions.md', 'pending_promotions.md': 'pending_promotions.md' } },
+  { dir: path.join(AGENT_DIR, 'memory'), files: { 'decisions.md': 'decisions.md', 'learning_log.md': 'learning_log.md' } },
   { dir: path.join(AGENT_DIR, 'memory', 'handoffs'), files: {} },
   { dir: path.join(AGENT_DIR, 'plan'), files: { 'active.md': 'active.md', 'history.md': 'history.md' } },
   { dir: path.join(AGENT_DIR, 'plan', 'checklists'), files: {} },
@@ -120,18 +120,7 @@ function main() {
     }
   }
 
-  // Step 5: Check pending promotions
-  const pendingPath = path.join(AGENT_DIR, 'memory', 'pending_promotions.md');
-  if (fs.existsSync(pendingPath)) {
-    const content = fs.readFileSync(pendingPath, 'utf8');
-    const entryCount = (content.match(/^## \d{4}/gm) || []).length;
-    if (entryCount > 0) {
-      console.log(`\n⚠ ${entryCount} pending promotion(s) in memory/pending_promotions.md`);
-      console.log('  Review and add to brain/skills/flutter/learning_log.md');
-    }
-  }
-
-  // Step 6: Archive old handoffs (>14 days)
+  // Step 5: Archive old handoffs (>14 days)
   const handoffDir = path.join(AGENT_DIR, 'memory', 'handoffs');
   if (fs.existsSync(handoffDir)) {
     const now = Date.now();
@@ -159,7 +148,7 @@ function main() {
     }
   }
 
-  // Step 7: Install CLI dependencies if needed
+  // Step 6: Install CLI dependencies if needed
   const toolsDir = path.join(BRAIN_DIR, 'tools');
   const nodeModules = path.join(toolsDir, 'node_modules');
   if (!fs.existsSync(nodeModules) && fs.existsSync(path.join(toolsDir, 'package.json'))) {

@@ -49,7 +49,9 @@ Detail files on-demand only:
 | widgets.md | Building UI components |
 | conventions.md | Navigation, imports, naming |
 | workflows.md | New features, screens, migrations |
-| learning_log.md | After being corrected — append immediately |
+
+When corrected, log the project-specific lesson in `.agent/memory/learning_log.md`.
+If the lesson becomes a global working rule, update startup_repo `skills/` directly.
 
 ## CRG MCP Tools
 Use these for all codebase navigation (replaces brain.js):

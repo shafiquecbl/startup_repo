@@ -4,6 +4,21 @@
 
 ---
 
+## Quick Rules
+
+1. **No hardcoded design values** — use app tokens for spacing, radius, typography, and colors.
+2. **Use short token names** — `p16`, `r16`, `font16`; no verbose duplicates like `padding16`.
+3. **Spacing uses `AppPadding` or `.sp`** — no raw `EdgeInsets.all(16)` or `SizedBox(height: 16)`.
+4. **Radii use `AppRadius`** — all shaped corners use `RoundedSuperellipseBorder`.
+5. **Brand colors are static** — `AppColors.primary`, `secondary`, `error`.
+6. **Theme-varying colors come from context/theme** — background, surface, card, text, subtext, divider.
+7. **Typography uses context extensions** — `context.font10` through `context.font32`.
+8. **Use `copyWith` for variants** — change weight/color on an existing text style.
+9. **Snap one-off design values** — if design says 12px, choose nearest approved token.
+10. **Add new tokens only for repeated need** — never for a single screen.
+
+---
+
 ## AppPadding
 
 | Token | Value | Use |
@@ -15,6 +30,9 @@
 | `AppPadding.p20` | 20sp | Large padding |
 | `AppPadding.p24` | 24sp | Section spacing |
 | `AppPadding.screen` | 16sp H | Screen edge padding |
+
+Use short token names: `p16`, `r16`, `font16`.
+Do not create verbose duplicates like `padding16`, `circular16`, or `bodyText16`.
 
 ---
 
@@ -56,6 +74,9 @@ AppColors.of(context).text
 AppColors.of(context).subtext
 AppColors.of(context).divider
 ```
+
+Use static colors only for fixed brand/system colors.
+Use `AppColors.of(context)` for theme-varying surfaces, text, subtext, and dividers.
 
 ---
 

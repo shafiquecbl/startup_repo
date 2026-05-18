@@ -4,6 +4,25 @@
 
 ---
 
+## Quick Rules
+
+1. **Feature folders stay layered** — `data/`, `domain/`, `presentation/`; screens in `presentation/view/`, extracted widgets in `presentation/widgets/`.
+2. **Flow is one-way** — `Controller → Service → Repository → ApiClient`.
+3. **Controller owns UI state** — loading/data/error fields, `update()`, and lifecycle cleanup live in controller.
+4. **Controller implements `GetxService`** — feature binding must register it in `core/helper/get_di.dart`.
+5. **Large controllers split into mixins** — split after ~150 lines or 3+ concerns; mixins never call `Get.find()`.
+6. **Repository is API-only** — only calls `ApiClient`, returns `ApiResult<Response>`, no parsing/business logic.
+7. **Service owns parsing** — unwraps `ApiResult`, parses JSON, returns plain model/list/null to controller.
+8. **Controller never handles raw API** — no `Response`, no `ApiResult`, no `jsonDecode` in controllers.
+9. **Typed models for data boundaries** — use `XxxRequestModel`, `XxxModel`, `XxxRouteParamsModel`.
+10. **3+ params need a model** — no loose method/navigation arg lists.
+11. **Endpoint paths live in `Endpoints`** — never in `AppConstants`, views, controllers, or repos.
+12. **`ApiResult` is sealed and never nullable** — failure is explicit, not `null`.
+13. **Error parsing is centralized** — use `ApiErrorParser`; do not parse raw error bodies elsewhere.
+14. **Stable UI mapping lives in enum/model getters** — no duplicated mapping methods in widgets.
+
+---
+
 ## Feature Structure
 
 ```
@@ -17,7 +36,8 @@ lib/features/<feature>/
 │   └── service/        # abstract + impl (business logic)
 └── presentation/
     ├── controller/     # GetxController
-    └── view/           # widgets (UI only)
+    ├── view/           # route screens only
+    └── widgets/        # extracted feature widgets
 ```
 
 **Chain:** `Controller → Service → Repository → ApiClient`
@@ -102,12 +122,12 @@ Future<FeatureModel?> getData() async {
 // (e.g., config load failure → redirect). Reference: splash_service_impl.dart
 ```
 
-| Scenario | Return type |
-|----------|-------------|
-| Failure = show empty state | `Model?` |
-| Failure = show empty list | `List<Model>` |
-| Failure = show dummy data | `Model` (never null) |
-| Failure = block the flow | `ApiResult<Model>` ⚠️ |
+| Scenario                   | Return type           |
+| -------------------------- | --------------------- |
+| Failure = show empty state | `Model?`              |
+| Failure = show empty list  | `List<Model>`         |
+| Failure = show dummy data  | `Model` (never null)  |
+| Failure = block the flow   | `ApiResult<Model>` ⚠️ |
 
 ---
 
@@ -125,11 +145,11 @@ Future<ApiResult<Response>> getData() async =>
 
 When passing **3+ params** to a method or navigating with data — use a typed model.
 
-| Use | Suffix | Has |
-|-----|--------|-----|
-| Data sent to API | `XxxRequestModel` | `toJson()` |
-| Data from API | `XxxModel` | `fromJson()` |
-| Screen navigation data | `XxxRouteParamsModel` | nothing |
+| Use                    | Suffix                | Has          |
+| ---------------------- | --------------------- | ------------ |
+| Data sent to API       | `XxxRequestModel`     | `toJson()`   |
+| Data from API          | `XxxModel`            | `fromJson()` |
+| Screen navigation data | `XxxRouteParamsModel` | nothing      |
 
 ```dart
 // ❌ service.signup(name, email, password, phone)
@@ -173,6 +193,19 @@ class Failure<T> extends ApiResult<T> { final String message; final int? statusC
 
 ---
 
+## Error Parsing
+
+Use `ApiErrorParser` for backend error messages.
+
+Rules:
+
+- parsing logic lives in `core/api/error.dart`
+- `ApiClientImpl` calls parser once in `_handleResponse`
+- repositories/services/controllers do not parse raw error bodies
+- add parser strategies when backend formats differ; do not scatter `jsonDecode` error checks
+
+---
+
 ## Binding
 
 ```dart
@@ -187,3 +220,25 @@ class FeatureBinding extends Bindings {
 ```
 
 Add `FeatureBinding()` to `get_di.dart`. Controller must implement `GetxService` or `Get.find()` will fail.
+
+---
+
+## Stable UI Mapping
+
+Move stable mapping logic into enums/models instead of duplicating widget methods.
+
+```dart
+// ✅ enum owns mapping
+enum OrderStatus {
+  pending,
+  outForDelivery;
+
+  int get deliveryStep => switch (this) {
+    OrderStatus.pending => 0,
+    OrderStatus.outForDelivery => 2,
+  };
+}
+
+// ❌ repeated in multiple widgets
+int deliveryStepForStatus(OrderStatus status) => ...
+```

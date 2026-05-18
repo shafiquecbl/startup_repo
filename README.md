@@ -90,16 +90,15 @@ your-project/
     │   └── templates/               ← First-init templates
     │
     ├── skills/flutter/              ← Flutter rules + conventions
-    │   ├── SKILL.md                 ← 12 cardinal rules (always loaded)
+    │   ├── SKILL.md                 ← Cardinal rules (always loaded)
     │   ├── architecture.md          ← Feature structure, API, models, controllers
     │   ├── design_system.md         ← Colors, typography, theming
     │   ├── widgets.md               ← Reusable UI components
     │   ├── conventions.md           ← Naming, imports, navigation
-    │   ├── workflows.md             ← How to build features & screens
-    │   └── learning_log.md          ← Corrections (syncs to all projects)
+    │   └── workflows.md             ← How to build features & screens
     │
     ├── context/registry.md          ← YOUR PROJECT's component map
-    ├── memory/                      ← YOUR PROJECT's decisions & handoffs
+    ├── memory/                      ← YOUR PROJECT's learning log, decisions & handoffs
     └── plan/                        ← YOUR PROJECT's active plan & history
         └── checklists/              ← Execution tracking per task
 ```
@@ -257,20 +256,29 @@ Every task follows 6 steps: Understand → Discover → Analyze → Plan → Exe
 
 ## Flutter Skill Rules
 
-These 12 rules are always loaded. The AI follows them on every task:
+These rules are always loaded. The AI follows them on every task:
 
-1. **No `setState`** — use `ValueNotifier` + `ValueListenableBuilder`, or `GetBuilder`
+1. **No `setState`** — local state uses `ValueNotifier`; shared state uses `GetBuilder`
 2. **Class-based widgets only** — no `Widget _buildX()` function widgets
-3. **No hardcoded values** — use `AppPadding`, `AppRadius`, `context.fontXX`, `AppColors`
-4. **`Endpoints` class for API paths** — never put paths in `AppConstants`
-5. **Explicit types everywhere** — `final bool x = false`, never `final x = false`
-6. **`AppNav` for navigation** — never `Get.to()` directly
-7. **Constructor-based route params** — never `Get.arguments`
-8. **Service returns plain model** — never `ApiResult` in the controller
-9. **`dart analyze` after every file** — zero errors before proceeding
-10. **Search before creating** — check if a component exists before making a new one
-11. **Request models for 3+ params** — create typed `XxxRequestModel` instead
-12. **Mixin composition for large controllers** — split into mixins when > ~150 lines
+3. **Separate widget files** — screens orchestrate; meaningful widgets live in `presentation/widgets/`
+4. **No hardcoded design values** — use `AppPadding`, `AppRadius`, `context.fontXX`, `AppColors`
+5. **Theme-aware design** — static only for brand colors; surfaces/text/dividers from theme/context
+6. **`Endpoints` class for API paths** — never put endpoint strings in `AppConstants`
+7. **Explicit types everywhere** — `final bool x = false`, never `final x = false`
+8. **`AppNav` for navigation** — never call `Get.to`/`Get.back` directly
+9. **Constructor route params** — never use `Get.arguments`
+10. **Repository is API-only** — returns `ApiResult<Response>`, no parsing/business logic
+11. **Service returns plain model** — controller never handles `ApiResult`/`Response`
+12. **ApiErrorParser for errors** — no raw error parsing outside API client/parser
+13. **Request models for 3+ params** — create `XxxRequestModel` instead of loose args
+14. **Get.lazyPut for DI** — controllers implement `GetxService` and binding is registered
+15. **Mixin composition for large controllers** — split after ~150 lines or 3+ concerns
+16. **Stable UI mapping in enums/models** — no duplicated widget mapping methods
+17. **Production cleanup** — no stale TODOs/dead commented paths in active flows
+18. **`dart format` before analyze** — format changed Dart files using `analysis_options.yaml` page width
+19. **`dart analyze` after every file** — zero errors before proceeding
+20. **Search before creating** — reuse existing code before making widgets/components
+21. **Dialogs/sheets use static `.show()` APIs** — no loose `showDialog()`/`showModalBottomSheet()` in views
 
 Detailed rules for architecture, design system, widgets, conventions, and workflows are in separate files loaded on-demand when relevant.
 
@@ -294,10 +302,11 @@ The sync script:
 
 When you correct the AI in a project:
 
-1. AI adds the correction to `learning_log.md` immediately
-2. If it applies to all projects → add to `memory/pending_promotions.md`
-3. Open startup_repo → finalize the rule → push to GitHub
-4. Run `sync.js` in other projects → everyone gets the fix
+1. AI adds the correction to that project's `.agent/memory/learning_log.md`
+2. If it becomes your global working style → open startup_repo
+3. Add the finalized rule directly to `skills/`
+4. Push startup_repo
+5. Run `sync.js` in other projects → everyone gets the rule
 
 ---
 

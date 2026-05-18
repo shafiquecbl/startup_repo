@@ -4,6 +4,21 @@
 
 ---
 
+## Quick Rules
+
+1. **Design-first before screen code** — inventory screens, spot shared patterns, check tokens, plan widgets.
+2. **Build widget files before assembling screens** — screens stay orchestration-only.
+3. **Use existing components first** — search before creating new widgets/models/services.
+4. **Core vs feature widgets** — `core/widgets/` for 2+ features; otherwise `presentation/widgets/`.
+5. **Use focused feature folders** — split monoliths into real feature owners like `food_home`, `food_detail`, `cart`.
+6. **Build dummy-data-first** — complete model, dummy data, repo, service, binding, controller, UI before API swap.
+7. **Keep API swap simple** — dummy line and real service line should be easy to replace.
+8. **Respect data ownership** — import owner models across features instead of duplicating them.
+9. **Document backend contract** — write `docs/api/<feature>_api.md` after dummy feature build.
+10. **Clean before sign-off** — delete dead comments, stale TODOs, and abandoned branches in active flows.
+
+---
+
 ## Design-First — Before Any Screen Code
 
 | Step | Action |
@@ -11,8 +26,8 @@
 | 1. Inventory | List every screen in the feature set |
 | 2. Spot repeating patterns | Cards, tiles, badges, empty states used on 2+ screens |
 | 3. Token-check | Snap non-token values to nearest token (no new tokens) |
-| 4. Plan widgets | `core/widgets/` if used in ≥2 features, else `view/widgets/` |
-| 5. Build widgets first | Then assemble screens from widgets |
+| 4. Plan widgets | `core/widgets/` if used in ≥2 features, else `presentation/widgets/` |
+| 5. Build widget files first | One meaningful widget class per file, then assemble screens |
 | 6. Consistency review | All spacings/radii/colors use tokens, same `Scaffold` structure |
 | 7. Production cleanup | Remove TODO/dead commented paths from active flows before sign-off |
 
@@ -43,21 +58,39 @@ lib/features/<feature>/
 │       └── <feature>_service_impl.dart  # logic + dummy fallback
 └── presentation/
     ├── controller/<feature>_controller.dart
-    └── view/
-        ├── <feature>_screen.dart
-        └── widgets/
+    ├── view/
+    │   └── <feature>_screen.dart       # orchestration only
+    └── widgets/                        # one meaningful widget per file
 ```
 
 ### Build Order: Model → Dummy → Repo → Service → Binding → Controller → UI
 
-### File Split Heuristic (avoid over-fragmentation)
+### Feature Organization
 
-Keep a widget in its own file only if one is true:
-- reused in 2+ places
-- over ~70 lines or has meaningful logic
-- likely to be tested independently
+Prefer focused features over monoliths.
 
-Otherwise, colocate as a private class in the parent file (still class-based, never `Widget _buildX`).
+```
+// ✅ CORRECT
+features/food_home/
+features/food_detail/
+features/cart/
+
+// ❌ WRONG
+features/food/  // home + detail + cart mixed together
+```
+
+Use cross-feature imports for real ownership instead of merging unrelated screens into one feature.
+
+### File Split Heuristic
+
+Create a separate widget file when the UI has a meaningful name, logic, state, callback contract, or reuse.
+
+Rules:
+- screen file = orchestration only
+- extracted widget class = own file
+- shared across 2+ features = `core/widgets/`
+- large feature widget set = subfolders under `widgets/`
+- tiny one-off layout = keep inline; do not invent a widget name just to split
 
 #### Model
 ```dart
@@ -166,3 +199,13 @@ After building, generate `docs/api/<feature>_api.md` for backend devs.
 \```
 Response JSON must match model's `fromJson` keys exactly.
 ```
+
+---
+
+## Production Cleanup
+
+Before sign-off:
+- delete dead commented code
+- delete stale TODOs in active flows
+- use the working behavior or an explicit safe fallback
+- do not leave abandoned branches inside production widgets/controllers

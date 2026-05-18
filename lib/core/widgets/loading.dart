@@ -6,10 +6,7 @@ class LoadingWidget extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return const Column(
-      mainAxisAlignment: MainAxisAlignment.center,
-      children: [Loading()],
-    );
+    return const Column(mainAxisAlignment: MainAxisAlignment.center, children: [Loading()]);
   }
 }
 
@@ -19,10 +16,6 @@ class Loading extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return SizedBox(
-      width: size.sp,
-      height: size.sp,
-      child: const CircularProgressIndicator.adaptive(),
-    );
+    return SizedBox(width: size.sp, height: size.sp, child: const CircularProgressIndicator.adaptive());
   }
 }
