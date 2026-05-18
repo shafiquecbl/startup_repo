@@ -16,7 +16,8 @@
 8. **User-facing strings use `.tr`** — no raw visible English in widgets.
 9. **Use `const` wherever possible** — constructors, widgets, lists, and values.
 10. **Dispose owned resources** — controllers, focus nodes, notifiers, streams, timers.
-11. **No dead paths** — remove stale TODOs and commented production branches.
+11. **Pair backing fields with getters** — declare each private field directly above its getter.
+12. **No dead paths** — remove stale TODOs and commented production branches.
 
 ---
 
@@ -59,9 +60,8 @@ Feature-local files (models, repos, own widgets) still use relative imports.
 - **`dart analyze`** — run after every file change, zero errors
 - **`.tr`** — all user-facing strings must be translated
 - **`const`** — use wherever possible
+- **Backing field + getter pairs** — keep each private field immediately above its getter
 - **No dead paths** — delete stale TODOs and commented-out production code
-
----
 
 ## Pre-Submit Checklist
 
@@ -73,6 +73,7 @@ Feature-local files (models, repos, own widgets) still use relative imports.
 - [ ] No `Get.put()` (use `Get.lazyPut()`)
 - [ ] All strings use `.tr`
 - [ ] All vars/params/returns have explicit types
+- [ ] Private backing fields are paired directly with getters
 - [ ] Endpoints use `Endpoints.xxx` (not `AppConstants`)
 - [ ] Class-based widgets only (no `Widget _buildX()`)
 - [ ] `dispose()` called for all controllers, focus nodes, notifiers

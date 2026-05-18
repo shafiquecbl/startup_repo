@@ -7,19 +7,21 @@
 ## Quick Rules
 
 1. **Feature folders stay layered** — `data/`, `domain/`, `presentation/`; screens in `presentation/view/`, extracted widgets in `presentation/widgets/`.
-2. **Flow is one-way** — `Controller → Service → Repository → ApiClient`.
-3. **Controller owns UI state** — loading/data/error fields, `update()`, and lifecycle cleanup live in controller.
-4. **Controller implements `GetxService`** — feature binding must register it in `core/helper/get_di.dart`.
-5. **Large controllers split into mixins** — split after ~150 lines or 3+ concerns; mixins never call `Get.find()`.
-6. **Repository is API-only** — only calls `ApiClient`, returns `ApiResult<Response>`, no parsing/business logic.
-7. **Service owns parsing** — unwraps `ApiResult`, parses JSON, returns plain model/list/null to controller.
-8. **Controller never handles raw API** — no `Response`, no `ApiResult`, no `jsonDecode` in controllers.
-9. **Typed models for data boundaries** — use `XxxRequestModel`, `XxxModel`, `XxxRouteParamsModel`.
-10. **3+ params need a model** — no loose method/navigation arg lists.
-11. **Endpoint paths live in `Endpoints`** — never in `AppConstants`, views, controllers, or repos.
-12. **`ApiResult` is sealed and never nullable** — failure is explicit, not `null`.
-13. **Error parsing is centralized** — use `ApiErrorParser`; do not parse raw error bodies elsewhere.
-14. **Stable UI mapping lives in enum/model getters** — no duplicated mapping methods in widgets.
+2. **Do not invent architecture layers** — do not add new top-level feature layers or bypass the defined layer responsibilities.
+3. **Enums live beside models** — keep feature enums in `features/<feature>/data/enum/`, just like models live in `data/model/`.
+4. **Flow is one-way** — `Controller → Service → Repository → ApiClient`.
+5. **Controller owns UI state** — loading/data/error fields, `update()`, and lifecycle cleanup live in controller.
+6. **Controller implements `GetxService`** — feature binding must register it in `core/helper/get_di.dart`.
+7. **Large controllers split into mixins** — split after ~150 lines or 3+ concerns; mixins never call `Get.find()`.
+8. **Repository is API-only** — only calls `ApiClient`, returns `ApiResult<Response>`, no parsing/business logic.
+9. **Service owns parsing** — unwraps `ApiResult`, parses JSON, returns plain model/list/null to controller.
+10. **Controller never handles raw API** — no `Response`, no `ApiResult`, no `jsonDecode` in controllers.
+11. **Typed models for data boundaries** — use `XxxRequestModel`, `XxxModel`, `XxxRouteParamsModel`.
+12. **3+ params need a model** — no loose method/navigation arg lists.
+13. **Endpoint paths live in `Endpoints`** — never in `AppConstants`, views, controllers, or repos.
+14. **`ApiResult` is sealed and never nullable** — failure is explicit, not `null`.
+15. **Error parsing is centralized** — use `ApiErrorParser`; do not parse raw error bodies elsewhere.
+16. **Stable UI mapping lives in enum/model getters** — no duplicated mapping methods in widgets.
 
 ---
 
@@ -30,6 +32,7 @@ lib/features/<feature>/
 ├── data/
 │   ├── model/          # fromJson, toJson, const constructors
 │   │   └── dummy/      # dummy_<feature>_data.dart
+│   ├── enum/           # feature enums and enum mapping extensions
 │   └── repository/     # abstract + impl (API calls only)
 ├── domain/
 │   ├── binding/        # Get.lazyPut wiring
@@ -226,6 +229,7 @@ Add `FeatureBinding()` to `get_di.dart`. Controller must implement `GetxService`
 ## Stable UI Mapping
 
 Move stable mapping logic into enums/models instead of duplicating widget methods.
+Feature enums live under `features/<feature>/data/enum/`.
 
 ```dart
 // ✅ enum owns mapping
