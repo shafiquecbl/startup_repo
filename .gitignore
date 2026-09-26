@@ -45,6 +45,7 @@ app.*.map.json
 /android/app/release
 
 .fvm/
+.serena/
 .env
 .env.*
 /android/app/signing.properties

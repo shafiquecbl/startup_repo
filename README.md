@@ -2,7 +2,7 @@
 
 A production-ready Flutter boilerplate with **Agent Brain** — a context engineering framework that gives AI coding tools memory, planning, codebase awareness, and the ability to push back on bad decisions.
 
-Uses **[code-review-graph](https://github.com/tirth8205/code-review-graph)** MCP for codebase indexing and navigation — Tree-sitter AST parsing, blast-radius analysis, and semantic search with **6.8× fewer tokens** on reviews.
+Uses **[Serena](https://github.com/oraios/serena)** MCP for symbol-aware code navigation, reference lookup, and focused edits through the Dart language server.
 
 Works with **Google Antigravity**, **Claude Code**, **GitHub Copilot**, and any AI tool with file + terminal access.
 
@@ -19,7 +19,7 @@ AI coding tools are stateless. Every session starts blank. This means:
 - AI **ignores** your architecture rules and conventions
 - AI **never pushes back** when you ask for something that contradicts past decisions
 
-Agent Brain fixes all of this using **files + code-review-graph MCP**. No paid service. No proprietary lock-in.
+Agent Brain fixes this using **portable files + Serena MCP**. `.agent/` remains the source of truth; Serena provides code intelligence.
 
 ---
 
@@ -32,14 +32,19 @@ git clone https://github.com/shafiquecbl/startup_repo.git my-project
 cd my-project
 ```
 
-### 2. Install code-review-graph
+### 2. Install Serena
 
 ```bash
-pip install code-review-graph
-code-review-graph build
+curl -LsSf https://astral.sh/uv/install.sh | sh
+uv tool install -p 3.13 serena-agent
+serena init
+serena setup codex
+serena project create . --ls dart --index
 ```
 
-That's it. Open your project in any AI tool and start coding — it reads `AGENTS.md` automatically.
+The setup command above targets Codex. For another AI client, use Serena's
+[official client instructions](https://oraios.github.io/serena/02-usage/030_clients.html).
+Open the project after setup — the AI reads `AGENTS.md`, activates Serena, and starts working.
 
 ### Using with an existing project
 
@@ -50,10 +55,9 @@ cp path/to/startup_repo/AGENTS.md your-project/
 cp path/to/startup_repo/CLAUDE.md your-project/
 cp -r path/to/startup_repo/.github your-project/
 
-# Build the code graph
+# Configure Serena for this project
 cd your-project
-pip install code-review-graph
-code-review-graph build
+serena project create . --ls dart --index
 ```
 
 ---
@@ -67,7 +71,7 @@ Every AI tool reads `AGENTS.md` at the project root, which points to `.agent/bra
 **Discipline** — every task follows the same lifecycle, regardless of size:
 
 1. **Understand** — know what's correct before touching what's wrong
-2. **Discover** — find every occurrence (CRG search, scan, audit)
+2. **Discover** — use Serena symbols/references, then targeted text search when needed
 3. **Analyze** — read each case, document what's wrong AND what the fix is
 4. **Plan** — write a checklist with context per item (not flat `[ ] file.dart`)
 5. **Execute** — fix one item at a time, mark done, never batch
@@ -105,7 +109,7 @@ your-project/
 
 **Key separation:** `brain/` and `skills/` are the shared tools (same across all projects). `context/`, `memory/`, and `plan/` are your project's data (unique per project, never overwritten by sync).
 
-**Codebase navigation** is handled by code-review-graph MCP — no custom DB needed. CRG builds a Tree-sitter AST graph of your codebase and provides semantic search, impact analysis, and blast-radius computation via MCP tools.
+**Codebase navigation** is handled by Serena MCP. It uses the Dart language server to find symbols, references, diagnostics, and focused edit targets without reading entire files. Serena memory is disabled because `.agent/` owns project memory and workflow.
 
 ---
 
@@ -121,7 +125,7 @@ Without Agent Brain, asking "create a loading button" produces a brand new widge
 You: Create a loading button for the checkout screen
 
 AI: Searching existing components...
-→ CRG semantic_search_nodes_tool "button"
+→ Serena symbol search: "button"
 
 Found:
   PrimaryButton — lib/core/widgets/primary_button.dart
@@ -183,7 +187,7 @@ AI: 6+ files → planning first.
 - [ ] Checkout flow via AppNav
 - [ ] dart analyze on all new files
 
-→ CRG search: QuantitySelector already exists at
+→ Serena symbol search: QuantitySelector already exists at
   lib/features/food_detail/presentation/widgets/quantity_selector.dart
 Reusing it.
 
@@ -215,7 +219,7 @@ Every task follows 6 steps: Understand → Discover → Analyze → Plan → Exe
 
 **Step 1 — UNDERSTAND:** Read design_system.md. The correct pattern is `context.theme.dividerColor`, `context.font14` — not local `ThemeData` variables.
 
-**Step 2 — DISCOVER:** CRG `semantic_search_nodes_tool` + grep for `Theme.of` → 56 matches in 22 files.
+**Step 2 — DISCOVER:** Serena symbol navigation + targeted search for `Theme.of` → 56 matches in 22 files.
 
 **Step 3 — ANALYZE:** Read each file. Document with LINE NUMBERS what's wrong and the exact replacement. Write into checklist.
 
@@ -321,7 +325,7 @@ Agent Brain is Flutter-first but framework-agnostic at its core. To add React, P
 
 1. Create `.agent/skills/react/SKILL.md` with cardinal rules
 2. Add detail files (architecture, conventions, etc.)
-3. Everything else (sync, planning, memory, CRG) works unchanged
+3. Everything else (sync, planning, memory, Serena) works unchanged
 
 ---
 
@@ -329,9 +333,9 @@ Agent Brain is Flutter-first but framework-agnostic at its core. To add React, P
 
 | Component | Purpose |
 |-----------|---------|
-| `BRAIN.md` | Orchestrator — push-back rules, execution lifecycle, CRG reference |
+| `BRAIN.md` | Orchestrator — workflow, project state, and Serena routing |
 | `SKILL.md` | Flutter cardinal rules (always loaded) |
-| `code-review-graph` | MCP-based codebase indexing, search, and impact analysis |
+| `Serena` | MCP-based symbol navigation, references, diagnostics, and focused edits |
 | `sync.js` | Cross-project sync script |
 
 **Token budget:** Always-loaded context is ~830 tokens. Maximum at any time is ~5,000 tokens. Caveman mode reduces output by ~60-75%.
@@ -340,9 +344,9 @@ Agent Brain is Flutter-first but framework-agnostic at its core. To add React, P
 
 ## Requirements
 
-- **Python** 3.10+ (for code-review-graph)
+- **uv + Serena** (for required code intelligence)
 - **Flutter** 3.x (for the boilerplate itself)
-- Any AI coding tool with file access and terminal (Antigravity, Claude Code, Copilot, Cursor, etc.)
+- An MCP-capable AI coding tool (Codex, Claude Code, Copilot, Cursor, etc.)
 
 ---
 

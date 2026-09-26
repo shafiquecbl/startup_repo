@@ -21,14 +21,17 @@ Use caveman mode → short, direct, no filler. Explain deeply only when asked.
 
 ## Code Navigation
 
-Use `code-review-graph` first when its MCP tools are available and indexed.
+Serena MCP is mandatory for code exploration and symbol-aware edits.
 
-- Search → `semantic_search_nodes`
-- Relationships → `query_graph`
-- Impact → `get_impact_radius`
-- Review → `detect_changes` + `get_review_context`
+1. Activate the current project with Serena before reading code.
+2. Use symbol overview/search and reference lookup before opening whole files.
+3. Use Serena's symbol editing/refactoring tools when they fit the change.
+4. Use targeted `rg` for plain text, configuration, generated files, or gaps in language-server support.
 
-If the graph is unavailable, use targeted `rg`, focused file reads, and normal build tools. Do not install tooling automatically.
+If Serena is missing, disconnected, or the project is not configured, stop normal code work and follow
+[`SERENA.md`](SERENA.md). Install, configure, activate, and verify it instead of silently falling back.
+
+`.agent/` remains the source of truth for memory and workflow. Do not use Serena memories or onboarding.
 
 ## Workflow
 
