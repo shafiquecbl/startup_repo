@@ -1,4 +1,5 @@
 import 'package:startup_repo/imports.dart';
+
 import 'theme_repo.dart';
 
 class ThemeRepoImpl implements ThemeRepo {
@@ -6,13 +7,8 @@ class ThemeRepoImpl implements ThemeRepo {
   ThemeRepoImpl({required this.prefs});
 
   @override
-  ThemeMode loadCurrentTheme() {
-    final value = prefs.getString(SharedKeys.theme) ?? 'system';
-    return ThemeMode.values.byName(value);
-  }
+  String? loadThemeMode() => prefs.getString(SharedKeys.theme);
 
   @override
-  Future<bool> saveThemeMode(ThemeMode themeMode) async {
-    return await prefs.setString(SharedKeys.theme, themeMode.name);
-  }
+  Future<bool> saveThemeMode(String themeMode) => prefs.setString(SharedKeys.theme, themeMode);
 }

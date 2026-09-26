@@ -1,11 +1,12 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
-import '../../data/repository/theme_repo.dart';
+
+import '../../domain/service/theme_service.dart';
 
 class ThemeController extends GetxController implements GetxService {
-  final ThemeRepo themeRepo;
+  final ThemeService themeService;
 
-  ThemeController({required this.themeRepo}) {
+  ThemeController({required this.themeService}) {
     _loadCurrentTheme();
   }
 
@@ -13,14 +14,13 @@ class ThemeController extends GetxController implements GetxService {
   ThemeMode get themeMode => _themeMode;
 
   void _loadCurrentTheme() {
-    _themeMode = themeRepo.loadCurrentTheme();
-    Get.changeThemeMode(_themeMode);
+    _themeMode = themeService.loadCurrentTheme();
     update();
   }
 
   void setThemeMode(ThemeMode themeMode) {
     _themeMode = themeMode;
-    themeRepo.saveThemeMode(themeMode);
+    themeService.saveThemeMode(themeMode);
     Get.changeThemeMode(_themeMode);
     update();
   }

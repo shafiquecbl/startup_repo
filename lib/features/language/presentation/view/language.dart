@@ -23,7 +23,7 @@ class _LanguageScreenState extends State<LanguageScreen> {
               children: [
                 CustomTextField(
                   hintText: 'search_langauge'.tr,
-                  suffixIcon: Iconsax.search_normal,
+                  suffixIcon: HugeIcons.strokeRoundedSearch01,
                   onChanged: con.searchLanguage,
                 ),
                 SizedBox(height: 16.sp),
@@ -73,7 +73,7 @@ class _LanguageScreenState extends State<LanguageScreen> {
       ),
       bottomNavigationBar: Padding(
         padding: AppPadding.p16.copyWith(top: 0),
-        child: PrimaryButton(text: 'done'.tr, onPressed: Get.back),
+        child: PrimaryButton(text: 'done'.tr, onPressed: AppNav.back),
       ),
     );
   }

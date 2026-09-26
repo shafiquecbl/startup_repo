@@ -10,7 +10,7 @@
 2. **Class widgets only** — no `Widget _buildX()` helpers.
 3. **Screens orchestrate only** — route setup, controller binding, and high-level layout stay in screen files.
 4. **Meaningful widget classes get own files** — feature widgets live in `features/<feature>/presentation/widgets/`.
-5. **Shared widgets move to `core/widgets/`** — only when used by 2+ features.
+5. **Extract repeated visuals once** — repeated in one feature → feature widget; used by 2+ features → `core/widgets/`.
 6. **Large widget sets get subfolders** — group by focus like `header/`, `form/`, `summary/`, `sheet/`.
 7. **Do not over-fragment tiny layout** — keep a one-off `Row`/`Padding` inline until it earns a name.
 8. **Theme-first UI** — prefer built-in themed widgets, then app wrappers, then custom widgets.
@@ -19,6 +19,8 @@
 11. **Use `AppImage`** — no direct `Image.network()` in app UI.
 12. **Dialogs/sheets expose static `.show()`** — no loose `showDialog()`/`showModalBottomSheet()` in views.
 13. **Forms own controllers/focus nodes** — validate on submit and dispose everything.
+14. **Feature widgets own their feature state** — do not explode one controller into long field/callback constructor lists.
+15. **No `FutureBuilder` for feature data** — controller state renders loading/error/empty/content.
 
 ---
 
@@ -86,6 +88,35 @@ presentation/
         └── order_total_row.dart
 ```
 
+### Feature Widget Ownership
+
+A screen composes sections. It should not read one controller, derive every label, and forward all state/actions as
+parameters. That hides the real behavior in the screen and makes every child rebuild with a large constructor.
+
+```dart
+// ✅ Feature-specific section owns its focused reactive subtree.
+class ProfileIdentityCard extends StatelessWidget {
+  const ProfileIdentityCard({super.key});
+
+  @override
+  Widget build(BuildContext context) {
+    return GetBuilder<ProfileController>(
+      builder: (ProfileController controller) {
+        return ProfileIdentityContent(profile: controller.profile, onEdit: controller.openEditProfile);
+      },
+    );
+  }
+}
+```
+
+- Feature-specific widgets may use their focused controller directly.
+- Reusable presentational widgets receive one cohesive model/value plus semantic callbacks.
+- Core widgets stay controller-agnostic and accept only the configuration they genuinely need.
+- Do not pass controller-derived title, subtitle, status, photo, progress, and fixed navigation callbacks separately.
+- Keep fixed navigation and feature actions with the feature widget/controller that owns them.
+- Do not copy a visual component and tweak each screen independently.
+- Parameterize meaningful variations, but do not replace copies with one giant dozens-of-parameters widget.
+
 ---
 
 ## Rule 3: Theme-First — Use Built-in Widgets
@@ -119,7 +150,7 @@ PrimaryButton(text: 'login', isLoading: con.isLoading, onPressed: _submit)
 | `AppImage` | `CachedNetworkImage` | Shimmer, error, asset fallback |
 | `ConfirmationDialog` | `showDialog` | Static `.show()` |
 | `ConfirmationSheet` | `showModalBottomSheet` | Static `.show()` |
-| `AppDialog` | `SmartDialog` | `.showLoading()`, `.showToast()` |
+| `AppToast` | `Toastification` | Deduplicated success/error/info/warning feedback |
 
 ---
 
@@ -127,7 +158,7 @@ PrimaryButton(text: 'login', isLoading: con.isLoading, onPressed: _submit)
 
 ```dart
 const LoadingWidget()                          // centered spinner
-EmptyStateWidget(icon: Iconsax.box, title: 'no_items'.tr)
+EmptyStateWidget(icon: Icons.inbox_outlined, title: 'no_items'.tr)
 ErrorStateWidget(message: 'error'.tr, onRetry: () => controller.load())
 
 // Skeletons
@@ -139,6 +170,19 @@ const SkeletonListTile()
 For feature-level skeletons, keep dedicated files under:
 `features/<feature>/presentation/shimmers/`.
 Consolidate related shimmers into one file when they are tightly related (e.g., list + stats + details for same feature).
+
+Choose feedback by operation:
+
+| Operation | UI treatment |
+| --- | --- |
+| First content load with known layout | Layout-matching skeleton with a subtle fade/pulse |
+| Blocking startup/session work | Full-screen loader when the next layout is genuinely unknown |
+| Pull-to-refresh | Keep content visible and show refresh feedback |
+| Pagination | Footer loader/skeleton; never replace the current list |
+| Button/tile mutation | Loading only on the affected control |
+
+Avoid an aggressive sweeping highlight. A skeleton should preserve the expected layout and feel quieter than the
+content it represents.
 
 ---
 
@@ -156,10 +200,13 @@ AppImage(asset: Images.logo, width: 120.sp)
 
 ```dart
 // ✅ CORRECT
-ConfirmationDialog.show(title: 'delete_item'.tr, onAccept: () {});
-AppDialog.showLoading();
-AppDialog.dismiss();
-AppDialog.showToast('success'.tr);
+ConfirmationDialog.show(
+  title: 'delete_item',
+  subtitle: 'delete_item_confirmation',
+  actionText: 'delete',
+  onAccept: controller.deleteItem,
+);
+AppToast.success('saved_successfully'.tr);
 
 // ❌ WRONG — loose function
 showDialog(context: context, builder: (_) => ...);
@@ -190,4 +237,12 @@ class _LoginScreenState extends State<LoginScreen> {
 }
 ```
 
-Key: `textInputAction: TextInputAction.next`, `onSubmitted: (_) => nextFocus.requestFocus()`, validate on submit.
+Keyboard and focus rules:
+
+- Intermediate single-line field: `TextInputAction.next`, then request the next focus node.
+- Final form field: `TextInputAction.done`, then submit or unfocus.
+- Chat/search action: use `send`/`search` when that is the actual action.
+- Multiline field: use newline only when line breaks are meaningful; otherwise use done and dismiss/submit.
+- `onSubmitted` must move focus, submit, or unfocus. Do not leave the keyboard action inert.
+- Tap-outside dismissal supplements a correct keyboard action; it does not replace it.
+- Dispose every owned `TextEditingController`, `FocusNode`, and notifier.

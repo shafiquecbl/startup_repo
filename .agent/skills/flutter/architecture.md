@@ -13,13 +13,13 @@
 5. **Controller owns UI state** — loading/data/error fields, `update()`, and lifecycle cleanup live in controller.
 6. **Controller implements `GetxService`** — feature binding must register it in `core/helper/get_di.dart`.
 7. **Large controllers split into mixins** — split after ~150 lines or 3+ concerns; mixins never call `Get.find()`.
-8. **Repository is API-only** — only calls `ApiClient`, returns `ApiResult<Response>`, no parsing/business logic.
-9. **Service owns parsing** — unwraps `ApiResult`, parses JSON, returns plain model/list/null to controller.
-10. **Controller never handles raw API** — no `Response`, no `ApiResult`, no `jsonDecode` in controllers.
-11. **Typed models for data boundaries** — use `XxxRequestModel`, `XxxModel`, `XxxRouteParamsModel`.
-12. **3+ params need a model** — no loose method/navigation arg lists.
+8. **Repository is infrastructure-only** — calls `ApiClient`, storage, or database and returns raw `ApiResult<Object?>`; no feature models, parsing, or business logic.
+9. **Service owns feature logic** — converts models to request data, unwraps `ApiResult`, parses raw JSON, and returns plain values/models to controllers.
+10. **Controller owns UI state** — no `ApiResult`, raw response parsing, repository calls, or `FutureBuilder`-owned feature state.
+11. **Typed inputs represent one action** — a cohesive form/action payload travels UI → controller → service as one model.
+12. **Do not model by parameter count** — independent ids, pages, queries, and toggles may stay scalars; avoid one-field wrappers and mechanical `3+` rules.
 13. **Endpoint paths live in `Endpoints`** — never in `AppConstants`, views, controllers, or repos.
-14. **`ApiResult` is sealed and never nullable** — failure is explicit, not `null`.
+14. **Repository `ApiResult` is sealed and never nullable** — services translate it into the simplest feature-facing result.
 15. **Error parsing is centralized** — use `ApiErrorParser`; do not parse raw error bodies elsewhere.
 16. **Stable UI mapping lives in enum/model getters** — no duplicated mapping methods in widgets.
 
@@ -63,9 +63,13 @@ class FeatureController extends GetxController implements GetxService {
   bool get isLoading => _isLoading;
   set isLoading(bool value) { _isLoading = value; update(); }
 
+  bool _hasError = false;
+  bool get hasError => _hasError;
+
   Future<void> load() async {
     isLoading = true;
-    _data = await featureService.getData(); // null = failed, toast already shown
+    _data = await featureService.getData();
+    _hasError = _data == null;
     isLoading = false;
   }
 }
@@ -106,47 +110,49 @@ mixin TimerMixin on GetxController {
 
 ---
 
-## Service — Returns the Model, NOT ApiResult
+## Service — Feature Logic and Parsing
 
 ```dart
-// ✅ DEFAULT — unwrap in service, controller gets clean model
 Future<FeatureModel?> getData() async {
-  final ApiResult<Response> result = await featureRepo.getData();
-  if (result case Success(data: final response)) {
-    return FeatureModel.fromJson(jsonDecode(response.body));
+  final ApiResult<Object?> result = await featureRepo.getData();
+  if (result case Success<Object?>(data: final Object? data)) {
+    return FeatureModel.fromJson(readJsonMap(data));
   }
-  return null; // Failure — API client already showed toast
+  return null;
 }
-// Use List<Model> (empty on failure) or Model (dummy fallback) as appropriate.
 ```
 
-```dart
-// ⚠️ EXCEPTION — return ApiResult<Model> ONLY when controller must react to failure
-// (e.g., config load failure → redirect). Reference: splash_service_impl.dart
-```
-
-| Scenario                   | Return type           |
-| -------------------------- | --------------------- |
-| Failure = show empty state | `Model?`              |
-| Failure = show empty list  | `List<Model>`         |
-| Failure = show dummy data  | `Model` (never null)  |
-| Failure = block the flow   | `ApiResult<Model>` ⚠️ |
+- A model query returns `Model?`: model = success, `null` = failure/no usable response.
+- A list query returns `List<Model>?`: `null` = failure, `[]` = successful empty result.
+- A mutation can return `bool`: `true` = success, `false` = failure.
+- Do not return dummy data after a failed production request. Dummy data belongs in previews/tests/catalogs.
+- Controllers never receive `ApiResult<Object?>`.
 
 ---
 
 ## Repository — Thin Pass-Through Only
 
 ```dart
-// ✅ No logic. Only API calls. Always ApiResult<Response>.
-Future<ApiResult<Response>> getData() async =>
-    await apiClient.get(Endpoints.featureData);
+// No model import. No JSON parsing. No business decision.
+Future<ApiResult<Object?>> getData() =>
+    apiClient.execute(const ApiRequest(method: ApiMethod.get, path: Endpoints.featureData));
 ```
+
+Repositories may call the API client, local database, secure storage, or preferences. They only adapt those
+infrastructure calls. The service decides what the raw result means for the feature.
 
 ---
 
 ## Models — Request / Response / Route Params
 
-When passing **3+ params** to a method or navigating with data — use a typed model.
+Create an input/request model when values form one user action, such as signup, checkout, or profile submission. Build
+it at the UI submit boundary and pass the same typed value through controller and service. This keeps those contracts
+stable when the form gains or loses a field. The service validates/normalizes it and converts it to raw transport data
+before calling the repository.
+
+Do not create a model only because a method has several parameters. Independent ids, page numbers, search queries,
+and single toggles normally remain explicit scalar parameters. A one-value wrapper normally makes the flow harder to
+read.
 
 | Use                    | Suffix                | Has          |
 | ---------------------- | --------------------- | ------------ |
@@ -165,8 +171,26 @@ class SignupRequestModel {
 Future<void> signup({required SignupRequestModel request}) async { ... }
 ```
 
-File placement: `data/model/<feature>_route_models.dart` for request + route param models.
-**Reference:** `ycab_user/features/ride_booking/data/model/book_ride_route_models.dart`
+Keep each model in a focused file. Do not collect unrelated request and response models into one large file.
+
+Services convert request models to `Map<String, dynamic>` before calling repositories. Repositories do not import
+feature models.
+
+---
+
+## Multipart / Media Uploads
+
+Keep uploads inside the same feature chain:
+
+`UI → Controller → Feature Service → Repository → ApiClient`
+
+- The service owns validation, normalization, file limits, and the logical user action.
+- The repository converts raw fields and file paths/bytes into multipart transport and performs the request.
+- The API client sends the request and returns `ApiResult<Object?>` like every other endpoint.
+- Prefer one multipart request when fields and files belong to one save action and the backend supports it.
+- Use separate upload calls only when the backend contract or an independently retryable media lifecycle requires it.
+- Do not add a generic `UploadService` merely because a request contains a file.
+- Repositories still do not accept or parse feature response models.
 
 ---
 
@@ -191,8 +215,10 @@ class Success<T> extends ApiResult<T> { final T data; }
 class Failure<T> extends ApiResult<T> { final String message; final int? statusCode; }
 ```
 
-- **Repo always returns `ApiResult<Response>`** — never nullable
-- Error toast shown automatically by `ApiClientImpl` — callers never need try/catch
+- **Repository always returns `ApiResult<Object?>`** — never nullable.
+- `Success<Object?>.data` is the raw decoded transport body from Dio.
+- The service parses that value into the feature model.
+- Transport/backend error feedback remains centralized in the API client.
 
 ---
 
@@ -202,10 +228,29 @@ Use `ApiErrorParser` for backend error messages.
 
 Rules:
 
-- parsing logic lives in `core/api/error.dart`
-- `ApiClientImpl` calls parser once in `_handleResponse`
-- repositories/services/controllers do not parse raw error bodies
+- backend error parsing lives under `core/api/support/`
+- `DioApiClient` maps failures once
+- repositories/services/controllers do not parse backend error payloads
 - add parser strategies when backend formats differ; do not scatter `jsonDecode` error checks
+
+Response data parsing is different: the feature service parses successful raw data into its models.
+
+---
+
+## Loading Lifecycle
+
+Model these transitions deliberately:
+
+`initial → loading → content | empty | error → refreshing | paginating`
+
+- Start initial loading from the controller lifecycle or an explicit screen entry method.
+- Keep loaded data in controller state so ordinary rebuilds/navigation do not refetch it.
+- Initial failure and successful empty data are different states.
+- Refresh keeps current content visible; it must not clear the screen back to initial loading.
+- Pagination appends data and uses footer progress; a page failure preserves the existing list.
+- A button/tile mutation owns its local loading state instead of blocking the whole screen.
+- Retry, pull-to-refresh, pagination, and user actions are explicit request events.
+- Do not use `FutureBuilder` for repository/service calls. Rebuilding it can recreate futures and duplicate requests.
 
 ---
 

@@ -1,5 +1,6 @@
-import '../../../../core/api/api_client.dart';
-import '../../../../core/api/api_result.dart';
+import '../../../../core/api/client/api_client.dart';
+import '../../../../core/api/model/api_request.dart';
+import '../../../../core/api/model/api_result.dart';
 import '../../../../imports.dart';
 import 'splash_repo.dart';
 
@@ -9,7 +10,8 @@ class SplashRepoImpl implements SplashRepo {
   SplashRepoImpl({required this.prefs, required this.apiClient});
 
   @override
-  Future<ApiResult<Response>> getConfig() async => await apiClient.get(Endpoints.config);
+  Future<ApiResult<Object?>> getConfig() =>
+      apiClient.execute(const ApiRequest(method: ApiMethod.get, path: Endpoints.config));
 
   @override
   Future<bool> saveFirstTime() async => await prefs.setBool(SharedKeys.onBoardingSkip, false);

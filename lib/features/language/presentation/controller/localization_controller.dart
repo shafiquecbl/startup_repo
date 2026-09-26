@@ -1,11 +1,12 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
+
 import '../../data/model/language.dart';
-import '../../data/repository/localization_repo_interface.dart';
+import '../../domain/service/localization_service.dart';
 
 class LocalizationController extends GetxController implements GetxService {
-  final LocalizationRepo localizationRepo;
-  LocalizationController({required this.localizationRepo}) {
+  final LocalizationService localizationService;
+  LocalizationController({required this.localizationService}) {
     loadCurrentLanguage();
   }
 
@@ -22,21 +23,23 @@ class LocalizationController extends GetxController implements GetxService {
   int get selectedIndex => _selectedIndex;
 
   void loadCurrentLanguage() {
-    final Locale locale = localizationRepo.loadCurrentLanguage();
-    setLanguage(locale);
-    _languages = List.from(appLanguages);
+    final Locale locale = localizationService.loadCurrentLanguage();
+    _locale = locale;
+    _isLtr = locale.languageCode != 'ar' && locale.languageCode != 'fa';
+    _languages = List<LanguageModel>.from(localizationService.availableLanguages);
     update();
   }
 
   void setLanguage(Locale locale) {
     _locale = locale;
     _isLtr = _locale.languageCode != 'ar' && _locale.languageCode != 'fa';
+    Get.updateLocale(_locale);
     saveLanguage(_locale);
     update();
   }
 
   Future<void> saveLanguage(Locale locale) async {
-    await localizationRepo.saveLanguage(locale);
+    await localizationService.saveLanguage(locale);
   }
 
   void setSelectIndex(int index) {
@@ -46,10 +49,10 @@ class LocalizationController extends GetxController implements GetxService {
 
   void searchLanguage(String query) {
     if (query.isEmpty) {
-      _languages = List.from(appLanguages);
+      _languages = List<LanguageModel>.from(localizationService.availableLanguages);
     } else {
       _selectedIndex = -1;
-      _languages = appLanguages
+      _languages = localizationService.availableLanguages
           .where((language) => language.languageName.toLowerCase().contains(query.toLowerCase()))
           .toList();
     }

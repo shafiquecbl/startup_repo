@@ -1,60 +1,64 @@
-import java.util.Properties
 import java.io.FileInputStream
+import java.util.Properties
 
 plugins {
     id("com.android.application")
-    id("kotlin-android")
     // The Flutter Gradle Plugin must be applied after the Android and Kotlin Gradle plugins.
     id("dev.flutter.flutter-gradle-plugin")
-    // id("com.google.gms.google-services")
-    // id("com.google.firebase.firebase-perf")
-    // id("com.google.firebase.crashlytics")
 }
 
-// Load environment variables from .env
-val env: Properties = Properties().apply {
-    val envFile = File(rootProject.projectDir.parentFile, ".env")
-    if (envFile.exists()) {
-        FileInputStream(envFile).use { load(it) }
-    } else {
-        throw IllegalStateException("Environment file .env not found.")
+fun loadRequiredProperties(fileName: String): Properties {
+    val propertiesFile = file(fileName)
+    if (!propertiesFile.exists()) {
+        throw IllegalStateException("Properties file $fileName not found.")
+    }
+    return Properties().apply {
+        FileInputStream(propertiesFile).use { load(it) }
     }
 }
 
+val appConfig: Properties = loadRequiredProperties("app_config.properties")
+val signingPropertiesFile = file("signing.properties")
+val signingProperties: Properties = Properties().apply {
+    if (signingPropertiesFile.exists()) {
+        FileInputStream(signingPropertiesFile).use { load(it) }
+    }
+}
+val hasReleaseSigning: Boolean = signingPropertiesFile.exists()
 
 android {
     namespace = "com.example.startup_repo"
-    compileSdk = 36
-    ndkVersion = "27.0.12077973"
+    compileSdk = flutter.compileSdkVersion
+    ndkVersion = flutter.ndkVersion
+
+    buildFeatures {
+        resValues = true
+    }
 
     compileOptions {
         sourceCompatibility = JavaVersion.VERSION_17
         targetCompatibility = JavaVersion.VERSION_17
-        isCoreLibraryDesugaringEnabled = true
-    }
-
-    kotlinOptions {
-        jvmTarget = JavaVersion.VERSION_17.toString()
     }
 
     defaultConfig {
-        applicationId = env.getProperty("BUNDLE_ID_ANDROID")
-        minSdk = env.getProperty("MIN_SDK_VERSION")?.toInt() ?: 21
-        targetSdk = env.getProperty("TARGET_SDK_VERSION")?.toInt() ?: 35
-        versionCode = env.getProperty("ANDROID_VERSION_CODE")?.toInt() ?: 1
-        versionName = env.getProperty("ANDROID_VERSION_NAME") ?: "1.0"
-        multiDexEnabled = true
+        applicationId = appConfig.getProperty("application_id")
+        minSdk = flutter.minSdkVersion
+        targetSdk = flutter.targetSdkVersion
+        versionCode = flutter.versionCode
+        versionName = flutter.versionName
 
-        resValue("string", "app_name", env.getProperty("APP_NAME") ?: "Music Transfer")
+        resValue("string", "app_name", appConfig.getProperty("app_name") ?: "Startup Repo")
         
     }
 
     signingConfigs {
-        create("release") {
-            storeFile = file(env.getProperty("KEYSTORE_PATH") ?: "")
-            storePassword = env.getProperty("KEYSTORE_PASSWORD")
-            keyAlias = env.getProperty("KEYSTORE_ALIAS")
-            keyPassword = env.getProperty("KEY_PASSWORD")
+        if (hasReleaseSigning) {
+            create("release") {
+                storeFile = file(signingProperties.getProperty("keystore_path"))
+                storePassword = signingProperties.getProperty("keystore_password")
+                keyAlias = signingProperties.getProperty("keystore_alias")
+                keyPassword = signingProperties.getProperty("key_password")
+            }
         }
     }
 
@@ -63,7 +67,12 @@ android {
             signingConfig = signingConfigs.getByName("debug")
         }
         getByName("release") {
-            signingConfig = signingConfigs.getByName("release")
+            // The reusable starter stays buildable. Real apps provide ignored/CI release signing values.
+            signingConfig = if (hasReleaseSigning) {
+                signingConfigs.getByName("release")
+            } else {
+                signingConfigs.getByName("debug")
+            }
             isMinifyEnabled = true
             isShrinkResources = true
         }
@@ -71,9 +80,10 @@ android {
     
 }
 
-dependencies {
-    implementation("androidx.multidex:multidex:2.0.1")
-    coreLibraryDesugaring("com.android.tools:desugar_jdk_libs:2.1.4")
+kotlin {
+    compilerOptions {
+        jvmTarget = org.jetbrains.kotlin.gradle.dsl.JvmTarget.JVM_17
+    }
 }
 
 flutter {

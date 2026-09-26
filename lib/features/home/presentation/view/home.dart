@@ -1,6 +1,5 @@
 import 'package:startup_repo/features/theme/presentation/controller/theme_controller.dart';
-import 'package:startup_repo/core/widgets/confirmation_dialog.dart';
-import 'package:startup_repo/core/widgets/confirmation_sheet.dart';
+
 import '../../../../imports.dart';
 
 class HomeScreen extends StatelessWidget {
@@ -32,13 +31,17 @@ class HomeScreen extends StatelessWidget {
               Expanded(
                 child: PrimaryOutlineButton(
                   text: 'Outline Button',
-                  icon: Icon(Iconsax.video, size: 16.sp, color: Theme.of(context).primaryColor),
+                  icon: AppIcon(
+                    icon: HugeIcons.strokeRoundedVideo01,
+                    size: 16.sp,
+                    color: context.theme.primaryColor,
+                  ),
                   onPressed: () {
                     ConfirmationSheet.show(
                       title: 'Are you sure?',
                       subtitle: 'This action cannot be undone.',
                       actionText: 'Yes',
-                      onAccept: Get.back,
+                      onAccept: AppNav.back,
                     );
                   },
                 ),
@@ -47,13 +50,13 @@ class HomeScreen extends StatelessWidget {
               Expanded(
                 child: PrimaryButton(
                   text: 'Primary Button',
-                  icon: Icon(Iconsax.video, size: 16.sp, color: Colors.white),
+                  icon: AppIcon(icon: HugeIcons.strokeRoundedVideo01, size: 16.sp, color: Colors.white),
                   onPressed: () {
                     ConfirmationDialog.show(
                       title: 'Are you sure?',
                       subtitle: 'This action cannot be undone.',
                       actionText: 'Yes',
-                      onAccept: Get.back,
+                      onAccept: AppNav.back,
                     );
                   },
                 ),
@@ -86,16 +89,16 @@ class HomeScreen extends StatelessWidget {
             },
           ),
           SizedBox(height: 32.sp),
-          const CustomTextField(hintText: 'Enter text', prefixIcon: Iconsax.search_normal),
+          const CustomTextField(hintText: 'Enter text', prefixIcon: HugeIcons.strokeRoundedSearch01),
           SizedBox(height: 16.sp),
-          CustomDropDown(
+          CustomDropDown<String>(
             hintText: 'Dropdown',
             items: const [
               DropdownMenuItem(value: 'Item 1', child: Text('Item 1')),
               DropdownMenuItem(value: 'Item 2', child: Text('Item 2')),
               DropdownMenuItem(value: 'Item 3', child: Text('Item 3')),
             ],
-            onChanged: (value) {},
+            onChanged: (String? value) {},
           ),
         ],
       ),
@@ -126,7 +129,7 @@ class ThemeModeWidget extends StatelessWidget {
                 width: 1.5.sp,
               ),
             ),
-            child: Icon(icon, size: 18.sp),
+            child: AppIcon(icon: icon, size: 18.sp),
           ),
           SizedBox(height: 8.sp),
           Text(text, style: context.font12),
@@ -135,14 +138,14 @@ class ThemeModeWidget extends StatelessWidget {
     );
   }
 
-  IconData get icon {
+  AppIconData get icon {
     switch (themeMode) {
       case ThemeMode.system:
-        return Iconsax.monitor_mobbile;
+        return HugeIcons.strokeRoundedComputer;
       case ThemeMode.light:
-        return Iconsax.sun_1;
+        return HugeIcons.strokeRoundedSun01;
       case ThemeMode.dark:
-        return Iconsax.moon;
+        return HugeIcons.strokeRoundedMoon02;
     }
   }
 }

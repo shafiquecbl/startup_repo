@@ -1,4 +1,5 @@
 import 'package:get/get.dart';
+
 import '../../data/model/config_model.dart';
 import '../../domain/service/splash_service.dart';
 

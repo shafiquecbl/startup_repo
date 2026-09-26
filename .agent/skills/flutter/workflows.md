@@ -11,11 +11,12 @@
 3. **Use existing components first** — search before creating new widgets/models/services.
 4. **Core vs feature widgets** — `core/widgets/` for 2+ features; otherwise `presentation/widgets/`.
 5. **Use focused feature folders** — split monoliths into real feature owners like `food_home`, `food_detail`, `cart`.
-6. **Build dummy-data-first** — complete model, dummy data, repo, service, binding, controller, UI before API swap.
-7. **Keep API swap simple** — dummy line and real service line should be easy to replace.
+6. **Dummy data stays isolated** — use it for previews, catalogs, and tests; never as a silent production fallback.
+7. **One active path** — do not keep commented dummy/real alternatives in controllers or services.
 8. **Respect data ownership** — import owner models across features instead of duplicating them.
 9. **Document backend contract** — write `docs/api/<feature>_api.md` after dummy feature build.
 10. **Clean before sign-off** — delete dead comments, stale TODOs, and abandoned branches in active flows.
+11. **Plan every UI state** — initial, loading, refreshing, paginating, error, empty, and content where applicable.
 
 ---
 
@@ -35,9 +36,10 @@
 
 ---
 
-## Dummy-Data-First — New Feature
+## New Feature
 
-> Build complete feature with dummy data first. Swap to real API in one line per endpoint.
+> Build the real feature flow. Dummy data may support design/testing, but it must not become a second commented
+> production path.
 > **Reference implementation:** `food_home/`, `food_detail/`, `cart/`
 
 ### Directory Scaffold
@@ -55,7 +57,7 @@ lib/features/<feature>/
 │   ├── binding/<feature>_binding.dart
 │   └── service/
 │       ├── <feature>_service.dart       # abstract
-│       └── <feature>_service_impl.dart  # logic + dummy fallback
+│       └── <feature>_service_impl.dart  # parsing + feature logic
 └── presentation/
     ├── controller/<feature>_controller.dart
     ├── view/
@@ -63,7 +65,7 @@ lib/features/<feature>/
     └── widgets/                        # one meaningful widget per file
 ```
 
-### Build Order: Model → Dummy → Repo → Service → Binding → Controller → UI
+### Build Order: Contract → Model → Repo → Service → Binding → Controller → UI
 
 ### Feature Organization
 
@@ -121,6 +123,10 @@ class FeatureData {
 }
 ```
 
+Use this file from previews, catalogs, or tests. If a temporary demo build needs it, wire a clearly named demo
+implementation in DI. Do not comment/uncomment production lines, and do not replace a failed API response with dummy
+success data.
+
 #### Repo
 ```dart
 // Always thin — no logic, just API calls + Endpoints
@@ -129,46 +135,50 @@ class FeatureRepoImpl extends FeatureRepo {
   FeatureRepoImpl({required this.client});
 
   @override
-  Future<ApiResult<Response>> fetchData() async =>
-      await client.get(Endpoints.featureData);
+  Future<ApiResult<Object?>> fetchData() =>
+      client.execute(const ApiRequest(method: ApiMethod.get, path: Endpoints.featureData));
 }
 ```
 
-#### Service — DUMMY/REAL Swap Pattern
+#### Service
 ```dart
 @override
 Future<FeatureData?> fetchData() async {
-  final ApiResult<Response> result = await featureRepo.fetchData();
-  if (result case Success(data: final response)) {
-    return FeatureData.fromJson(jsonDecode(response.body));
+  final ApiResult<Object?> result = await featureRepo.fetchData();
+  if (result case Success<Object?>(data: final Object? data)) {
+    return FeatureData.fromJson(readJsonMap(data));
   }
   return null;
 }
 ```
 
-#### Controller — DUMMY/REAL Comment
+#### Controller
 ```dart
 Future<void> load() async {
   isLoading = true;
-
-  // DUMMY: swap this line when backend is ready
-  _data = FeatureData.dummy();
-  // REAL: _data = await featureService.fetchData();
-
+  _data = await featureService.fetchData();
+  _hasError = _data == null;
   isLoading = false;
 }
 ```
 
-When backend is ready: delete `// DUMMY` line, uncomment `// REAL`. Done.
-
 #### UI
 ```dart
 GetBuilder<FeatureController>(builder: (con) {
-  if (con.isLoading) return const LoadingWidget();
-  if (con.data == null) return const EmptyStateWidget(...);
-  return FeatureContent(data: con.data!);
+  if (con.isInitialLoading) return const FeatureSkeleton();
+  if (con.hasError) return ErrorStateWidget(message: 'error', onRetry: con.load);
+  if (con.data!.items.isEmpty) return const EmptyStateWidget(...);
+  return FeatureContent(
+    data: con.data!,
+    isRefreshing: con.isRefreshing,
+    isPaginating: con.isPaginating,
+  );
 })
 ```
+
+Do not use `FutureBuilder` for this flow. The controller owns the request lifecycle and keeps loaded data across normal
+widget rebuilds. Retry, refresh, and pagination call explicit controller methods. Refresh and pagination preserve
+existing content; a local mutation reports progress on the affected action instead of replacing the full screen.
 
 ---
 

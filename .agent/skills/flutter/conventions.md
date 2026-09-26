@@ -18,6 +18,7 @@
 10. **Dispose owned resources** — controllers, focus nodes, notifiers, streams, timers.
 11. **Pair backing fields with getters** — declare each private field directly above its getter.
 12. **No dead paths** — remove stale TODOs and commented production branches.
+13. **No `FutureBuilder` for feature/API state** — controllers own loading, failure, empty, and loaded data.
 
 ---
 
@@ -78,6 +79,12 @@ Feature-local files (models, repos, own widgets) still use relative imports.
 - [ ] Class-based widgets only (no `Widget _buildX()`)
 - [ ] `dispose()` called for all controllers, focus nodes, notifiers
 - [ ] No TODO/dead commented code in active production paths
+- [ ] No `FutureBuilder` around service/repository calls
+- [ ] Failure and successful-empty states are not collapsed into the same value
+- [ ] Initial load, refresh, pagination, and action loading use the appropriate distinct UI treatment
+- [ ] Text fields define keyboard action, focus/submit behavior, and dispose owned resources
+- [ ] Cohesive form/action data uses one input model through UI → controller → service
+- [ ] Media upload stays in the feature service/repository chain unless an independent upload lifecycle is required
 - [ ] Controller extends `GetxController implements GetxService`
 - [ ] Feature binding exists **and** is registered in `core/helper/get_di.dart`
 - [ ] Extracted widget classes live in separate widget files

@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:startup_repo/core/design/colors.dart';
+
 import 'src/appbar_theme.dart';
 import 'src/bottom_sheet_theme.dart';
 import 'src/dialog_theme.dart';
@@ -26,7 +27,7 @@ ThemeData get light => ThemeData(
   colorScheme: ColorScheme.fromSeed(
     seedColor: AppColors.primary,
     secondary: AppColors.primary,
-  ).copyWith(outline: lightColors.divider, surface: darkColors.card, brightness: Brightness.light),
+  ).copyWith(outline: lightColors.divider, surface: lightColors.card, brightness: Brightness.light),
   textTheme: textTheme(lightColors),
   iconTheme: iconTheme(lightColors),
   appBarTheme: appBarTheme(lightColors),

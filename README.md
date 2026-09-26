@@ -267,10 +267,10 @@ These rules are always loaded. The AI follows them on every task:
 7. **Explicit types everywhere** — `final bool x = false`, never `final x = false`
 8. **`AppNav` for navigation** — never call `Get.to`/`Get.back` directly
 9. **Constructor route params** — never use `Get.arguments`
-10. **Repository is API-only** — returns `ApiResult<Response>`, no parsing/business logic
-11. **Service returns plain model** — controller never handles `ApiResult`/`Response`
+10. **Repository is infrastructure-only** — returns raw `ApiResult<Object?>`, no feature models/parsing/business logic
+11. **Service owns feature logic** — builds request data, parses responses, returns plain values/models
 12. **ApiErrorParser for errors** — no raw error parsing outside API client/parser
-13. **Request models for 3+ params** — create `XxxRequestModel` instead of loose args
+13. **Models need meaning** — create cohesive request/route models, not parameter-count wrappers
 14. **Get.lazyPut for DI** — controllers implement `GetxService` and binding is registered
 15. **Mixin composition for large controllers** — split after ~150 lines or 3+ concerns
 16. **Stable UI mapping in enums/models** — no duplicated widget mapping methods
@@ -279,6 +279,8 @@ These rules are always loaded. The AI follows them on every task:
 19. **`dart analyze` after every file** — zero errors before proceeding
 20. **Search before creating** — reuse existing code before making widgets/components
 21. **Dialogs/sheets use static `.show()` APIs** — no loose `showDialog()`/`showModalBottomSheet()` in views
+22. **No `FutureBuilder` for feature/API state** — controllers own loading, error, empty, and loaded states
+23. **Feature widgets own their state** — avoid long controller-derived constructor parameter lists
 
 Detailed rules for architecture, design system, widgets, conventions, and workflows are in separate files loaded on-demand when relevant.
 
@@ -302,11 +304,14 @@ The sync script:
 
 When you correct the AI in a project:
 
-1. AI adds the correction to that project's `.agent/memory/learning_log.md`
-2. If it becomes your global working style → open startup_repo
-3. Add the finalized rule directly to `skills/`
-4. Push startup_repo
-5. Run `sync.js` in other projects → everyone gets the rule
+1. AI records the correction in that project's `.agent/memory/learning_log.md`.
+2. AI classifies it as project-specific or a possible global working rule.
+3. For a possible global rule, AI proposes the smallest startup_repo skill change and asks for approval.
+4. Only after approval, update and validate startup_repo, then push it.
+5. Run `sync.js` in other projects → everyone gets the approved rule.
+
+This keeps one reviewed source of truth. Product names, screens, client decisions, temporary bugs, and one-off design
+choices remain inside their project.
 
 ---
 

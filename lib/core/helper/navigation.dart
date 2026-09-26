@@ -18,6 +18,10 @@ class AppNav {
     return await Get.offAll(() => child, duration: _duration, routeName: _routeName(child));
   }
 
+  static void back() {
+    Get.back<void>();
+  }
+
   /// Convert widget to route name
   static String _routeName(Widget widget) {
     String className = widget.runtimeType.toString();

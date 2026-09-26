@@ -1,5 +1,4 @@
 import '../../../../imports.dart';
-import '../../../language/data/model/language.dart';
 import 'localization_repo_interface.dart';
 
 class LocalizationRepoImpl implements LocalizationRepo {
@@ -7,22 +6,14 @@ class LocalizationRepoImpl implements LocalizationRepo {
   LocalizationRepoImpl({required this.prefs});
 
   @override
-  Locale loadCurrentLanguage() {
-    return Locale(
-      prefs.getString(SharedKeys.languageCode) ?? appLanguages.first.languageCode,
-      prefs.getString(SharedKeys.countryCode) ?? appLanguages.first.countryCode,
-    );
-  }
+  String? loadLanguageCode() => prefs.getString(SharedKeys.languageCode);
 
   @override
-  Future<void> saveLanguage(Locale locale) async {
-    Get.updateLocale(locale);
-    await prefs.setString(SharedKeys.languageCode, locale.languageCode);
-    await prefs.setString(SharedKeys.countryCode, locale.countryCode!);
-  }
+  String? loadCountryCode() => prefs.getString(SharedKeys.countryCode);
 
   @override
-  List<Locale> get availableLanguages {
-    return appLanguages.map((lang) => Locale(lang.languageCode, lang.countryCode)).toList();
+  Future<void> saveLanguage({required String languageCode, required String countryCode}) async {
+    await prefs.setString(SharedKeys.languageCode, languageCode);
+    await prefs.setString(SharedKeys.countryCode, countryCode);
   }
 }
