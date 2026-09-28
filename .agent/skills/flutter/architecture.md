@@ -22,6 +22,8 @@
 14. **Repository `ApiResult` is sealed and never nullable** — services translate it into the simplest feature-facing result.
 15. **Error parsing is centralized** — use `ApiErrorParser`; do not parse raw error bodies elsewhere.
 16. **Stable UI mapping lives in enum/model getters** — no duplicated mapping methods in widgets.
+17. **Organize feature-first, then by responsibility** — keep focused models, enums, commands, converters, and
+    extensions with their owning feature; do not create generic `utils`/`helpers` dumping grounds or empty layers.
 
 ---
 
@@ -175,6 +177,20 @@ Keep each model in a focused file. Do not collect unrelated request and response
 
 Services convert request models to `Map<String, dynamic>` before calling repositories. Repositories do not import
 feature models.
+
+### Focused Feature Files
+
+Organize code by feature ownership first, then by the responsibility it protects:
+
+- Keep one public model, enum, command, converter, or extension per focused file unless types form one tightly coupled
+  unit, such as a sealed type and its variants.
+- Put boundary conversion beside the boundary it adapts. Do not scatter serialization or persistence conversion across
+  controllers and widgets.
+- Keep extensions small and type-local. They must not hide I/O, state mutation, or business workflows.
+- Use role-specific names such as `validator`, `policy`, `mapper`, or `formatter` instead of generic `utils` or
+  `helpers` buckets.
+- Create a layer or directory only when it owns behavior or protects a real dependency boundary. Do not pre-create
+  empty Clean Architecture layers for possible future work.
 
 ---
 
