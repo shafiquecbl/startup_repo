@@ -36,6 +36,7 @@ description: Build and maintain Flutter features in this repository using its es
 27. **Forms define keyboard flow** — set next/done/send/newline deliberately, move focus or submit, and dispose every owned input resource
 28. **Uploads use the existing chain** — service owns the action; repository/ApiClient own multipart transport; no upload service by default
 29. **Extract repeated visuals once** — same feature → feature widget, multiple features → core widget; do not copy-and-tweak screens
+30. **Centralize cross-cutting platform UI** — configure system bars, edge-to-edge behavior, and global insets once at the app shell/native window; never require repeated per-screen wrappers or padding
 
 ## Detail Files (load on demand)
 
