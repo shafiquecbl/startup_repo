@@ -19,14 +19,20 @@ class PrimaryAnnotatedRegion extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final Color backgroundColor = color ?? context.theme.scaffoldBackgroundColor;
+    final Brightness iconBrightness = context.isDarkMode ? Brightness.light : Brightness.dark;
+
     return AnnotatedRegion<SystemUiOverlayStyle>(
       value: SystemUiOverlayStyle(
-        systemNavigationBarColor: color ?? context.theme.scaffoldBackgroundColor,
+        systemNavigationBarColor: Colors.transparent,
+        systemNavigationBarDividerColor: Colors.transparent,
+        systemNavigationBarIconBrightness: iconBrightness,
+        systemNavigationBarContrastEnforced: false,
         statusBarColor: Colors.transparent,
-        statusBarIconBrightness: context.isDarkMode ? Brightness.light : Brightness.dark,
+        statusBarIconBrightness: iconBrightness,
         statusBarBrightness: context.isDarkMode ? Brightness.dark : Brightness.light,
       ),
-      child: child,
+      child: ColoredBox(color: backgroundColor, child: child),
     );
   }
 }

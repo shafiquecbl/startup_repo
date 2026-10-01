@@ -31,6 +31,13 @@ android {
     compileSdk = flutter.compileSdkVersion
     ndkVersion = flutter.ndkVersion
 
+    packaging {
+        jniLibs {
+            // Compress native libraries in direct APKs. App Bundles keep Play's modern delivery behavior.
+            useLegacyPackaging = true
+        }
+    }
+
     buildFeatures {
         resValues = true
     }
@@ -75,6 +82,7 @@ android {
             }
             isMinifyEnabled = true
             isShrinkResources = true
+            proguardFiles(getDefaultProguardFile("proguard-android-optimize.txt"))
         }
     }
     

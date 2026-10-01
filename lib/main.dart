@@ -1,3 +1,4 @@
+import 'package:flutter/services.dart';
 import 'package:startup_repo/imports.dart';
 import 'package:toastification/toastification.dart';
 
@@ -13,6 +14,7 @@ import 'core/utils/messages.dart';
 
 Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
+  await SystemChrome.setEnabledSystemUIMode(SystemUiMode.edgeToEdge);
   final Map<String, Map<String, String>> languages = await di.init();
   final ConnectivityService connectivityService = Get.find<ConnectivityService>();
   runApp(MyApp(languages: languages, connectivityService: connectivityService));
@@ -50,9 +52,11 @@ class MyApp extends StatelessWidget {
                   locale: localizeController.locale,
                   translations: Messages(languages: languages),
                   fallbackLocale: const Locale('en', 'US'),
-                  builder: (BuildContext context, Widget? child) => ConnectivityBanner(
-                    connectivityService: connectivityService,
-                    child: child ?? const SizedBox.shrink(),
+                  builder: (BuildContext context, Widget? child) => PrimaryAnnotatedRegion(
+                    child: ConnectivityBanner(
+                      connectivityService: connectivityService,
+                      child: child ?? const SizedBox.shrink(),
+                    ),
                   ),
                   home: const HomeScreen(),
                 ),

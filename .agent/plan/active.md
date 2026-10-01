@@ -20,3 +20,11 @@
 - Reuse AppQuantitySelector from widgets registry
 - Cart total calculation goes in controller, not view
 -->
+
+## Android edge-to-edge + release size baseline
+
+**Status:** Done
+
+- [x] Centralize edge-to-edge and system-bar styling at the app root/native activity.
+- [x] Add compressed JNI packaging and optimized release ProGuard configuration.
+- [x] Format, analyze, and build an ARM64 release APK.
