@@ -14,8 +14,9 @@
 6. **Theme-varying colors come from context/theme** — background, surface, card, text, subtext, divider.
 7. **Typography uses context extensions** — `context.font10` through `context.font32`.
 8. **Use `copyWith` for variants** — change weight/color on an existing text style.
-9. **Snap one-off design values** — if design says 12px, choose nearest approved token.
+9. **Snap one-off design values** — use the matching approved token when it exists; otherwise choose the nearest one.
 10. **Add new tokens only for repeated need** — never for a single screen.
+11. **Keep generated design drafts out of the project** — save only the approved final asset; after approval, remove obsolete project variants and keep one canonical filename.
 
 ---
 

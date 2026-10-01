@@ -8,7 +8,7 @@
 
 1. **Use `AppNav` for navigation** — no direct `Get.to()`, `Get.back()`, or route shortcuts in views.
 2. **Pass route data through constructors** — never use `Get.arguments`.
-3. **Core imports use barrel file** — use `package:startup_repo/imports.dart` for shared core exports.
+3. **Core imports use barrel file** — use `package:<pubspec_name>/imports.dart` for shared core exports.
 4. **Feature-local imports stay local** — models/repos/own widgets can use relative imports.
 5. **Explicit types everywhere** — variables, params, fields, and return types are written out.
 6. **Use `Get.lazyPut()` for DI** — never `Get.put()` for feature registration.
@@ -41,14 +41,15 @@ Get.back();
 
 ```dart
 // ✅ CORRECT — single import covers all core
-import 'package:startup_repo/imports.dart';
+import 'package:<pubspec_name>/imports.dart';
 
 // ❌ WRONG — individual imports for core files
-import 'package:startup_repo/core/utils/app_constants.dart';
-import 'package:startup_repo/core/theme/...';
+import 'package:<pubspec_name>/core/utils/app_constants.dart';
+import 'package:<pubspec_name>/core/theme/...';
 ```
 
-Feature-local files (models, repos, own widgets) still use relative imports.
+Replace `<pubspec_name>` with the current package name from `pubspec.yaml`. Feature-local files (models, repos, own
+widgets) still use relative imports.
 
 ---
 
@@ -57,7 +58,7 @@ Feature-local files (models, repos, own widgets) still use relative imports.
 - **Explicit types** — `final bool x = false`, never `final x = false`
 - **Return types** — every method must have explicit return type
 - **`Get.lazyPut`** — never `Get.put()`
-- **`dart format --page-width 110`** — run before analyze on changed Dart files
+- **`dart format`** — run on changed Dart files; page width comes from `analysis_options.yaml`
 - **`dart analyze`** — run after every file change, zero errors
 - **`.tr`** — all user-facing strings must be translated
 - **`const`** — use wherever possible
@@ -67,7 +68,7 @@ Feature-local files (models, repos, own widgets) still use relative imports.
 ## Pre-Submit Checklist
 
 - [ ] `dart analyze` — zero errors
-- [ ] `dart format --page-width 110` ran on changed Dart files
+- [ ] `dart format` ran on changed Dart files using `analysis_options.yaml`
 - [ ] No `setState` (use `ValueNotifier` or `GetBuilder`)
 - [ ] No hardcoded colors/sizes (use tokens)
 - [ ] No `Get.to()` / `Get.arguments` (use `AppNav` + constructors)

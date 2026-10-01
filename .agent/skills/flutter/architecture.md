@@ -11,9 +11,9 @@
 3. **Enums live beside models** — keep feature enums in `features/<feature>/data/enum/`, just like models live in `data/model/`.
 4. **Flow is one-way** — `Controller → Service → Repository → ApiClient`.
 5. **Controller owns UI state** — loading/data/error fields, `update()`, and lifecycle cleanup live in controller.
-6. **Controller implements `GetxService`** — feature binding must register it in `core/helper/get_di.dart`.
+6. **Controller implements `GetxService`** — this is the project lifecycle convention; its feature binding is registered in `core/helper/get_di.dart`.
 7. **Large controllers split into mixins** — split after ~150 lines or 3+ concerns; mixins never call `Get.find()`.
-8. **Repository is infrastructure-only** — calls `ApiClient`, storage, or database and returns raw `ApiResult<Object?>`; no feature models, parsing, or business logic.
+8. **Repository is infrastructure-only** — calls infrastructure already configured by the project and returns raw results; no feature models, parsing, or business logic.
 9. **Service owns feature logic** — converts models to request data, unwraps `ApiResult`, parses raw JSON, and returns plain values/models to controllers.
 10. **Controller owns UI state** — no `ApiResult`, raw response parsing, repository calls, or `FutureBuilder`-owned feature state.
 11. **Typed inputs represent one action** — a cohesive form/action payload travels UI → controller → service as one model.
@@ -108,8 +108,6 @@ mixin TimerMixin on GetxController {
 ```
 
 **Rules:** Never call `Get.find` inside a mixin. Every mixin with resources must have `disposeXxx()`.
-**Reference:** `ycab_user/features/ride_booking/presentation/`
-
 ---
 
 ## Service — Feature Logic and Parsing
@@ -140,8 +138,9 @@ Future<ApiResult<Object?>> getData() =>
     apiClient.execute(const ApiRequest(method: ApiMethod.get, path: Endpoints.featureData));
 ```
 
-Repositories may call the API client, local database, secure storage, or preferences. They only adapt those
-infrastructure calls. The service decides what the raw result means for the feature.
+Repositories adapt infrastructure already configured by the project, such as the API client or preferences. The
+service decides what the raw result means for the feature. Do not introduce a database, secure storage, logging,
+configuration layer, package, or generic service unless the task requires it.
 
 ---
 
@@ -216,7 +215,7 @@ Keep uploads inside the same feature chain:
 class Endpoints {
   Endpoints._();
   static const String config = 'config';
-  static const String foodHome = 'api/food/home';
+  static const String featureData = 'api/feature/data';
 }
 // ❌ NEVER put endpoint paths in AppConstants
 ```
@@ -283,7 +282,8 @@ class FeatureBinding extends Bindings {
 }
 ```
 
-Add `FeatureBinding()` to `get_di.dart`. Controller must implement `GetxService` or `Get.find()` will fail.
+Add `FeatureBinding()` to `get_di.dart`. Registration is what makes `Get.find()` work. Implementing `GetxService`
+is the project convention for controller lifecycle and persistence; it is not the registration mechanism.
 
 ---
 

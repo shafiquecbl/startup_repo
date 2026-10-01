@@ -10,11 +10,11 @@
 2. **Build widget files before assembling screens** — screens stay orchestration-only.
 3. **Use existing components first** — search before creating new widgets/models/services.
 4. **Core vs feature widgets** — `core/widgets/` for 2+ features; otherwise `presentation/widgets/`.
-5. **Use focused feature folders** — split monoliths into real feature owners like `food_home`, `food_detail`, `cart`.
+5. **Use focused feature folders** — split monoliths by distinct domain responsibility.
 6. **Dummy data stays isolated** — use it for previews, catalogs, and tests; never as a silent production fallback.
 7. **One active path** — do not keep commented dummy/real alternatives in controllers or services.
 8. **Respect data ownership** — import owner models across features instead of duplicating them.
-9. **Document backend contract** — write `docs/api/<feature>_api.md` after dummy feature build.
+9. **Document backend contract only when needed** — write `docs/api/<feature>_api.md` only when requested or the task includes backend handoff.
 10. **Clean before sign-off** — delete dead comments, stale TODOs, and abandoned branches in active flows.
 11. **Plan every UI state** — initial, loading, refreshing, paginating, error, empty, and content where applicable.
 
@@ -32,7 +32,8 @@
 | 6. Consistency review | All spacings/radii/colors use tokens, same `Scaffold` structure |
 | 7. Production cleanup | Remove TODO/dead commented paths from active flows before sign-off |
 
-**Snap rule:** Design says 12px padding → use `p8` or `p16`. Never create a one-off value.
+**Snap rule:** Design says 12px padding → use the existing `p12` token. If no exact token exists, use the nearest
+approved token instead of creating a one-off value.
 
 ---
 
@@ -40,7 +41,6 @@
 
 > Build the real feature flow. Dummy data may support design/testing, but it must not become a second commented
 > production path.
-> **Reference implementation:** `food_home/`, `food_detail/`, `cart/`
 
 ### Directory Scaffold
 
@@ -49,7 +49,7 @@ lib/features/<feature>/
 ├── data/
 │   ├── model/
 │   │   ├── <feature>_model.dart
-│   │   └── dummy/dummy_<feature>_data.dart
+│   │   └── dummy/dummy_<feature>_data.dart  # only for requested previews/tests/demos
 │   └── repository/
 │       ├── <feature>_repo.dart          # abstract
 │       └── <feature>_repo_impl.dart     # ApiClient calls
@@ -72,13 +72,13 @@ lib/features/<feature>/
 Prefer focused features over monoliths.
 
 ```
-// ✅ CORRECT
-features/food_home/
-features/food_detail/
-features/cart/
+// ✅ CORRECT — separate domain responsibilities
+features/catalog/
+features/item_detail/
+features/checkout/
 
 // ❌ WRONG
-features/food/  // home + detail + cart mixed together
+features/store/  // unrelated catalog, detail, and checkout flows mixed together
 ```
 
 Use cross-feature imports for real ownership instead of merging unrelated screens into one feature.
@@ -186,20 +186,18 @@ existing content; a local mutation reports progress on the affected action inste
 
 ```dart
 // Use absolute package paths when importing from another feature
-import 'package:startup_repo/features/food_home/data/model/food_item.dart';
+import 'package:<pubspec_name>/features/catalog/data/model/item.dart';
 ```
 
-| Model | Owner feature | Imported by |
-|-------|--------------|-------------|
-| `FoodItem` | `food_home` | `food_detail`, `cart` |
-| `FoodAddon` | `food_detail` | `cart` |
-| `CartItem` | `cart` | `food_detail` |
+Replace `<pubspec_name>` with the current package name from `pubspec.yaml`. Keep one owning feature for each model;
+other features import that model instead of duplicating it.
 
 ---
 
 ## API Spec Doc
 
-After building, generate `docs/api/<feature>_api.md` for backend devs.
+Create `docs/api/<feature>_api.md` only when the user requests it or backend handoff is part of the task. Do not add
+documentation as an automatic side effect of ordinary feature work.
 
 ```markdown
 ### `GET /api/feature/data`

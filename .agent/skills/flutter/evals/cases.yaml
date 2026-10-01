@@ -1,0 +1,83 @@
+version: 1
+purpose: Prevent Flutter skill changes from reducing code quality or reintroducing known agent mistakes.
+
+run_policy:
+  - Run each case in a fresh session against an isolated copy of the same project state.
+  - Run the current skill first as the baseline, then the proposed skill with the same prompt.
+  - Reject the proposed skill if it fails a critical check that the baseline passed.
+  - Record analyzer result, rule violations, files added, packages added, files read, and token usage when available.
+
+cases:
+  - id: local_widget_state
+    prompt: Add password visibility toggling to an existing login form.
+    critical:
+      - Uses ValueNotifier and ValueListenableBuilder instead of setState.
+      - Disposes the notifier.
+      - Keeps meaningful extracted widgets as classes in separate files.
+      - Adds no package or unrelated abstraction.
+
+  - id: cohesive_action_input
+    prompt: Add profile editing with name, email, phone, and avatar submission.
+    critical:
+      - Uses one cohesive request model through UI, controller, and service.
+      - Keeps the repository transport-only and free of feature models or parsing.
+      - Keeps validation and response parsing in the service.
+      - Uses the existing multipart chain without creating a generic upload service.
+
+  - id: independent_route_values
+    prompt: Open a details screen using an item id and an optional initial tab.
+    critical:
+      - Uses AppNav and constructor parameters.
+      - Does not use Get.arguments or direct Get navigation.
+      - Keeps independent values as scalars instead of creating a mechanical wrapper model.
+
+  - id: paginated_content_states
+    prompt: Build a paginated notifications screen with refresh and retry.
+    critical:
+      - Controller owns initial, error, empty, refresh, pagination, and loaded state.
+      - Uses a layout-matching skeleton only for the initial load.
+      - Keeps content visible during refresh and uses footer progress for pagination.
+      - Does not use FutureBuilder for the feature request.
+
+  - id: existing_component_reuse
+    prompt: Add a submit button with a loading state when PrimaryButton already supports isLoading.
+    critical:
+      - Reuses PrimaryButton.
+      - Does not create another button wrapper or duplicate the existing component.
+      - Keeps loading local to the action.
+
+  - id: design_tokens
+    prompt: Build a themed card using 12px padding, 16px radius, title text, and a divider.
+    critical:
+      - Uses AppPadding.p12 and AppRadius.r16.
+      - Uses context typography and theme-aware surface, text, and divider colors.
+      - Adds no one-off design token or hardcoded design value.
+
+  - id: existing_preferences_only
+    prompt: Persist an onboarding-completed flag using the existing preferences helper.
+    critical:
+      - Reuses the existing preferences helper.
+      - Does not add secure storage, a database, logging, config layers, or another storage service.
+      - Adds no package.
+
+  - id: minimal_scope
+    prompt: Add a search field to an existing list screen.
+    critical:
+      - Changes only the files needed for the requested behavior.
+      - Defines keyboard search action, submit behavior, and resource disposal.
+      - Does not add architecture layers, packages, API documentation, or unrelated refactors.
+
+  - id: dependency_registration
+    prompt: Add a controller, service, repository, and binding for a new API-backed feature.
+    critical:
+      - Uses the Controller to Service to Repository to ApiClient flow.
+      - Uses Get.lazyPut and registers the feature binding in get_di.dart.
+      - Keeps GetxService as the project controller lifecycle convention.
+      - Does not claim GetxService is what makes Get.find work.
+
+  - id: shared_model_ownership
+    prompt: Reuse an existing model owned by another feature in a new feature.
+    critical:
+      - Imports the owner model using the package name from pubspec.yaml.
+      - Does not duplicate or move the model into a generic shared dump.
+      - Keeps feature-local imports relative.

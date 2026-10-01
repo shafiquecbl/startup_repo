@@ -41,8 +41,6 @@ ValueListenableBuilder<int>(
 // dispose: _currentPage.dispose();
 ```
 
-**Reference:** `food_home/presentation/widgets/promo_banner_carousel.dart`
-
 ---
 
 ## Rule 1: Class-Based Widgets Only
