@@ -17,6 +17,7 @@
 9. **Snap one-off design values** — use the matching approved token when it exists; otherwise choose the nearest one.
 10. **Add new tokens only for repeated need** — never for a single screen.
 11. **Keep generated design drafts out of the project** — save only the approved final asset; after approval, remove obsolete project variants and keep one canonical filename.
+12. **Keep brand surfaces exact** — launcher, native splash, Flutter splash, and in-app primary actions must resolve to one brand-color source of truth. Give Android adaptive and Android 12 marks their own safe-zone canvases, regenerate platform outputs, and verify color plus visible bounds instead of reusing one asset everywhere.
 
 ---
 
