@@ -11,6 +11,7 @@ description: Build and maintain Flutter features in this repository using its es
 
 For this user, write in Roman Urdu and English. Do not use Hindi or Devanagari script unless the user explicitly asks for it.
 End every response with one concrete **Next step** so the user can continue without another planning round trip.
+For multi-task work, show a compact visual checklist with status markers and completed/total counts in progress and final updates so the user can understand progress at a glance. Distinguish done, in progress, pending, and blocked items; skip the checklist for simple one-step requests.
 
 1. **No setState** — local state uses `ValueNotifier`; shared state uses `GetBuilder`
 2. **Class-based widgets only** — no `Widget _buildX()` function widgets
@@ -43,6 +44,7 @@ End every response with one concrete **Next step** so the user can continue with
 29. **Extract repeated visuals once** — same feature → feature widget, multiple features → core widget; do not copy-and-tweak screens
 30. **Centralize cross-cutting platform UI** — configure system bars, edge-to-edge behavior, and global insets once at the app shell/native window; never require repeated per-screen wrappers or padding
 31. **No speculative infrastructure** — do not add packages, storage systems, databases, logging, config layers, generic services, or docs unless the task or existing architecture requires them
+32. **Evidence before implementation** — establish the requested outcome and trace the relevant end-to-end path to an evidenced root cause before changing code; do not patch assumptions
 
 ## Detail Files (load on demand)
 
