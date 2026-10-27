@@ -15,3 +15,9 @@ export 'core/design/design_system.dart';
 
 // Core widgets
 export 'core/widgets/widgets.dart';
+
+// Shared API types and JSON reader
+export 'core/api/client/api_client.dart';
+export 'core/api/model/api_request.dart';
+export 'core/api/model/api_result.dart';
+export 'core/helper/json_map_reader.dart';

@@ -1,4 +1,4 @@
-import 'package:startup_repo/core/api/model/api_result.dart';
+import 'package:startup_repo/imports.dart';
 
 abstract class SplashRepo {
   Future<ApiResult<Object?>> getConfig();

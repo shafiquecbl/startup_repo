@@ -64,20 +64,14 @@ serena project create . --ls dart --index
 
 ## How It Works
 
-Every AI tool reads `AGENTS.md` at the project root, which points to `.agent/brain/BRAIN.md` — the orchestrator that teaches the AI two things:
+The client entrypoints route to [AGENTS.md](AGENTS.md), which loads [.agent/brain/BRAIN.md](.agent/brain/BRAIN.md).
 
-**Rules** — push back on bad requests, search before creating, follow skills, hand off at session end.
+- **AGENTS.md** → communication and core coding preferences.
+- **BRAIN.md** → task-sized workflow, Serena, project state and shared learning.
+- **Flutter SKILL.md** → implementation workflow and links to relevant references.
+- **Flutter references** → detailed preferences and exceptions, read when their topic applies.
 
-**Discipline** — every task follows the same lifecycle, regardless of size:
-
-1. **Understand** — know what's correct before touching what's wrong
-2. **Discover** — use Serena symbols/references, then targeted text search when needed
-3. **Analyze** — read each case, document what's wrong AND what the fix is
-4. **Plan** — write a checklist with context per item (not flat `[ ] file.dart`)
-5. **Execute** — fix one item at a time, mark done, never batch
-6. **Verify** — full project check after everything is fixed
-
-The analysis is written into the checklist, so if a session ends after analyzing 15 files but fixing only 3, the next session picks up at file 4 without re-analyzing.
+Small changes stay focused. Features and migrations use a concise plan when they span multiple stages or sessions. Existing code is inspected before changes; verification follows the affected flow and task risk. Handoffs describe meaningful unfinished work only.
 
 ### Directory Structure
 
@@ -94,12 +88,13 @@ your-project/
     │   └── templates/               ← First-init templates
     │
     ├── skills/flutter/              ← Flutter rules + conventions
-    │   ├── SKILL.md                 ← Cardinal rules (always loaded)
-    │   ├── architecture.md          ← Feature structure, API, models, controllers
-    │   ├── design_system.md         ← Colors, typography, theming
-    │   ├── widgets.md               ← Reusable UI components
-    │   ├── conventions.md           ← Naming, imports, navigation
-    │   └── workflows.md             ← How to build features & screens
+    │   ├── SKILL.md                 ← Flutter workflow + reference routing
+    │   └── references/
+    │       ├── architecture.md      ← Layers, API, models, controllers, uploads
+    │       ├── widgets.md           ← Extraction, ownership, states, forms
+    │       ├── design_system.md     ← Geometry, themes, typography, assets
+    │       ├── conventions.md       ← Imports, localization, resources
+    │       └── verification.md      ← Format/analyze, performance, exact-path checks
     │
     ├── context/registry.md          ← YOUR PROJECT's component map
     ├── memory/                      ← YOUR PROJECT's learning log, decisions & handoffs
@@ -135,7 +130,7 @@ PrimaryButton already supports loading state via `isLoading` param.
 Using that:
 
   PrimaryButton(
-    text: 'Checkout',
+    text: 'checkout',
     isLoading: controller.isProcessing,
     onPressed: () => controller.checkout(),
   )
@@ -146,7 +141,7 @@ Using that:
 ```
 You: Use setState to toggle this loading state
 
-AI: Violates Cardinal Rule #1 — no setState.
+AI: Violates AGENTS.md → no setState.
 Project uses ValueNotifier + ValueListenableBuilder, or GetBuilder.
 
   // In controller
@@ -155,7 +150,7 @@ Project uses ValueNotifier + ValueListenableBuilder, or GetBuilder.
   set isLoading(bool v) { _isLoading = v; update(); }
 
   // In view
-  GetBuilder<Controller>(builder: (_) => ...)
+  GetBuilder<Controller>(builder: (Controller controller) => ...)
 
 Override?
 ```
@@ -176,22 +171,21 @@ Reverse?
 ```
 You: Build the full cart feature with add/remove/checkout
 
-AI: 6+ files → planning first.
+AI: Feature spans several stages → concise plan first.
 
 ## Plan: Cart Feature
-- [ ] CartController (GetxController) with cart state
-- [ ] CartService with API calls
-- [ ] CartRepository interface + impl
-- [ ] CartScreen using existing AppCard, PrimaryButton, QuantitySelector
-- [ ] CartBinding for DI
-- [ ] Checkout flow via AppNav
-- [ ] dart analyze on all new files
+- [ ] Confirm contract and existing model/component ownership
+- [ ] Models, repository interface + implementation
+- [ ] Service parsing and feature logic
+- [ ] Binding registration, then controller state
+- [ ] Screen, justified widgets and AppNav flow
+- [ ] Format/analyze each changed Dart file; relevant flow verification
 
 → Serena symbol search: QuantitySelector already exists at
   lib/features/food_detail/presentation/widgets/quantity_selector.dart
 Reusing it.
 
-Plan saved → .agent/plan/active.md. Starting CartController...
+Plan saved → .agent/plan/active.md. Starting with the contract and models...
 ```
 
 ### Example 5: Session handoff
@@ -211,82 +205,21 @@ AI: Writing handoff.
 Next session picks up from CartScreen UI.
 ```
 
-### Example 6: Large task — the full lifecycle
-
-Every task follows 6 steps: Understand → Discover → Analyze → Plan → Execute → Verify.
-
-**The task:** "Remove the `Theme.of(context)` local extraction pattern across the project."
-
-**Step 1 — UNDERSTAND:** Read design_system.md. The correct pattern is `context.theme.dividerColor`, `context.font14` — not local `ThemeData` variables.
-
-**Step 2 — DISCOVER:** Serena symbol navigation + targeted search for `Theme.of` → 56 matches in 22 files.
-
-**Step 3 — ANALYZE:** Read each file. Document with LINE NUMBERS what's wrong and the exact replacement. Write into checklist.
-
-**Step 4 — PLAN:** Checklist in `plan/checklists/theme-cleanup.md`:
-
-```markdown
-# Checklist: theme-cleanup
-
-> **Status:** 0/21 files done
-> **Pattern:** local ThemeData extraction in feature files
-> **Correct pattern:** `context.theme.dividerColor`, `context.font14`
-
 ---
 
-### lib/core/design/app_text.dart
-**SKIP** — defines the `context.fontXX` extension. Approved usage.
+## Flutter Instructions
 
----
+Coding preferences are maintained in one place per topic:
 
-### lib/core/widgets/app_image.dart
-- [ ] L64: `Theme.of(context).cardColor` → `context.theme.cardColor`
+- [Core preferences and communication](AGENTS.md)
+- [Flutter workflow and reference routing](.agent/skills/flutter/SKILL.md)
+- [Architecture](.agent/skills/flutter/references/architecture.md)
+- [Widgets](.agent/skills/flutter/references/widgets.md)
+- [Design system](.agent/skills/flutter/references/design_system.md)
+- [Conventions](.agent/skills/flutter/references/conventions.md)
+- [Verification](.agent/skills/flutter/references/verification.md)
 
----
-
-### lib/features/cart/presentation/view/cart_screen.dart
-- [ ] L23: `final ThemeData theme = Theme.of(context);` → DELETE
-- [ ] L45: `theme.dividerColor` → `context.theme.dividerColor`
-- [ ] L67: `theme.textTheme.bodyMedium` → `context.font14`
-```
-
-**Step 5 — EXECUTE:** Fix one file → `dart analyze` → mark ✅ → next file.
-
-**Session ends at 2/21?** Handoff written. Next session reads checklist, picks up at file 3. No re-analysis.
-
-**Step 6 — VERIFY:** All 21 done → `dart analyze` → 0 issues. Log decision. Archive checklist.
-
----
-
-## Flutter Skill Rules
-
-These rules are always loaded. The AI follows them on every task:
-
-1. **No `setState`** — local state uses `ValueNotifier`; shared state uses `GetBuilder`
-2. **Class-based widgets only** — no `Widget _buildX()` function widgets
-3. **Separate widget files** — screens orchestrate; meaningful widgets live in `presentation/widgets/`
-4. **No hardcoded design values** — use `AppPadding`, `AppRadius`, `context.fontXX`, `AppColors`
-5. **Theme-aware design** — static only for brand colors; surfaces/text/dividers from theme/context
-6. **`Endpoints` class for API paths** — never put endpoint strings in `AppConstants`
-7. **Explicit types everywhere** — `final bool x = false`, never `final x = false`
-8. **`AppNav` for navigation** — never call `Get.to`/`Get.back` directly
-9. **Constructor route params** — never use `Get.arguments`
-10. **Repository is infrastructure-only** — returns raw `ApiResult<Object?>`, no feature models/parsing/business logic
-11. **Service owns feature logic** — builds request data, parses responses, returns plain values/models
-12. **ApiErrorParser for errors** — no raw error parsing outside API client/parser
-13. **Models need meaning** — create cohesive request/route models, not parameter-count wrappers
-14. **Get.lazyPut for DI** — controllers implement `GetxService` and binding is registered
-15. **Mixin composition for large controllers** — split after ~150 lines or 3+ concerns
-16. **Stable UI mapping in enums/models** — no duplicated widget mapping methods
-17. **Production cleanup** — no stale TODOs/dead commented paths in active flows
-18. **`dart format` before analyze** — format changed Dart files using `analysis_options.yaml` page width
-19. **`dart analyze` after every file** — zero errors before proceeding
-20. **Search before creating** — reuse existing code before making widgets/components
-21. **Dialogs/sheets use static `.show()` APIs** — no loose `showDialog()`/`showModalBottomSheet()` in views
-22. **No `FutureBuilder` for feature/API state** — controllers own loading, error, empty, and loaded states
-23. **Feature widgets own their state** — avoid long controller-derived constructor parameter lists
-
-Detailed rules for architecture, design system, widgets, conventions, and workflows are in separate files loaded on-demand when relevant.
+The previous top-level detail files are replaced by these references. The former workflows content is consolidated into SKILL.md and the relevant topic reference.
 
 ---
 
@@ -303,6 +236,8 @@ The sync script:
 - Updates `brain/` and `skills/` (tool files, skills, templates)
 - **Never touches** your project's `context/`, `memory/`, or `plan/`
 - Creates data files from templates only if they don't exist
+
+The current sync script copies brain/ and skills/ only; it does not update root client entrypoints or delete removed source files. When upgrading an existing project to this structure, merge the updated AGENTS.md, CLAUDE.md and .github/copilot-instructions.md, and remove the five legacy Flutter detail files after updating their callers. Keep project-specific instructions and project data intact.
 
 ### Learning loop
 
@@ -323,8 +258,8 @@ choices remain inside their project.
 
 Agent Brain is Flutter-first but framework-agnostic at its core. To add React, Python, or any other framework:
 
-1. Create `.agent/skills/react/SKILL.md` with cardinal rules
-2. Add detail files (architecture, conventions, etc.)
+1. Create `.agent/skills/react/SKILL.md` with its workflow and relevant constraints
+2. Add topic references when needed
 3. Everything else (sync, planning, memory, Serena) works unchanged
 
 ---
@@ -334,11 +269,12 @@ Agent Brain is Flutter-first but framework-agnostic at its core. To add React, P
 | Component | Purpose |
 |-----------|---------|
 | `BRAIN.md` | Orchestrator — workflow, project state, and Serena routing |
-| `SKILL.md` | Flutter cardinal rules (always loaded) |
+| `AGENTS.md` | Communication, core preferences and instruction entrypoint |
+| `SKILL.md` | Flutter workflow and relevant-reference routing |
 | `Serena` | MCP-based symbol navigation, references, diagnostics, and focused edits |
 | `sync.js` | Cross-project sync script |
 
-**Token budget:** Always-loaded context is ~830 tokens. Maximum at any time is ~5,000 tokens. Caveman mode reduces output by ~60-75%.
+**Context use:** The Flutter skill routes to relevant topic references. Actual context size and token usage depend on the client and task; no fixed token budget is measured here.
 
 ---
 

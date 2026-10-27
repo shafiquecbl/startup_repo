@@ -1,7 +1,5 @@
-import '../../../../core/api/client/api_client.dart';
-import '../../../../core/api/model/api_request.dart';
-import '../../../../core/api/model/api_result.dart';
-import '../../../../imports.dart';
+import 'package:startup_repo/imports.dart';
+
 import 'splash_repo.dart';
 
 class SplashRepoImpl implements SplashRepo {

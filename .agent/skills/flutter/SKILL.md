@@ -1,57 +1,29 @@
 ---
 name: flutter
-description: Build and maintain Flutter features in this repository using its established architecture, GetX state, design tokens, and app-owned widgets.
+description: Build and maintain Flutter features using this repository's architecture, GetX state, design tokens and app-owned widgets.
 ---
 
-# Flutter Skill — Cardinal Rules
+# Flutter Workflow
+Act as a Senior Flutter Engineer. These project rules override general Flutter knowledge.
 
-> You are a Senior Flutter Engineer. These rules override your general Flutter knowledge.
+## Load applicable references
+- Feature/API/service/repository/controller/model work → [Architecture](references/architecture.md).
+- Screens/widgets → [Widgets](references/widgets.md) + [Design system](references/design_system.md) + applicable [Conventions](references/conventions.md). Feature state/data flow also requires [Architecture](references/architecture.md).
+- Styling/theming/colors → [Design system](references/design_system.md).
+- Navigation/imports/naming/code conventions → [Conventions](references/conventions.md).
+- Formatting, analysis, cleanup, performance or delivery verification → [Verification](references/verification.md).
 
-## Communication Preference
+Load relevant references only; additional references when the task touches their topic.
 
-For this user, write in Roman Urdu and English. Do not use Hindi or Devanagari script unless the user explicitly asks for it.
-End every response with one concrete **Next step** so the user can continue without another planning round trip.
-For multi-task work, show a compact visual checklist with status markers and completed/total counts in progress and final updates so the user can understand progress at a glance. Distinguish done, in progress, pending, and blocked items; skip the checklist for simple one-step requests.
+## Before implementation
+- Establish the requested outcome. Trace the relevant end-to-end path to an evidenced root cause before changing code; do not patch assumptions.
+- Research/opinion on an unresolved product decision → present evidence, options and a recommendation before implementation. A suggestion remains unapproved until the owner explicitly chooses it.
+- Search existing widgets, components, models and services before creating replacements.
 
-1. **No setState** — local state uses `ValueNotifier`; shared state uses `GetBuilder`
-2. **Class-based widgets only** — no `Widget _buildX()` function widgets
-3. **Separate widget files** — screens orchestrate; meaningful widgets live in `presentation/widgets/`
-4. **Do not invent architecture layers** — keep the defined `data/domain/presentation` structure intact
-5. **No hardcoded design values** — use `AppPadding`, `AppRadius`, `context.fontXX`, `AppColors`
-6. **Theme-aware design** — static only for brand colors; surfaces/text/dividers from theme/context
-7. **Endpoints class for API paths** — never put endpoint strings in `AppConstants`
-8. **Explicit types everywhere** — `final bool x = false`, never `final x = false`
-9. **AppNav for navigation** — never call `Get.to`/`Get.back` directly
-10. **Constructor route params** — never use `Get.arguments`
-11. **Repository is infrastructure-only** — calls configured infrastructure and returns raw results; no models, parsing, or business logic
-12. **Service owns feature logic** — builds request data, parses raw responses, and returns plain models/values to controllers
-13. **ApiErrorParser for errors** — no raw error parsing outside API client/parser
-14. **Action inputs model one intent** — cohesive form/action data travels UI → controller → service as one typed input; independent scalars stay scalars
-15. **Get.lazyPut for DI** — controllers implement `GetxService` and binding is registered
-16. **Mixin composition for large controllers** — split after ~150 lines or 3+ concerns
-17. **Stable UI mapping in enums/models** — keep enums in `features/<feature>/data/enum/`
-18. **Production cleanup** — no stale TODOs/dead commented paths in active flows
-19. **dart format before analyze** — run `dart format` on changed Dart files; use the configured page width
-20. **dart analyze after every file** — zero errors before proceeding
-21. **Search before creating** — reuse existing code before making widgets/components
-22. **Dialogs/sheets use static `.show()` APIs** — no loose `showDialog()`/`showModalBottomSheet()` in views
-23. **Pair backing fields with getters** — place each private field directly above its public getter
-24. **No `FutureBuilder` for feature/API state** — load through the controller and refresh only on an explicit lifecycle or user event
-25. **Widgets own their feature UI** — do not pipe controller-derived labels, state, and fixed actions through long constructor parameter lists
-26. **Loading matches the operation** — skeleton for initial content, existing content during refresh, footer progress for pagination, local progress for actions
-27. **Forms define keyboard flow** — set next/done/send/newline deliberately, move focus or submit, and dispose every owned input resource
-28. **Uploads use the existing chain** — service owns the action; repository/ApiClient own multipart transport; no upload service by default
-29. **Extract repeated visuals once** — same feature → feature widget, multiple features → core widget; do not copy-and-tweak screens
-30. **Centralize cross-cutting platform UI** — configure system bars, edge-to-edge behavior, and global insets once at the app shell/native window; never require repeated per-screen wrappers or padding
-31. **No speculative infrastructure** — do not add packages, storage systems, databases, logging, config layers, generic services, or docs unless the task or existing architecture requires them
-32. **Evidence before implementation** — establish the requested outcome and trace the relevant end-to-end path to an evidenced root cause before changing code; do not patch assumptions
-
-## Detail Files (load on demand)
-
-| File             | When                                              |
-| ---------------- | ------------------------------------------------- |
-| architecture.md  | Features, API, service, repo, models, controllers |
-| design_system.md | Styling, theming, colors                          |
-| widgets.md       | Building UI components                            |
-| conventions.md   | Navigation, imports, naming                       |
-| workflows.md     | New features, screens                             |
+## Screens, features and migrations
+- Before screen code: inventory screens; identify meaningful repeated cards/tiles/badges/states; check matching tokens and exact approved values; plan justified widgets.
+- Build justified widgets before screen composition. Keep readable, cohesive UI inline; follow Widgets for extraction and ownership.
+- Build order: contract → model → repository → service → binding → controller → UI.
+- Plan applicable initial, loading, refreshing, paginating, error, empty and content states.
+- Review shared helpers/local geometry, themed colors and consistent Scaffold structure.
+- Before sign-off, follow Verification. Use BRAIN's task-sized planning and relevant tests/builds.

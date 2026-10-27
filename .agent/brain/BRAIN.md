@@ -37,6 +37,13 @@ If Serena is missing, disconnected, or the project is not configured, stop norma
 
 Scale process to the task.
 
+- At the start, state the scope, planned checks and a rough time estimate.
+- Match verification to the task. Repeat passing checks on unchanged code only for a new failure, change or unresolved concern.
+- Full AI eval runs are separate work and require an explicit user request.
+- When work is likely to exceed the estimate, explain why, what remains and the revised estimate; do not silently expand scope.
+
+Time estimates trigger updates, not permission to skip required verification for bug fixes, security-sensitive or destructive work, or user-requested proof.
+
 ### Small change
 
 1. Read the relevant rule and file.
@@ -51,6 +58,12 @@ Scale process to the task.
 4. Implement in reviewable increments.
 5. Format, analyze, and run relevant tests/builds.
 6. Move only durable architectural choices to `.agent/memory/decisions.md`.
+
+### Actual-task skills review
+
+Before sign-off, review the actual task changes and necessary connected code against applicable existing AGENTS/skill/reference rules. Cover relevant responsibilities, justified widgets/parameters, state/resource ownership, existing patterns and task scope. Review every applicable rule in the loaded references; do not invent rules or duplicate preferences into a new catalogue.
+
+Report confirmed findings with the existing rule, code file/line and evidence. Fix confirmed findings within the approved task and recheck affected code. Use relevant runtime/test evidence for behavior; missing proof stays UNVERIFIED. Do not infer skills compliance from analyzer success or claim an independent guarantee from the same agent's review.
 
 Do not create plans, decisions, learning entries, or handoffs for routine work that does not need them.
 

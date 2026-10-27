@@ -1,30 +1,3 @@
 # Active Plan
 
-> Current task being worked on. One plan at a time.
-> AI creates this before starting work on tasks touching 3+ files.
-
-<!-- Example:
-## Build CartScreen
-**Started:** 2026-03-18
-**Scope:** Cart UI with quantity selector, remove item, checkout button
-
-### Steps
-- [x] Create CartController with cart state
-- [x] Create CartService with API calls
-- [ ] Build CartScreen UI using AppCard, AppButton
-- [ ] Add quantity selector widget
-- [ ] Connect to checkout flow via AppNav
-- [ ] Run dart analyze, fix all warnings
-
-### Notes
-- Reuse AppQuantitySelector from widgets registry
-- Cart total calculation goes in controller, not view
--->
-
-## Android edge-to-edge + release size baseline
-
-**Status:** Done
-
-- [x] Centralize edge-to-edge and system-bar styling at the app root/native activity.
-- [x] Add compressed JNI packaging and optimized release ProGuard configuration.
-- [x] Format, analyze, and build an ARM64 release APK.
+No active implementation task. Automatic checker and dependent hook/review-record machinery were removed on user request. Fixed eval tooling was previously archived; historical details are in [history.md](history.md).

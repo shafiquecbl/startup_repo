@@ -1,5 +1,4 @@
-import 'package:startup_repo/core/api/model/api_result.dart';
-import 'package:startup_repo/core/helper/json_map_reader.dart';
+import 'package:startup_repo/imports.dart';
 
 import '../../data/model/config_model.dart';
 import '../../data/repository/splash_repo.dart';

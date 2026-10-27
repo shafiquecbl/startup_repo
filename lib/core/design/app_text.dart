@@ -1,33 +1,35 @@
 import 'package:flutter/material.dart';
 
 extension AppText on BuildContext {
-  TextStyle get font34 => Theme.of(this).textTheme.displayLarge!;
+  TextTheme get _textTheme => Theme.of(this).textTheme;
 
-  TextStyle get font32 => Theme.of(this).textTheme.displayMedium!;
+  TextStyle get font57 => _textTheme.displayLarge!;
 
-  TextStyle get font30 => Theme.of(this).textTheme.displaySmall!;
+  TextStyle get font45 => _textTheme.displayMedium!;
 
-  TextStyle get font28 => Theme.of(this).textTheme.headlineLarge!;
+  TextStyle get font36 => _textTheme.displaySmall!;
 
-  TextStyle get font26 => Theme.of(this).textTheme.headlineMedium!;
+  TextStyle get font32 => _textTheme.headlineLarge!;
 
-  TextStyle get font24 => Theme.of(this).textTheme.headlineSmall!;
+  TextStyle get font28 => _textTheme.headlineMedium!;
 
-  TextStyle get font22 => Theme.of(this).textTheme.titleLarge!;
+  TextStyle get font24 => _textTheme.headlineSmall!;
 
-  TextStyle get font20 => Theme.of(this).textTheme.titleMedium!;
+  TextStyle get font22 => _textTheme.titleLarge!;
 
-  TextStyle get font18 => Theme.of(this).textTheme.titleSmall!;
+  TextStyle get font16Title => _textTheme.titleMedium!;
 
-  TextStyle get font16 => Theme.of(this).textTheme.bodyLarge!;
+  TextStyle get font14Title => _textTheme.titleSmall!;
 
-  TextStyle get font14 => Theme.of(this).textTheme.bodyMedium!;
+  TextStyle get font16 => _textTheme.bodyLarge!;
 
-  TextStyle get font12 => Theme.of(this).textTheme.bodySmall!;
+  TextStyle get font14 => _textTheme.bodyMedium!;
 
-  TextStyle get font10 => Theme.of(this).textTheme.labelLarge!;
+  TextStyle get font12 => _textTheme.bodySmall!;
 
-  TextStyle get font8 => Theme.of(this).textTheme.labelMedium!;
+  TextStyle get font14Label => _textTheme.labelLarge!;
 
-  TextStyle get font6 => Theme.of(this).textTheme.labelSmall!;
+  TextStyle get font12Label => _textTheme.labelMedium!;
+
+  TextStyle get font11 => _textTheme.labelSmall!;
 }

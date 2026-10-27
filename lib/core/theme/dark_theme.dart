@@ -14,30 +14,41 @@ import 'src/text_theme.dart';
 import 'src/textbuton_theme.dart';
 import 'src/card_theme.dart';
 
-ThemeData get dark => ThemeData(
-  fontFamily: 'Poppins',
-  useMaterial3: true,
-  brightness: Brightness.dark,
-  primaryColor: AppColors.primary,
-  disabledColor: darkColors.disabled,
-  scaffoldBackgroundColor: darkColors.background,
-  hintColor: darkColors.hint,
-  cardColor: darkColors.card,
-  shadowColor: darkColors.shadow,
-  colorScheme: ColorScheme.fromSeed(
-    seedColor: AppColors.primary,
-    secondary: AppColors.primary,
-  ).copyWith(outline: darkColors.divider, surface: darkColors.card, brightness: Brightness.dark),
-  textTheme: textTheme(darkColors),
-  iconTheme: iconTheme(darkColors),
-  appBarTheme: appBarTheme(darkColors),
-  elevatedButtonTheme: elevatedButtonThemeData,
-  outlinedButtonTheme: outlinedButtonThemeData,
-  textButtonTheme: textButtonTheme,
-  inputDecorationTheme: inputDecorationTheme(darkColors),
-  dropdownMenuTheme: dropdownMenuTheme(darkColors),
-  dialogTheme: dialogTheme(darkColors),
-  bottomSheetTheme: bottomSheetTheme(darkColors),
-  dividerTheme: dividerTheme(darkColors),
-  cardTheme: cardTheme(darkColors),
-);
+ThemeData get dark {
+  final ColorScheme colorScheme =
+      ColorScheme.fromSeed(seedColor: AppColors.primary, brightness: Brightness.dark).copyWith(
+        primary: AppColors.primary,
+        onPrimary: Colors.white,
+        secondary: AppColors.secondary,
+        surface: darkColors.background,
+        surfaceContainerLow: darkColors.card,
+        onSurface: darkColors.text,
+        outline: darkColors.divider,
+        outlineVariant: darkColors.divider,
+      );
+
+  return ThemeData(
+    fontFamily: 'Poppins',
+    useMaterial3: true,
+    brightness: Brightness.dark,
+    primaryColor: colorScheme.primary,
+    disabledColor: darkColors.disabled,
+    scaffoldBackgroundColor: colorScheme.surface,
+    hintColor: darkColors.hint,
+    cardColor: colorScheme.surfaceContainerLow,
+    shadowColor: darkColors.shadow,
+    colorScheme: colorScheme,
+    textTheme: textTheme(darkColors),
+    iconTheme: iconTheme(darkColors),
+    appBarTheme: appBarTheme(darkColors),
+    elevatedButtonTheme: elevatedButtonThemeData,
+    outlinedButtonTheme: outlinedButtonThemeData,
+    textButtonTheme: textButtonTheme,
+    inputDecorationTheme: inputDecorationTheme(darkColors),
+    dropdownMenuTheme: dropdownMenuTheme(darkColors),
+    dialogTheme: dialogTheme(darkColors),
+    bottomSheetTheme: bottomSheetTheme(darkColors),
+    dividerTheme: dividerTheme(darkColors),
+    cardTheme: cardTheme(darkColors),
+  );
+}
