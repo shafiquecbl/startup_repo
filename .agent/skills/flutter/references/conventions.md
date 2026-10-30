@@ -6,6 +6,7 @@
 - Read the actual package name from pubspec.yaml; never assume startup_repo.
 
 ## Style and resources
+- App configuration uses direct code constants/getters; do not read it through dotenv.
 - User-facing strings use .tr; no raw visible English in widgets.
 - Use const wherever possible: constructors, widgets, lists and values.
 - Put each private backing field immediately above its public getter:

@@ -21,7 +21,7 @@
 - Configure system bars, edge-to-edge and global insets once at the app shell/native window; no repeated per-screen wrappers or padding.
 
 ## Assets and brand
-- Project raster assets → WebP unless a platform requires another format. Lossless WebP for transparency/crisp UI edges.
+- Assets → use the existing asset helper class. Project raster assets → WebP unless a platform requires another format. Lossless WebP for transparency/crisp UI edges.
 - Keep generated drafts outside the project; save only approved final assets. After approval remove obsolete project variants and keep one canonical filename.
 - Launcher, native splash, Flutter splash and primary actions resolve to one brand-color source.
 - Give Android adaptive and Android 12 marks their own safe-zone canvases. Regenerate platform outputs; verify color and visible bounds instead of reusing one asset everywhere.

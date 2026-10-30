@@ -4,7 +4,7 @@
 - Keep readable, cohesive UI inline. Extract only for useful reuse, reduced complexity or clear ownership of independent state/resources.
 - A name, callback, a few repeated lines or a shorter screen alone does not justify extraction.
 - Each extracted widget class gets its own file; no extra extracted classes at the bottom of a screen. Exception: tightly related feature shimmers may share a file, as described under State presentation.
-- Same-feature widgets → features/<feature>/presentation/widgets/; used by 2+ features → core/widgets/. Group large widget sets by focus, e.g. header/form/summary/sheet.
+- Feature-owned widgets → features/<feature>/presentation/widgets/, even when reused by other features; generic shared widgets → core/widgets/. Group large widget sets into screen/purpose subfolders; reuse shared widgets rather than duplicating them per screen.
 - Feature-specific widgets read controller-owned data through the owning controller/GetBuilder. Keep their UI action handlers, fixed navigation and local UI state inside the owning widget instead of passing controller-derived values and callbacks through the parent screen. Keep constructors const wherever possible.
 - Reusable presentational widgets remain controller-agnostic and receive one cohesive model/value plus semantic callbacks. Core widgets remain controller-agnostic and take only necessary data/configuration and callbacks.
 - No long constructor lists of controller-derived titles/state/actions. Reuse meaningful components; parameterize real variations without a giant dozens-of-parameters widget or copy-and-tweak screens.

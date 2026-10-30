@@ -27,12 +27,12 @@
 - Validate all user input in the owning screen/widget before calling the controller. Services must not perform user-input validation.
 - One cohesive form/action input is built at UI submission and passed unchanged as the same typed value through UI → controller → service. Service normalizes and converts it for transport.
 - Independent ids, page numbers, queries and toggles stay scalars. Pass independent route values directly through constructors. No mechanical parameter-count rule or one-field wrappers.
-- API request → XxxRequestModel with toJson(); response → XxxModel with fromJson(); when a genuinely cohesive navigation payload needs a model → XxxRouteParamsModel without serialization.
+- Model class names and snake_case filenames omit redundant Model/_model suffixes. API request → XxxRequest with toJson(); response → Xxx with fromJson(); when a genuinely cohesive navigation payload needs a model → XxxRouteParams without serialization.
 - Stable UI mapping belongs in enum/model getters, not duplicated widget methods. Feature enums → features/<feature>/data/enum/.
 - Literal endpoint paths belong only in Endpoints at core/utils/endpoints.dart; never AppConstants, views, controllers or repositories.
 
 ## Loading lifecycle
-- Start loading from controller lifecycle or explicit screen entry. Keep data in controller state across ordinary rebuilds/navigation; no accidental refetch.
+- Start loading from controller lifecycle or explicit screen entry. Keep data in controller state across ordinary rebuilds/navigation; no accidental refetch. Default-plan selection is controller-owned; UI build must not repeat it or mutate controller state.
 - No FutureBuilder for feature/API state or service/repository calls. Retry, refresh, pagination and user actions are explicit controller events.
 - Initial failure differs from successful empty. Guard an in-flight load; derive initial loading versus refreshing from whether data exists; reset loading in finally.
 - Failed refresh retains existing data. Pagination appends; page failure preserves the list. Keep local mutation state with its action. UI treatment → [Widgets](widgets.md).

@@ -19,6 +19,7 @@ Load relevant references only; additional references when the task touches their
 - Establish the requested outcome. Trace the relevant end-to-end path to an evidenced root cause before changing code; do not patch assumptions.
 - Research/opinion on an unresolved product decision → present evidence, options and a recommendation before implementation. A suggestion remains unapproved until the owner explicitly chooses it.
 - Search existing widgets, components, models and services before creating replacements.
+- Widgets, services, repositories and controllers take only required inputs/dependencies. Avoid unnecessary overrides, callbacks and stored fields; use simple local values/API calls directly unless injection serves a real need.
 
 ## Screens, features and migrations
 - Before screen code: inventory screens; identify meaningful repeated cards/tiles/badges/states; check matching tokens and exact approved values; plan justified widgets.
